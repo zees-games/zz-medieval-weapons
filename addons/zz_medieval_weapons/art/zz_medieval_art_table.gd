@@ -36,8 +36,8 @@ static func rows() -> Dictionary:
 			"surface": "steel",
 		},
 		&"dagger": {
-			"hold": Vector3(-40, 0, 0), "rest": Vector3(0.28, -0.32, -0.50), "side": 1,
-			"styles": [S.THRUST, S.SLASH_R, S.SLASH_L], "heft": 0.7, "weight": "light",
+			"hold": Vector3(-40, 0, 0), "rest": Vector3(0.26, -0.30, -0.44), "side": 1,
+			"styles": [S.THRUST, S.SLASH_R, S.SLASH_L], "heft": 0.7, "scale": 1.3, "weight": "light",
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},
 			"surface": "steel",
 		},

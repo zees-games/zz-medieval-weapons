@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 315
+const CHECKS := 317
 
 var _entered := 0
 var _finished := 0
@@ -91,6 +91,18 @@ func _config() -> void:
 	_check(int(merged["longsword"]["rays"]) == 7, "yml overrides rays")
 	_check(is_equal_approx(float(merged["longsword"]["reach"]), 2.4), "untouched key keeps its default")
 	_check(is_equal_approx(float(merged["dagger"]["damage"]), 28.0), "other weapons keep defaults")
+	# weapon_defs (what Zombie Zone's pack loader calls) must see the same override.
+	f = FileAccess.open(tmp.path_join("dagger.yml"), FileAccess.WRITE)
+	f.store_string("dagger:\n  damage: 41\n")
+	f.close()
+	var tuned := 0.0
+	var untuned := 0.0
+	for def in ZzMedievalSpawnProvider.weapon_defs({}, tmp):
+		if def.id == &"dagger": tuned = float(def.tuning.get("damage"))
+	_check(tuned > 0.0, "weapon_defs yields a dagger with a damage")
+	for def in ZzMedievalSpawnProvider.weapon_defs():
+		if def.id == &"dagger": untuned = float(def.tuning.get("damage"))
+	_check(not is_equal_approx(tuned, untuned), "a yml override changes the dagger through weapon_defs")
 	# The shipped cfg directory, read through dot-core, equals the built-in table.
 	_check(str(ZzMedievalConfig.load_all()) == str(d), "shipped yml equals the defaults")
 	_end()

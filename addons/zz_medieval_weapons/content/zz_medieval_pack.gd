@@ -17,7 +17,7 @@ const PROJECTILE := BEHAVIOUR_DIR + "zz_projectile.gd"
 
 static func weapons(cfg: Dictionary = {}) -> Array[DotWeaponDef]:
 	if cfg.is_empty():
-		cfg = ZzMedievalConfig.defaults()
+		cfg = ZzMedievalConfig.load_all()
 	var types := damage_types()
 	var out: Array[DotWeaponDef] = []
 	for id in ZzMedievalConfig.IDS:

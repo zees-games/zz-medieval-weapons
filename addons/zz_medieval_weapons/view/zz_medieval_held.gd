@@ -101,7 +101,7 @@ func bind(id: StringName, cfg: Dictionary = {}) -> void:
 	_missile = _drop(_missile) as Node3D
 	weapon_id = id
 	_row = ZzMedievalArtTable.row(id)
-	_cfg = cfg if not cfg.is_empty() else ZzMedievalConfig.defaults().get(String(id), {})
+	_cfg = cfg if not cfg.is_empty() else ZzMedievalConfig.load_all().get(String(id), {})
 	anim.configure(id, cfg)
 	_model = ZzMedievalModels.build(id)
 	_grip.add_child(_model)

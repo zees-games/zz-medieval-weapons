@@ -58,7 +58,7 @@ func configure(weapon_id: StringName, cfg: Dictionary = {}) -> void:
 	id = weapon_id
 	_row = ZzMedievalArtTable.row(id)
 	if cfg.is_empty():
-		cfg = ZzMedievalConfig.defaults().get(String(id), {})
+		cfg = ZzMedievalConfig.load_all().get(String(id), {})
 	var rate := float(ZzMedievalConfig.TICK_RATE)
 	swing_s = float(cfg.get("swing_ticks", 40)) / rate
 	draw_s = float(cfg.get("draw_ticks", 58)) / rate

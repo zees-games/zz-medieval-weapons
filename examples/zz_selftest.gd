@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 416
+const CHECKS := 418
 
 var _entered := 0
 var _finished := 0
@@ -537,6 +537,16 @@ func _crossbow_anim() -> void:
 	_check(c.pose()["off_string"] > 0.5, "the off hand works the string")
 	c.set_reloading(false)
 	_check(c.loaded and c.draw == 1.0, "the simulation ending the reload snaps to loaded")
+	var profile_s := float(ZzMedievalConfig.load_all()["crossbow"]["reload_ticks"]) / float(ZzMedievalConfig.TICK_RATE)
+	c.start_use()
+	c.set_reloading(true)
+	var t := 0.0
+	while c.reloading and t < 20.0:
+		c.advance(1.0 / 64.0)
+		t += 1.0 / 64.0
+	_check(absf(t - profile_s) < 0.05 * profile_s, "the crossbow reload animation lasts the profile's reload time (%.2f vs %.2f)" % [t, profile_s])
+	var rest: Dictionary = c.pose()
+	_check(c.loaded and c.draw == 1.0 and (rest["pos"] as Vector3).length() < 0.01 and (rest["rot"] as Vector3).length() < 0.5, "the crossbow reload ends at the rest pose")
 	_end()
 
 

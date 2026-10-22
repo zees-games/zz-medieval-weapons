@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 418
+const CHECKS := 423
 
 var _entered := 0
 var _finished := 0
@@ -25,6 +25,7 @@ func _ready() -> void:
 	_models()
 	_spawn()
 	_workshop()
+	_pack_cfg()
 	_packs()
 	_art_table()
 	_pose()
@@ -357,6 +358,51 @@ func _workshop() -> void:
 		_check(loaded != null and loaded.describe() == d.describe() and str(loaded.tuning.describe()) == str(d.tuning.describe()) and loaded.params == d.params, "%s .tres is not stale" % d.id)
 		_check(FileAccess.get_file_as_string(ZzMedievalConfig.profile_path(d.id)) == ZzMedievalConfig.to_yaml(d.id), "%s yml matches defaults" % d.id)
 	_end()
+
+func _pack_cfg() -> void:
+	_begin("delivered pack cfg root")
+	var src := "user://pack_cfg_src"
+	var rel := "cfg/addons/zz_medieval_weapons/weapon"
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://cfg/server/addons/zz_medieval_weapons/weapon"))
+	var exported := ZzDefExport.export_to(src)
+	_check(exported.ok, "export succeeds")
+	var yml := src.path_join(rel).path_join("dagger.yml")
+	var text := FileAccess.get_file_as_string(yml)
+	_check(text.contains("damage:"), "the export ships the profile")
+	var re := RegEx.create_from_string("(?m)^  damage: .*$")
+	var f := FileAccess.open(yml, FileAccess.WRITE)
+	f.store_string(re.sub(text, "  damage: 777.0"))
+	f.close()
+	var pck := PCKPacker.new()
+	var pck_path := ProjectSettings.globalize_path("user://pack_cfg_test.pck")
+	pck.pck_start(pck_path)
+	var stack: Array[String] = [""]
+	while not stack.is_empty():
+		var sub: String = stack.pop_back()
+		for d in DirAccess.get_directories_at(src.path_join(rel).path_join(sub)):
+			stack.append(sub.path_join(d))
+		for n in DirAccess.get_files_at(src.path_join(rel).path_join(sub)):
+			pck.add_file("res://dot_cloud/zzcfg/1".path_join(rel).path_join(sub).path_join(n), ProjectSettings.globalize_path(src.path_join(rel).path_join(sub).path_join(n)))
+	pck.flush()
+	_check(ProjectSettings.load_resource_pack(pck_path), "pack mounts")
+	ZzMedievalConfig.pack_cfg_root = "res://dot_cloud/zzcfg/1/cfg"
+	ZzMedievalConfig.base_roots = PackedStringArray(["user://cfg"])
+	_check(is_equal_approx(_pack_damage(), 777.0), "a delivered pack's profile numbers reach weapon_defs()")
+	var srv := FileAccess.open("user://cfg/server/addons/zz_medieval_weapons/weapon/dagger.yml", FileAccess.WRITE)
+	srv.store_string("extra:\n  damage: 555.0\n")
+	srv.close()
+	_check(is_equal_approx(_pack_damage(), 555.0), "cfg/server still overrides the pack")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://cfg/server/addons/zz_medieval_weapons/weapon/dagger.yml"))
+	ZzMedievalConfig.pack_cfg_root = ""
+	ZzMedievalConfig.base_roots = PackedStringArray()
+	_end()
+
+
+func _pack_damage() -> float:
+	for d in ZzMedievalSpawnProvider.weapon_defs():
+		if String(d.id).ends_with("dagger"):
+			return float(d.tuning.get("damage"))
+	return -1.0
 
 
 func _event(out: DotWeaponOutcome, type: String) -> Variant:

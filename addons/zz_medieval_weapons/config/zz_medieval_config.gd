@@ -20,6 +20,10 @@ const TICK_RATE := 64
 static var fallback_dir: String = "res://cfg/addons/zz_medieval_weapons"
 ## The game id for the game tier (`cfg/game/<game>/weapon`); empty skips it.
 static var game: String = ""
+## A mounted pack's `cfg` root (`DotCloudMounter.cfg_root_of`), the weakest root when [method profile_set] gets none.
+static var pack_cfg_root: String = ""
+## Roots stacked over [member pack_cfg_root]; empty means [method DotProfileSet.default_roots]. Tests set it to hide the project's own `res://cfg`.
+static var base_roots: PackedStringArray = PackedStringArray()
 ## Profiles that failed to load in the last [method load_all]; their weapons keep the layer below.
 static var errors: PackedStringArray = PackedStringArray()
 
@@ -129,6 +133,8 @@ static func load_all(dir: String = "", roots: PackedStringArray = PackedStringAr
 
 ## The profile set the weapons load from. A set caches its profiles, which point back at it: call [method DotProfileSet.clear_cache] when done or it leaks.
 static func profile_set(roots: PackedStringArray = PackedStringArray(), layer: Variant = null) -> DotProfileSet:
+	if roots.is_empty() and pack_cfg_root != "":
+		roots = PackedStringArray([pack_cfg_root]) + (base_roots if not base_roots.is_empty() else DotProfileSet.default_roots())
 	return DotWeaponProfiles.make_set(ADDON, game, roots, layer)
 
 

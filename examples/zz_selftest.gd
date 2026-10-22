@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 403
+const CHECKS := 409
 
 var _entered := 0
 var _finished := 0
@@ -308,6 +308,17 @@ func _models() -> void:
 		_check(box.position.y > -0.25 and box.end.y > 0.8 and box.end.y < 1.0, "%s: butt below the grip, head about a metre up (+Y along the weapon)" % id)
 		_check(mi.mesh.surface_get_array_len(0) < 4000, "%s stays under the vertex budget" % id)
 		v.free()
+	for id in [&"longsword", &"bow", &"round_shield"]:
+		var v2 := ZzMedievalModels.build(id)
+		_check(not ZzMedievalModels.is_placeholder(id), "%s is a vendored glb" % id)
+		var top := 0.0
+		var low := 0.0
+		for m in v2.find_children("*", "MeshInstance3D", true, false):
+			var bb := (m as MeshInstance3D).get_aabb()
+			top = maxf(top, bb.end.y)
+			low = minf(low, bb.position.y)
+		_check(top > 0.35 and low > -0.8 and top < 1.1, "%s: sized in metres about the grip (+Y along the weapon)" % id)
+		v2.free()
 	var arrow := ZzMedievalModels.projectile(&"arrow")
 	_check(arrow.get_child_count() == 2, "arrow has shaft and head")
 	arrow.free()
@@ -598,7 +609,8 @@ func _held() -> void:
 	bow.bind(&"bow")
 	bow.step(0.01)
 	var model := bow.find_child("bow", true, false)
-	_check(model != null and (model.find_child("string", true, false) as Node3D).visible == false, "the model's own string is hidden")
+	var own := model.find_child("string", true, false) as Node3D if model != null else null
+	_check(model != null and (own == null or not own.visible), "the model's own string is hidden or absent")
 	bow.anim.hold_draw(true)
 	for f in 20:
 		bow.step(1.0 / 60.0)

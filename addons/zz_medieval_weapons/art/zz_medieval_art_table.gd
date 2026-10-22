@@ -87,8 +87,8 @@ static func rows() -> Dictionary:
 			"hold": Vector3(0, -90, 0), "rest": Vector3(-0.30, -0.18, -0.58), "side": -1,
 			"styles": [S.LOOSE], "heft": 1.0, "scale": 0.8, "weight": "light",
 			"string": {
-				"tips": [Vector3(0, -0.7, 0), Vector3(0, 0.7, 0)],
-				"axis": Vector3(1, 0, 0), "rest": Vector3.ZERO, "travel": 0.40,
+				"tips": [Vector3(0.52, -0.7, 0), Vector3(0.52, 0.7, 0)],
+				"axis": Vector3(1, 0, 0), "rest": Vector3(0.52, 0, 0), "travel": 0.40,
 			},
 			"projectile": "arrow", "nock_axis": Vector3(-1, 0, 0),
 			"surface": "wood",

@@ -98,11 +98,11 @@ static func rows() -> Dictionary:
 			"offhand": Vector3(0, 0.62, -0.04),
 			"styles": [S.FIRE], "heft": 1.0, "scale": 0.9, "weight": "heavy",
 			"string": {
-				"tips": [Vector3(-0.35, 0.55, 0), Vector3(0.35, 0.55, 0)],
+				"tips": [Vector3(-0.437, 0.255, -0.026), Vector3(0.437, 0.255, -0.026)],
 				# Cocked is pull 1: the string drawn back toward the stock.
-				"axis": Vector3(0, -1, 0), "rest": Vector3(0, 0.50, 0), "travel": 0.22,
+				"axis": Vector3(0, -1, 0), "rest": Vector3(0, 0.235, -0.02), "travel": 0.2,
 			},
-			"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.05),
+			"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.06),
 			"surface": "iron",
 		},
 	}

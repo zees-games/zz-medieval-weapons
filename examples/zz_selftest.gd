@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 409
+const CHECKS := 416
 
 var _entered := 0
 var _finished := 0
@@ -319,6 +319,14 @@ func _models() -> void:
 			low = minf(low, bb.position.y)
 		_check(top > 0.35 and low > -0.8 and top < 1.1, "%s: sized in metres about the grip (+Y along the weapon)" % id)
 		v2.free()
+	for id in [&"battle_axe", &"mace", &"spear", &"crossbow", &"dagger"]:
+		_check(not ZzMedievalModels.is_placeholder(id), "%s is a vendored glb" % id)
+	var env := ZzMedievalReflectionSource.sky_environment()
+	_check(env.reflected_light_source == Environment.REFLECTION_SOURCE_SKY and env.sky != null, "the sky environment gives metal something to reflect")
+	var host := Node3D.new()
+	var probe := ZzMedievalReflectionSource.attach_probe(host)
+	_check(probe.get_parent() == host and probe.update_mode == ReflectionProbe.UPDATE_ONCE, "a probe hangs on the host and captures once")
+	host.free()
 	var arrow := ZzMedievalModels.projectile(&"arrow")
 	_check(arrow.get_child_count() == 2, "arrow has shaft and head")
 	arrow.free()

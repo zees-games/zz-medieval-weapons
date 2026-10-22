@@ -10,11 +10,7 @@ func _ready() -> void:
 		ids = Array(ZzMedievalConfig.IDS)
 
 	var env := WorldEnvironment.new()
-	env.environment = Environment.new()
-	env.environment.background_mode = Environment.BG_COLOR
-	env.environment.background_color = Color(0.16, 0.18, 0.22)
-	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.environment.ambient_light_color = Color(0.6, 0.6, 0.65)
+	env.environment = ZzMedievalReflectionSource.sky_environment()
 	add_child(env)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-40, 30, 0)

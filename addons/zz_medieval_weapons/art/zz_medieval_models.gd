@@ -2,12 +2,9 @@ class_name ZzMedievalModels
 extends RefCounted
 
 ## The weapons' models. Each id first looks for a vendored `assets/<id>.glb` (the Sketchfab
-## models listed in CREDITS.md, once downloaded); until then it builds a PLACEHOLDER from
-## primitives, so a game never meets an empty hand. Every model is +Y along the weapon with
+## models listed in CREDITS.md); an id without one builds a PLACEHOLDER from primitives, so a
+## game never meets an empty hand. Every model is +Y along the weapon with
 ## the origin at the grip (the same convention zee-dot-weapons states for melee).
-##
-## TODO(art): the placeholders are in use for all eight; the downloads need a Sketchfab
-## token (see CREDITS.md).
 
 const ASSET_DIR := "res://assets/"
 

@@ -33,11 +33,7 @@ func _ready() -> void:
 
 func _stage() -> void:
 	var env := WorldEnvironment.new()
-	env.environment = Environment.new()
-	env.environment.background_mode = Environment.BG_COLOR
-	env.environment.background_color = Color(0.45, 0.55, 0.65)
-	env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.environment.ambient_light_color = Color(0.62, 0.62, 0.66)
+	env.environment = ZzMedievalReflectionSource.sky_environment()
 	add_child(env)
 	var sun := DirectionalLight3D.new()
 	sun.rotation_degrees = Vector3(-50, 25, 0)

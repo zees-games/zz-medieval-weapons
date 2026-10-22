@@ -8,6 +8,17 @@ extends ZzMedievalHeld
 ## so a long weapon never pokes into a wall); a spear's 3 m shaft will cut a wall it is
 ## pushed against. See docs/view-model.md.
 
+## Hang a reflection probe on the view model, for a world whose environment has no sky to mirror.
+## A game with a sky leaves it off; docs/lighting.md says why.
+@export var provide_reflections: bool = false
+
+
+func _ready() -> void:
+	super._ready()
+	if provide_reflections:
+		ZzMedievalReflectionSource.attach_probe(self)
+
+
 func _init() -> void:
 	name = "ViewModel"
 	shoulder = Vector3(0.22, -0.30, 0.16)

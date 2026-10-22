@@ -20,7 +20,7 @@ A first-person view model with arms, a third-person world model, procedural swin
 
 ## Art
 
-The war axe and double axe are CC0 models by Arms Museum, and the longsword, bow and round shield are CC-BY models (leeeck, ana.stakflett, iedalton), all from Sketchfab (decimated to 3k triangles, one 1024 px texture, worn look; author, URL and change note in [CREDITS.md](CREDITS.md)). The other five are placeholders built from primitives.
+The war axe and double axe are CC0 models by Arms Museum, and the longsword, bow and round shield are CC-BY models (leeeck, ana.stakflett, iedalton), all from Sketchfab (decimated to 3k triangles, one 1024 px texture, worn look; author, URL and change note in [CREDITS.md](CREDITS.md)). The mace, spear, crossbow, dagger and battle axe are CC-BY models too (CaptainHC, Kama Modeling, iedalton, Whatevvs). Metal keeps its authored values; what a game must give it to reflect is in [docs/lighting.md](docs/lighting.md).
 
 ## Testing
 

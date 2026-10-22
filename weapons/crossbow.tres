@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="DotWeaponDef" format=3]
+
+[ext_resource type="Script" path="res://addons/dot_weapon/core/dot_weapon_def.gd" id="1_ooo3w"]
+[ext_resource type="Script" path="res://addons/dot_combat/core/dot_damage_type.gd" id="2_n8dor"]
+[ext_resource type="Script" path="res://addons/dot_weapon/tuning/dot_weapon_ballistics.gd" id="3_b0q4c"]
+
+[sub_resource type="Resource" id="Resource_ncu05"]
+script = ExtResource("2_n8dor")
+id = &"pierce"
+display_name = "Pierce"
+
+[sub_resource type="Resource" id="Resource_rjbhr"]
+script = ExtResource("3_b0q4c")
+damage = 90.0
+damage_type = SubResource("Resource_ncu05")
+min_charge_damage = 1.0
+max_range = 400.0
+spread = 0.0
+spread_moving = 0.0
+spread_airborne = 0.0
+recoil_pitch = 0.0
+recoil_yaw = 0.0
+speed = 100.0
+min_speed = 100.0
+gravity_scale = 0.55
+radius = 0.05
+life_ticks = 640
+
+[resource]
+script = ExtResource("1_ooo3w")
+id = &"crossbow"
+display_name = "Crossbow"
+tags = Array[StringName]([&"ranged", &"medieval", &"crossbow"])
+behaviour_path = "res://addons/zz_medieval_weapons/behaviour/zz_projectile.gd"
+params = {
+&"projectile_id": "bolt",
+&"stamina_cost": 6.0
+}
+tuning = SubResource("Resource_rjbhr")
+authored_tick_rate = 64
+slot = 3
+deploy_ticks = 30
+holster_ticks = 16
+use_interval_ticks = 16
+ammo_type = &"bolts"
+magazine = 1
+reserve = 20
+reserve_max = 20
+reload_ticks = 200

@@ -1,0 +1,13 @@
+config_version=5
+
+[application]
+
+config/name="zz-medieval-weapons"
+config/description="Zee's Medieval Weapons: a longsword, bow, round shield, battle axe, mace, spear, crossbow and dagger on dot-weapon, tuned from cfg/addons/zz_medieval_weapons/*.yml."
+run/main_scene="res://examples/zz_selftest.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"

@@ -1,0 +1,53 @@
+[gd_resource type="Resource" script_class="DotWeaponDef" format=3]
+
+[ext_resource type="Script" path="res://addons/dot_weapon/core/dot_weapon_def.gd" id="1_sk5m8"]
+[ext_resource type="Script" path="res://addons/dot_combat/core/dot_damage_type.gd" id="2_xpqvi"]
+[ext_resource type="Script" path="res://addons/dot_weapon/tuning/dot_weapon_ballistics.gd" id="3_78lal"]
+
+[sub_resource type="Resource" id="Resource_ncu05"]
+script = ExtResource("2_xpqvi")
+id = &"pierce"
+display_name = "Pierce"
+
+[sub_resource type="Resource" id="Resource_714qt"]
+script = ExtResource("3_78lal")
+damage = 75.0
+damage_type = SubResource("Resource_ncu05")
+min_charge_damage = 0.2
+max_range = 400.0
+spread = 0.0
+spread_moving = 0.0
+spread_airborne = 0.0
+recoil_pitch = 0.0
+recoil_yaw = 0.0
+speed = 72.0
+min_speed = 22.0
+gravity_scale = 1.0
+radius = 0.05
+life_ticks = 640
+
+[resource]
+script = ExtResource("1_sk5m8")
+id = &"bow"
+display_name = "Bow"
+tags = Array[StringName]([&"ranged", &"medieval", &"bow"])
+behaviour_path = "res://addons/zz_medieval_weapons/behaviour/zz_projectile.gd"
+params = {
+&"projectile_id": "arrow",
+&"stamina_cost": 8.0
+}
+tuning = SubResource("Resource_714qt")
+authored_tick_rate = 64
+slot = 3
+deploy_ticks = 28
+holster_ticks = 16
+fire_mode = 3
+use_interval_ticks = 24
+charge_ticks = 72
+charge_requires_min = true
+min_charge = 0.3
+ammo_type = &"arrows"
+reserve = 30
+reserve_max = 30
+reload_ticks = 0
+auto_reload = false

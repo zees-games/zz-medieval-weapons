@@ -1,0 +1,147 @@
+{
+	"schema": 1,
+	"title": "Zee's Medieval Weapons",
+	"kinds": [
+		"weapon"
+	],
+	"games": "*",
+	"categories": [
+		{
+			"id": "melee",
+			"name": "Melee"
+		},
+		{
+			"id": "shield",
+			"name": "Shields"
+		},
+		{
+			"id": "ranged",
+			"name": "Ranged"
+		}
+	],
+	"entries": [
+		{
+			"kind": "weapon",
+			"id": "longsword",
+			"name": "Longsword",
+			"def": "weapons/longsword.tres",
+			"slot": 1,
+			"category": "melee",
+			"tags": [
+				"melee",
+				"medieval"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "bow",
+			"name": "Bow",
+			"def": "weapons/bow.tres",
+			"slot": 3,
+			"category": "ranged",
+			"tags": [
+				"ranged",
+				"medieval",
+				"bow"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "round_shield",
+			"name": "Round Shield",
+			"def": "weapons/round_shield.tres",
+			"slot": 2,
+			"category": "shield",
+			"tags": [
+				"melee",
+				"medieval",
+				"shield"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "battle_axe",
+			"name": "Battle Axe",
+			"def": "weapons/battle_axe.tres",
+			"slot": 1,
+			"category": "melee",
+			"tags": [
+				"melee",
+				"medieval"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "mace",
+			"name": "Mace",
+			"def": "weapons/mace.tres",
+			"slot": 1,
+			"category": "melee",
+			"tags": [
+				"melee",
+				"medieval"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "spear",
+			"name": "Spear",
+			"def": "weapons/spear.tres",
+			"slot": 1,
+			"category": "melee",
+			"tags": [
+				"melee",
+				"medieval"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "crossbow",
+			"name": "Crossbow",
+			"def": "weapons/crossbow.tres",
+			"slot": 3,
+			"category": "ranged",
+			"tags": [
+				"ranged",
+				"medieval",
+				"crossbow"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "dagger",
+			"name": "Dagger",
+			"def": "weapons/dagger.tres",
+			"slot": 1,
+			"category": "melee",
+			"tags": [
+				"melee",
+				"medieval"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		}
+	]
+}

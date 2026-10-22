@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="DotWeaponDef" format=3]
+
+[ext_resource type="Script" path="res://addons/dot_weapon/core/dot_weapon_def.gd" id="1_xswyl"]
+[ext_resource type="Script" path="res://addons/dot_combat/core/dot_damage_type.gd" id="2_5qhj8"]
+[ext_resource type="Script" path="res://addons/dot_weapon/tuning/dot_weapon_ballistics.gd" id="3_xllpl"]
+
+[sub_resource type="Resource" id="Resource_7ossb"]
+script = ExtResource("2_5qhj8")
+id = &"slash"
+display_name = "Slash"
+
+[sub_resource type="Resource" id="Resource_slenp"]
+script = ExtResource("3_xllpl")
+damage = 80.0
+damage_type = SubResource("Resource_7ossb")
+max_range = 2.1
+spread = 0.0
+spread_moving = 0.0
+spread_airborne = 0.0
+recoil_pitch = 0.0
+recoil_yaw = 0.0
+
+[resource]
+script = ExtResource("1_xswyl")
+id = &"battle_axe"
+display_name = "Battle Axe"
+tags = Array[StringName]([&"melee", &"medieval"])
+behaviour_path = "res://addons/zz_medieval_weapons/behaviour/zz_melee.gd"
+params = {
+&"arc_degrees": 50.0,
+&"rays": 4,
+&"stamina_cost": 22.0
+}
+tuning = SubResource("Resource_slenp")
+authored_tick_rate = 64
+deploy_ticks = 34
+holster_ticks = 18
+use_interval_ticks = 70
+cost_per_use = 0
+reload_ticks = 0
+auto_reload = false

@@ -1,0 +1,41 @@
+[gd_resource type="Resource" script_class="DotWeaponDef" format=3]
+
+[ext_resource type="Script" path="res://addons/dot_weapon/core/dot_weapon_def.gd" id="1_3vbdv"]
+[ext_resource type="Script" path="res://addons/dot_combat/core/dot_damage_type.gd" id="2_fqqlj"]
+[ext_resource type="Script" path="res://addons/dot_weapon/tuning/dot_weapon_ballistics.gd" id="3_73xiq"]
+
+[sub_resource type="Resource" id="Resource_sc33o"]
+script = ExtResource("2_fqqlj")
+id = &"strike"
+display_name = "Strike"
+
+[sub_resource type="Resource" id="Resource_ebkoj"]
+script = ExtResource("3_73xiq")
+damage = 66.0
+damage_type = SubResource("Resource_sc33o")
+max_range = 1.9
+spread = 0.0
+spread_moving = 0.0
+spread_airborne = 0.0
+recoil_pitch = 0.0
+recoil_yaw = 0.0
+
+[resource]
+script = ExtResource("1_3vbdv")
+id = &"mace"
+display_name = "Mace"
+tags = Array[StringName]([&"melee", &"medieval"])
+behaviour_path = "res://addons/zz_medieval_weapons/behaviour/zz_melee.gd"
+params = {
+&"arc_degrees": 36.0,
+&"rays": 3,
+&"stamina_cost": 16.0
+}
+tuning = SubResource("Resource_ebkoj")
+authored_tick_rate = 64
+deploy_ticks = 28
+holster_ticks = 16
+use_interval_ticks = 56
+cost_per_use = 0
+reload_ticks = 0
+auto_reload = false

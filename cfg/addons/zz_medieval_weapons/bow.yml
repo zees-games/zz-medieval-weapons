@@ -1,0 +1,21 @@
+# Zee's Medieval Weapons: Bow. Durations are ticks at 64 Hz.
+bow:
+  name: "Bow"
+  slot: 3
+  kind: "bow"
+  damage_type: "pierce"
+  damage: 75.0
+  min_charge_damage: 0.2
+  speed: 72.0
+  min_speed: 22.0
+  gravity_scale: 1.0
+  arrow_radius: 0.05
+  life_ticks: 640
+  draw_ticks: 72
+  min_charge: 0.3
+  deploy_ticks: 28
+  holster_ticks: 16
+  use_interval_ticks: 24
+  reserve: 30
+  stamina_cost: 8.0
+  projectile_id: "arrow"

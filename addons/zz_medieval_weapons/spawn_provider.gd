@@ -9,6 +9,23 @@ extends RefCounted
 const ROOT := "res://addons/zz_medieval_weapons/"
 
 
+## The contract game-zombie-zone's zz_packs.gd reads (it loads this file by path and calls it by
+## name, so nothing there names this pack): [code]weapon_defs(types := {})[/code] returns every
+## definition, and a "weapon" row is handed out only if its [code]spawn.weapon_id[/code] (or
+## [code]spawn.weapon[/code], or the row id) is one of those ids. [param types] is the game's
+## damage table (id -> DotDamageType); an entry there replaces this pack's own of that id, so
+## damage resolves against the game's resistances. Called with no argument it uses the pack's.
+static func weapon_defs(types: Dictionary = {}) -> Array[DotWeaponDef]:
+	var table := ZzMedievalPack.damage_types()
+	for key in types:
+		table[String(key)] = types[key]
+	var cfg := ZzMedievalConfig.defaults()
+	var out: Array[DotWeaponDef] = []
+	for id in ZzMedievalConfig.IDS:
+		out.append(ZzMedievalPack.build(id, cfg[String(id)], table))
+	return out
+
+
 static func spawn_entries() -> Array[Dictionary]:
 	var cfg := ZzMedievalConfig.defaults()
 	var out: Array[Dictionary] = []

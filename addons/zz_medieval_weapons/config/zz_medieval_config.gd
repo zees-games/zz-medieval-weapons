@@ -90,11 +90,11 @@ static func defaults() -> Dictionary:
 ## Defaults, then the `weapon` profiles of every tier, then any old-style ymls, environment and
 ## command line on top (an old file is an operator's own tuning, so it still wins; delete it once
 ## migrated). [param dir] reads that directory as the old-style yml (a map of weapon id to keys,
-## name order, later wins) instead of the cfg tree; [param roots] replaces the profile config roots (tests).
-static func load_all(dir: String = "", roots: PackedStringArray = PackedStringArray()) -> Dictionary:
+## name order, later wins) instead of the cfg tree; [param roots] replaces the profile config roots (tests); [param layer] is a runtime layer (id -> {path: value}) over the files.
+static func load_all(dir: String = "", roots: PackedStringArray = PackedStringArray(), layer: Variant = null) -> Dictionary:
 	errors = PackedStringArray()
 	var merged := defaults()
-	var set := profile_set(roots)
+	var set := profile_set(roots, layer)
 	for id in set.list_ids():
 		if not merged.has(id):
 			continue
@@ -117,8 +117,8 @@ static func load_all(dir: String = "", roots: PackedStringArray = PackedStringAr
 
 
 ## The profile set the weapons load from. A set caches its profiles, which point back at it: call [method DotProfileSet.clear_cache] when done or it leaks.
-static func profile_set(roots: PackedStringArray = PackedStringArray()) -> DotProfileSet:
-	return DotWeaponProfiles.make_set(ADDON, game, roots)
+static func profile_set(roots: PackedStringArray = PackedStringArray(), layer: Variant = null) -> DotProfileSet:
+	return DotWeaponProfiles.make_set(ADDON, game, roots, layer)
 
 
 ## Weapon menu entries (id, category, icon, sort) in menu order, from the profiles' `menu:` keys.

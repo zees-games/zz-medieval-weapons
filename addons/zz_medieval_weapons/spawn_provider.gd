@@ -27,6 +27,18 @@ static func weapon_defs(types: Dictionary = {}, cfg_dir: String = "") -> Array[D
 	return out
 
 
+## [method weapon_defs] rebuilt over a host's live profile edits ([param layer]: id -> {path: value}).
+static func weapon_defs_with(layer: Dictionary, types: Dictionary = {}) -> Array[DotWeaponDef]:
+	var table := ZzMedievalPack.damage_types()
+	for key in types:
+		table[String(key)] = types[key]
+	var cfg := ZzMedievalConfig.load_all("", PackedStringArray(), layer)
+	var out: Array[DotWeaponDef] = []
+	for id in ZzMedievalConfig.IDS:
+		out.append(ZzMedievalPack.build(id, cfg[String(id)], table))
+	return out
+
+
 static func spawn_entries() -> Array[Dictionary]:
 	var cfg := ZzMedievalConfig.load_all()
 	var out: Array[Dictionary] = []

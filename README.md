@@ -14,6 +14,10 @@ Eight historical weapons on [dot-weapon](../dot-weapon): longsword, dagger, batt
 
 Every number is in `cfg/addons/zz_medieval_weapons/*.yml`, read through dot-core's `DotAddonConfig.load_dir("zz_medieval_weapons", defaults)` (all files, name order, later wins; environment and `--zz_medieval_weapons.longsword.damage=60` also work). A file is a map of weapon id to keys; the shipped files are the built-in defaults written out, so deleting one changes nothing. Durations are ticks at 64 Hz. Keys: `damage`, `reach`, `arc_degrees`, `rays`, `swing_ticks`, `stamina_cost`, `deploy_ticks`; bow and crossbow `speed`, `min_speed`, `gravity_scale` (arrow drop), `draw_ticks`, `min_charge`, `reload_ticks`, `reserve`; shield `knockback`, `block_reduction`, `block_arc_degrees`, `block_stamina_per_damage`. `ZzMedievalConfig.load_all()` falls back to its own reader where dot-core predates `DotAddonConfig`.
 
+## Seeing the weapons
+
+A first-person view model with arms, a third-person world model, procedural swings (slash, overhead, thrust per weapon), a shield guard and bash, a bow's draw, nock, hold and loose with a flying arrow, a crossbow's fire and cocking, hit impacts, sound cue names and the replicated fields for watchers. All of it is data-driven from `ZzMedievalArtTable`; see [docs/view-model.md](docs/view-model.md). `tools/screenshot.sh --sheet` and `--world` render contact sheets.
+
 ## Art
 
 Placeholders built from primitives; Sketchfab CC0/CC-BY replacements are chosen but not downloaded (needs a token). See [CREDITS.md](CREDITS.md).

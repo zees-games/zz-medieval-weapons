@@ -1,10 +1,11 @@
 # zz-medieval-weapons
 
-Zee's Medieval Weapons: eight historical weapons on dot-weapon, as a Workshop pack (`provides.json`, games `*`). Read the family [CLAUDE.md](../../CLAUDE.md), [dot-weapon's](../dot-weapon/CLAUDE.md) and [README.md](README.md). Modelled on zee-dot-weapons, without its rig and view model: this pack is catalogue rows, behaviours, config, models and a spawn provider.
+Zee's Medieval Weapons: eight historical weapons on dot-weapon, as a Workshop pack (`provides.json`, games `*`). Read the family [CLAUDE.md](../../CLAUDE.md), [dot-weapon's](../dot-weapon/CLAUDE.md) and [README.md](README.md). Modelled on zee-dot-weapons, with its own minimal view model, world model and replication (it does not depend on zee-dot-weapons): catalogue rows, behaviours, config, models, a spawn provider and `view/`, `net/`; the detail is in [docs/view-model.md](docs/view-model.md).
 
 - Tuning is in `cfg/addons/zz_medieval_weapons/*.yml` through `DotAddonConfig`; `ZzMedievalConfig.defaults()` is the source of truth and the shipped yml and `weapons/*.tres` are **generated** by `tools/export-defs.sh`. Change a default, re-run it, commit all of it.
 - Behaviours apply nothing: stamina and knockback are outcome events the game applies; blocking is `ZzMedievalBlock`, a pure function.
 - Durations are ticks at 64 (`authored_tick_rate`).
 - Models: `assets/<id>.glb` if present, else a primitive placeholder (all eight are placeholders; see CREDITS.md). Credit every vendored model there and in the README.
 - A spawn menu consumes `spawn_provider.gd`; do not copy it into a game.
-- Check: `./game.sh test`; render with `tools/screenshot.sh` and look.
+- `ZzMedievalArtTable` is the only file that knows how a weapon is held and moves; `ZzWeaponAnim` holds no nodes and reads no input. A lambda connected to an anim must not capture the anim (a reference cycle, caught by the suite's leak check).
+- Check: `./game.sh test`; render with `tools/screenshot.sh` (`--sheet`, `--world`) and look at the frames.

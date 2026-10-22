@@ -67,12 +67,12 @@ static func placeholder(id: StringName) -> Node3D:
 				if i > 0:
 					_segment(root, prev, p, 0.025, WOOD)
 				prev = p
-			_segment(root, Vector3(0, -0.7, 0), Vector3(0, 0.7, 0), 0.006, STRING)
+			_segment(root, Vector3(0, -0.7, 0), Vector3(0, 0.7, 0), 0.006, STRING).name = "string"
 		"crossbow":
 			_box(root, Vector3(0.06, 0.7, 0.08), Vector3(0, 0.25, 0), WOOD)
 			_box(root, Vector3(0.7, 0.04, 0.05), Vector3(0, 0.55, 0), IRON)
-			_segment(root, Vector3(-0.35, 0.55, 0), Vector3(0, 0.45, 0), 0.006, STRING)
-			_segment(root, Vector3(0.35, 0.55, 0), Vector3(0, 0.45, 0), 0.006, STRING)
+			_segment(root, Vector3(-0.35, 0.55, 0), Vector3(0, 0.45, 0), 0.006, STRING).name = "string"
+			_segment(root, Vector3(0.35, 0.55, 0), Vector3(0, 0.45, 0), 0.006, STRING).name = "string2"
 		_:
 			_box(root, Vector3(0.1, 0.1, 0.1), Vector3.ZERO, Color.MAGENTA)
 	return root
@@ -87,6 +87,11 @@ static func projectile(projectile_id: StringName) -> Node3D:
 	(tip.mesh as CylinderMesh).bottom_radius = 0.02
 	tip.rotation = Vector3(-PI / 2, 0, 0)
 	return root
+
+
+## How long [method projectile] is, for the nock to seat its tail on the string.
+static func projectile_length(projectile_id: StringName) -> float:
+	return 0.9 if projectile_id == &"arrow" else 0.4
 
 
 static func _sword(root: Node3D, blade: float, width: float, guard: float) -> void:

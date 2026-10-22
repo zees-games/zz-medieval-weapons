@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 201
+const CHECKS := 315
 
 var _entered := 0
 var _finished := 0
@@ -25,6 +25,14 @@ func _ready() -> void:
 	_spawn()
 	_workshop()
 	_packs()
+	_art_table()
+	_pose()
+	_anim()
+	_bow_anim()
+	_crossbow_anim()
+	_net()
+	_held()
+	_flight()
 	print("%d sections entered, %d finished, %d checks (expected %d), %d failed" % [_entered, _finished, _checks, CHECKS, _failures])
 	if _entered != _finished or _checks != CHECKS:
 		_failures += 1
@@ -259,4 +267,248 @@ func _packs() -> void:
 		if ids.has(wid) or ids.has(str(r.get("id", ""))):
 			kept += 1
 	_check(kept == rows.size() and kept == ids.size(), "every weapon row has a definition behind it")
+	_end()
+
+
+## A fake replicating object: the fields [ZzMedievalNet] reads and writes.
+class FakeNet extends RefCounted:
+	var net_use_seq := 0
+	var net_use_style := 0
+	var net_blocking := false
+	var net_draw := 0
+	var net_reloading := false
+
+
+func _art_table() -> void:
+	_begin("art table")
+	for id in ZzMedievalConfig.IDS:
+		var r := ZzMedievalArtTable.row(id)
+		_check(not r.is_empty(), "%s has an art row" % id)
+		_check(r.has("hold") and r.has("rest") and not (r["styles"] as Array).is_empty(), "%s has hold, rest and styles" % id)
+	_check(ZzMedievalArtTable.has_string(&"bow") and ZzMedievalArtTable.has_string(&"crossbow"), "the two missile weapons have strings")
+	_check(not ZzMedievalArtTable.has_string(&"longsword"), "a sword has no string")
+	_check(ZzMedievalArtTable.string_point(&"bow", 1.0).x > ZzMedievalArtTable.string_point(&"bow", 0.0).x, "a drawn bow string is back toward the archer")
+	_check(ZzMedievalArtTable.cue(&"battle_axe", &"swing") == &"swing_heavy" and ZzMedievalArtTable.cue(&"dagger", &"swing") == &"swing_light", "swing cue follows the weapon's weight")
+	_check(ZzMedievalArtTable.cue(&"spear", &"hit") == &"hit_wood", "hit cue follows the surface")
+	_end()
+
+
+func _pose() -> void:
+	_begin("pose curves")
+	for st in [1, 2, 3, 4, 5, 6, 7]:
+		var a := ZzWeaponPose.sample(st, 0.0)
+		var z := ZzWeaponPose.sample(st, 1.0)
+		_check((a["pos"] as Vector3).length() < 0.001 and (z["pos"] as Vector3).length() < 0.001, "%s starts and ends at rest" % ZzWeaponPose.style_name(st))
+	var hi := ZzWeaponPose.sample(ZzWeaponPose.Style.THRUST, 0.55)
+	var back := ZzWeaponPose.sample(ZzWeaponPose.Style.THRUST, 0.34)
+	_check((hi["pos"] as Vector3).z < -0.5 and (back["pos"] as Vector3).z > 0.2, "a thrust draws back then reaches forward")
+	var r := ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_R, 0.55)
+	var l := ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_L, 0.55)
+	_check(is_equal_approx((r["pos"] as Vector3).x, -(l["pos"] as Vector3).x), "a left slash mirrors the right")
+	var o := ZzWeaponPose.sample(ZzWeaponPose.Style.OVERHEAD, 0.34)
+	_check((o["rot"] as Vector3).x > 90.0 and (o["pos"] as Vector3).y > 0.3, "an overhead raises the weapon over the shoulder")
+	_check(ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_R, 0.55, 0.5)["pos"].length() < r["pos"].length(), "heft scales the swing")
+	_end()
+
+
+func _anim() -> void:
+	_begin("melee animation")
+	var a := ZzWeaponAnim.new()
+	a.configure(&"longsword")
+	_check(is_equal_approx(a.swing_s, 42.0 / 64.0), "swing duration is swing_ticks at 64")
+	var seen := []
+	a.used.connect(func(s: int) -> void: seen.append(s))
+	var struck := [0]
+	a.struck.connect(func(_s: int) -> void: struck[0] += 1)
+	var cues := []
+	a.cue.connect(func(n: StringName) -> void: cues.append(n))
+	for i in 4:
+		a.start_use()
+		for f in 60:
+			a.advance(1.0 / 60.0)
+		_check(not a.is_swinging(), "swing %d finished" % i)
+	_check(seen == [1, 2, 3, 1], "longsword cycles slash, slash, overhead, slash (%s)" % [seen])
+	_check(struck[0] == 4, "each swing struck exactly once")
+	_check(cues.count(&"swing_light") == 4, "each swing asks for its sound")
+	a.start_use()
+	a.advance(a.swing_s * 0.5)
+	_check((a.pose()["pos"] as Vector3).length() > 0.1, "mid-swing the hand is away from rest")
+	var kick := ZzWeaponAnim.new()
+	kick.configure(&"mace")
+	var hits := []
+	kick.cue.connect(func(n: StringName) -> void: hits.append(n))
+	kick.hit(&"wood")
+	_check(hits == [&"hit_wood"] and (kick.pose()["pos"] as Vector3).z > 0.0, "a hit recoils the weapon and asks for its sound")
+	var sh := ZzWeaponAnim.new()
+	sh.configure(&"round_shield")
+	var base: Vector3 = sh.pose()["pos"]
+	sh.set_blocking(true)
+	for f in 30:
+		sh.advance(1.0 / 60.0)
+	_check(is_equal_approx(sh.block, 1.0), "the guard comes fully up")
+	_check((sh.pose()["pos"] as Vector3).distance_to(base) > 0.4, "a raised shield is across the body, not at the hip")
+	sh.set_blocking(false)
+	for f in 30:
+		sh.advance(1.0 / 60.0)
+	_check(is_equal_approx(sh.block, 0.0), "and goes down again")
+	sh.start_use()
+	_check(sh.style == ZzWeaponPose.Style.BASH, "the shield's use is a bash")
+	_end()
+
+
+func _bow_anim() -> void:
+	_begin("bow animation")
+	var b := ZzWeaponAnim.new()
+	b.configure(&"bow")
+	var loosed := []
+	b.loosed.connect(func(c: float) -> void: loosed.append(c))
+	b.hold_draw(true)
+	for f in 30:
+		b.advance(1.0 / 60.0)
+	_check(b.draw > 0.4 and b.draw < 0.7, "half a second of a 58-tick draw is about half (%.2f)" % b.draw)
+	_check(b.pose()["off_string"] > 0.9, "the other hand is on the string")
+	b.hold_draw(true)
+	for f in 60:
+		b.advance(1.0 / 60.0)
+	_check(is_equal_approx(b.draw, 1.0), "the draw stops at full")
+	b.hold_draw(false)
+	_check(loosed.size() == 1 and is_equal_approx(loosed[0], 1.0), "releasing a full draw looses once at full charge")
+	_check(not b.nocked and b.draw == 0.0, "the arrow is gone and the string forward")
+	for f in 30:
+		b.advance(1.0 / 60.0)
+	_check(b.nocked, "a new arrow is nocked")
+	b.hold_draw(true)
+	b.advance(0.1)
+	b.hold_draw(false)
+	_check(loosed.size() == 1, "a short draw is relaxed, not loosed")
+	_end()
+
+
+func _crossbow_anim() -> void:
+	_begin("crossbow animation")
+	var c := ZzWeaponAnim.new()
+	c.configure(&"crossbow")
+	_check(c.loaded and c.draw == 1.0, "starts cocked and loaded")
+	var loosed := []
+	c.loosed.connect(func(ch: float) -> void: loosed.append(ch))
+	c.start_use()
+	_check(loosed.size() == 1 and not c.loaded and c.draw == 0.0, "firing looses the bolt and lets the string go")
+	c.set_reloading(true)
+	for f in 45:
+		c.advance(1.0 / 60.0)
+	_check(c.draw > 0.3 and c.draw < 1.0 and not c.loaded, "mid-reload the string is part-way back")
+	_check(c.pose()["off_string"] > 0.5, "the off hand works the string")
+	c.set_reloading(false)
+	_check(c.loaded and c.draw == 1.0, "the simulation ending the reload snaps to loaded")
+	_end()
+
+
+func _net() -> void:
+	_begin("replication")
+	var specs := ZzMedievalNet.specs()
+	_check(specs.size() == 5, "five fields")
+	var bits := 0
+	for sp in specs:
+		bits += int(sp["bits"])
+		_check(sp["owner_only"] == false and sp["interpolated"] == false, "%s is public and uninterpolated" % sp["property"])
+	_check(bits == 4 + 3 + 1 + 4 + 1, "thirteen bits")
+	_check(ZzMedievalNet.all_specs().size() == DotWeaponNetSync.specs().size() + 5, "all_specs adds to dot-weapon's")
+	_check(ZzMedievalNet.uses_between(14, 2) == 4 and ZzMedievalNet.uses_between(3, 3) == 0, "uses_between is wrap-aware")
+	_check(absf(ZzMedievalNet.dequantise_draw(ZzMedievalNet.quantise_draw(0.5)) - 0.5) < 0.04, "draw survives quantising")
+	# Owner swings, a watcher copies it from the fields alone.
+	var owner := ZzWeaponAnim.new()
+	owner.configure(&"longsword")
+	var sender := ZzMedievalNet.Sender.new()
+	sender.attach(owner)
+	var wire := FakeNet.new()
+	owner.start_use()
+	owner.set_blocking(true)
+	sender.pull(owner, wire)
+	var watcher := ZzWeaponAnim.new()
+	watcher.configure(&"longsword")
+	var seq := ZzMedievalNet.apply(wire, watcher, 0)
+	_check(seq == 1 and watcher.style == ZzWeaponPose.Style.SLASH_R, "a watcher plays the owner's swing")
+	_check(watcher.blocking, "and sees the guard")
+	_check(ZzMedievalNet.apply(wire, watcher, seq) == 1, "an unchanged counter replays nothing")
+	for i in 17:
+		owner.start_use()
+	sender.pull(owner, wire)
+	_check(ZzMedievalNet.uses_between(seq, int(wire.net_use_seq)) == 1, "seventeen swings wrap to one (the counter is four bits)")
+	# A bow: draw travels as a level, the release as the counter.
+	var archer := ZzWeaponAnim.new()
+	archer.configure(&"bow")
+	var bs := ZzMedievalNet.Sender.new()
+	bs.attach(archer)
+	var seen := ZzWeaponAnim.new()
+	seen.configure(&"bow")
+	var loosed := []
+	seen.loosed.connect(func(c: float) -> void: loosed.append(c))
+	archer.hold_draw(true)
+	for f in 40:
+		archer.advance(1.0 / 60.0)
+	bs.pull(archer, wire)
+	var s2 := ZzMedievalNet.apply(wire, seen, 0)
+	for f in 40:
+		seen.advance(1.0 / 60.0)
+	_check(seen.draw > 0.5, "a watcher sees the string drawn (%.2f)" % seen.draw)
+	archer.hold_draw(false)
+	bs.pull(archer, wire)
+	ZzMedievalNet.apply(wire, seen, s2)
+	_check(loosed.size() == 1 and loosed[0] > 0.5, "and sees the arrow loosed at about the owner's draw (%s)" % [loosed])
+	_check(ZzMedievalNet.describe(wire).has("draw"), "describe reports the draw")
+	_end()
+
+
+func _held() -> void:
+	_begin("view and world models")
+	var root := Node3D.new()
+	add_child(root)
+	for id in ZzMedievalConfig.IDS:
+		for kind in 2:
+			var h: ZzMedievalHeld = ZzMedievalViewModel.new() if kind == 0 else ZzMedievalWorldModel.new()
+			root.add_child(h)
+			h.spawn_flight = false
+			h.bind(id)
+			h.anim.start_use()
+			h.step(0.2)
+			var t := h.grip_transform()
+			_check(t.origin.is_finite() and t.basis.is_finite(), "%s (%s) poses finitely" % [id, "view" if kind == 0 else "world"])
+			_check(h.get_child_count() >= 7, "%s has grip and two arms" % id)
+	var bow := ZzMedievalViewModel.new()
+	root.add_child(bow)
+	bow.spawn_flight = false
+	bow.bind(&"bow")
+	bow.step(0.01)
+	var model := bow.find_child("bow", true, false)
+	_check(model != null and (model.find_child("string", true, false) as Node3D).visible == false, "the model's own string is hidden")
+	bow.anim.hold_draw(true)
+	for f in 20:
+		bow.step(1.0 / 60.0)
+	var held_pull := bow.grip_transform().origin
+	_check(held_pull.y > -0.1 and held_pull.x > -0.2, "a drawing bow is raised toward the aim line (%s)" % held_pull)
+	var wm := ZzMedievalWorldModel.new()
+	var vm := ZzMedievalViewModel.new()
+	root.add_child(wm)
+	root.add_child(vm)
+	wm.bind(&"longsword")
+	vm.bind(&"longsword")
+	_check(wm.grip_transform().origin.y < vm.grip_transform().origin.y - 0.1, "a world model's hand hangs lower than the eye's")
+	root.queue_free()
+	_end()
+
+
+func _flight() -> void:
+	_begin("flight and impacts")
+	var root := Node3D.new()
+	add_child(root)
+	var f := ZzProjectileFlight.launch(root, &"arrow", Transform3D(Basis(), Vector3(0, 2, 0)), 30.0, 1.0)
+	f.mask = 0
+	for i in 60:
+		f.step(1.0 / 60.0)
+	_check(f.global_position.z < -25.0, "an arrow flies forward (%s)" % f.global_position)
+	_check(f.global_position.y < 2.0 - 4.0, "and drops under gravity (%s)" % f.global_position.y)
+	var burst := ZzMedievalImpacts.burst(root, Vector3(1, 1, 1), Vector3.UP, &"steel")
+	_check(burst.one_shot and burst.global_position.is_equal_approx(Vector3(1, 1, 1)), "a burst at the point")
+	_check(ZzMedievalImpacts.colour(&"flesh") != ZzMedievalImpacts.colour(&"wood"), "surfaces look different")
+	root.queue_free()
 	_end()

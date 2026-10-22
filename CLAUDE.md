@@ -2,7 +2,7 @@
 
 Zee's Medieval Weapons: eight historical weapons on dot-weapon, as a Workshop pack (`provides.json`, games `*`). Read the family [CLAUDE.md](../../CLAUDE.md), [dot-weapon's](../dot-weapon/CLAUDE.md) and [README.md](README.md). Modelled on zee-dot-weapons, with its own minimal view model, world model and replication (it does not depend on zee-dot-weapons): catalogue rows, behaviours, config, models, a spawn provider and `view/`, `net/`; the detail is in [docs/view-model.md](docs/view-model.md).
 
-- Tuning is in `cfg/addons/zz_medieval_weapons/*.yml` through `DotAddonConfig`; `ZzMedievalConfig.defaults()` is the source of truth and the shipped yml and `weapons/*.tres` are **generated** by `tools/export-defs.sh`. Change a default, re-run it, commit all of it.
+- Tuning is in weapon profiles `cfg/addons/zz_medieval_weapons/weapon/<id>.yml` (`DotWeaponProfiles` in dot-weapon over dot-core's `DotProfileSet`; pack keys under `extra:`, `upgrades/` children in the folder form), with the old `*.yml` files kept as a top layer; `ZzMedievalConfig.defaults()` is the source of truth and the shipped yml and `weapons/*.tres` are **generated** by `tools/export-defs.sh`. Change a default, re-run it, commit all of it.
 - Behaviours apply nothing: stamina and knockback are outcome events the game applies; blocking is `ZzMedievalBlock`, a pure function.
 - Durations are ticks at 64 (`authored_tick_rate`).
 - Models: `assets/<id>.glb` if present, else a primitive placeholder (all eight are placeholders; see CREDITS.md). Credit every vendored model there and in the README.

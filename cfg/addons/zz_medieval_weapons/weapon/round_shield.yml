@@ -1,7 +1,12 @@
 # Zee's Medieval Weapons: Round Shield. Durations are ticks at 64 Hz.
-round_shield:
-  name: "Round Shield"
-  slot: 2
+name: "Round Shield"
+slot: 2
+deploy_ticks: 22
+holster_ticks: 12
+menu:
+  category: shield
+  sort: 2
+extra:
   kind: "shield"
   damage_type: "strike"
   damage: 14.0
@@ -9,8 +14,6 @@ round_shield:
   arc_degrees: 44.0
   rays: 3
   swing_ticks: 56
-  deploy_ticks: 22
-  holster_ticks: 12
   stamina_cost: 10.0
   knockback: 7.0
   block_reduction: 0.8

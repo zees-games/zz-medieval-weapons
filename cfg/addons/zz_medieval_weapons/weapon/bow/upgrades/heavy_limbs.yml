@@ -1,0 +1,9 @@
+# A stiffer bow: faster arrows that hit harder.
+name: "Heavy limbs"
+cost: 120
+mul:
+  speed: 1.1
+add:
+  damage: 10
+menu:
+  sort: 0

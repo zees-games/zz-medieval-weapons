@@ -38,11 +38,10 @@ static func damage_types() -> Dictionary:
 static func build(id: StringName, c: Dictionary, types: Dictionary) -> DotWeaponDef:
 	var d := DotWeaponDef.new()
 	d.id = id
-	d.display_name = String(c["name"])
+	d.deploy_ticks = 24
+	d.holster_ticks = 14
+	DotWeaponProfiles.apply_common(d, c)
 	d.authored_tick_rate = ZzMedievalConfig.TICK_RATE
-	d.slot = int(c["slot"])
-	d.deploy_ticks = int(c.get("deploy_ticks", 24))
-	d.holster_ticks = int(c.get("holster_ticks", 14))
 	d.cost_per_use = 0
 	d.reload_ticks = 0
 	d.auto_reload = false

@@ -1,7 +1,12 @@
 # Zee's Medieval Weapons: Longsword. Durations are ticks at 64 Hz.
-longsword:
-  name: "Longsword"
-  slot: 1
+name: "Longsword"
+slot: 1
+deploy_ticks: 26
+holster_ticks: 14
+menu:
+  category: melee
+  sort: 0
+extra:
   kind: "melee"
   damage_type: "slash"
   damage: 55.0
@@ -9,6 +14,4 @@ longsword:
   arc_degrees: 60.0
   rays: 5
   swing_ticks: 42
-  deploy_ticks: 26
-  holster_ticks: 14
   stamina_cost: 12.0

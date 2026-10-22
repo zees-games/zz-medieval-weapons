@@ -1,0 +1,10 @@
+# A balanced blade swings faster and sweeps one more ray; needs the edge first.
+name: "Balanced"
+cost: 150
+requires: ["sharpened"]
+add:
+  swing_ticks: -4
+set:
+  rays: 6
+menu:
+  sort: 1

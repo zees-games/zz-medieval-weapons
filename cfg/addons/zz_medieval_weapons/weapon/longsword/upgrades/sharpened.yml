@@ -1,0 +1,9 @@
+# A honed edge: 10% more damage and a little more reach.
+name: "Sharpened"
+cost: 100
+mul:
+  damage: 1.1
+add:
+  reach: 0.1
+menu:
+  sort: 0

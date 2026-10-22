@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 317
+const CHECKS := 349
 
 var _entered := 0
 var _finished := 0
@@ -16,6 +16,7 @@ var _section := ""
 func _ready() -> void:
 	print("zz-medieval-weapons self-test")
 	_config()
+	_profiles()
 	_defs()
 	_melee()
 	_bow()
@@ -105,6 +106,103 @@ func _config() -> void:
 	_check(not is_equal_approx(tuned, untuned), "a yml override changes the dagger through weapon_defs")
 	# The shipped cfg directory, read through dot-core, equals the built-in table.
 	_check(str(ZzMedievalConfig.load_all()) == str(d), "shipped yml equals the defaults")
+	_end()
+
+
+func _write(path: String, text: String) -> void:
+	DirAccess.make_dir_recursive_absolute(path.get_base_dir())
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	f.store_string(text)
+	f.close()
+
+
+func _root(name: String) -> String:
+	return OS.get_temp_dir().path_join("zz_prof_%s_%d" % [name, Time.get_ticks_usec()])
+
+
+func _profiles() -> void:
+	_begin("weapon profiles")
+	var d := ZzMedievalConfig.defaults()
+	var res_roots := PackedStringArray(["res://cfg"])
+	var set := ZzMedievalConfig.profile_set(res_roots)
+	# Listing opens no profile; the order is by id, the menu order is by sort.
+	var ids := Array(DotWeaponProfiles.list_ids(set))
+	var want: Array = ZzMedievalConfig.IDS.map(func(i: StringName) -> String: return String(i))
+	want.sort()
+	_check(ids == want, "list_ids finds the eight shipped profiles (%s)" % [ids])
+	var menu := ZzMedievalConfig.menu_entries(res_roots)
+	_check(menu.size() == 8 and menu[0]["id"] == "longsword" and menu[7]["id"] == "dagger", "menu entries are in menu order")
+	var cats := {}
+	for m in menu:
+		cats[m["id"]] = m["category"]
+	_check(cats["round_shield"] == "shield" and cats["bow"] == "ranged" and cats["mace"] == "melee", "menu categories come from menu: keys")
+	# Equivalence with the code table: every number a profile carries is the default's.
+	var same := 0
+	for id in ZzMedievalConfig.IDS:
+		var res := set.load_profile(String(id))
+		if res.ok and str(DotWeaponProfiles.flat(res.value).get("damage")) == str(d[String(id)]["damage"]):
+			same += 1
+	_check(same == 8, "all eight profiles carry the default damage")
+	_check(str(ZzMedievalConfig.load_all("", res_roots)) == str(d), "profiles build exactly the default rows")
+	_check(ZzMedievalConfig.errors.is_empty(), "no shipped profile fails")
+	var def_res := DotWeaponProfiles.load_def(set, "longsword")
+	set.clear_cache()
+	_check(def_res.ok and def_res.value.slot == 1 and def_res.value.deploy_ticks == 26 and def_res.value.display_name == "Longsword", "load_def fills the common fields")
+	_check(def_res.ok and is_equal_approx(float(def_res.value.params["damage"]), 55.0), "load_def keeps the pack keys as params")
+	# Game and server tiers.
+	var tmp := _root("tiers")
+	_write(tmp.path_join("game/tg/weapon/longsword.yml"), "extra:\n  damage: 77.0\n")
+	_write(tmp.path_join("server/weapon/mace.yml"), "slot: 2\n")
+	ZzMedievalConfig.game = "tg"
+	var tiered := ZzMedievalConfig.load_all("", PackedStringArray(["res://cfg", tmp]))
+	ZzMedievalConfig.game = ""
+	_check(is_equal_approx(float(tiered["longsword"]["damage"]), 77.0), "the game tier overrides a pack key")
+	_check(is_equal_approx(float(tiered["longsword"]["reach"]), 2.4), "and leaves the others")
+	_check(int(tiered["mace"]["slot"]) == 2 and is_equal_approx(float(tiered["mace"]["damage"]), 66.0), "the server tier overrides a common key")
+	var no_game := ZzMedievalConfig.load_all("", PackedStringArray(["res://cfg", tmp]))
+	_check(is_equal_approx(float(no_game["longsword"]["damage"]), 55.0), "another game does not see the game tier")
+	# Upgrades.
+	_check(Array(DotWeaponProfiles.list_upgrades(set, "longsword")) == ["balanced", "sharpened"], "longsword lists two upgrades")
+	_check(DotWeaponProfiles.list_upgrades(set, "dagger").is_empty(), "dagger has none")
+	_check(Array(set.child_kinds("longsword")) == ["upgrades"], "the folder form has an upgrades child")
+	var up := ZzMedievalConfig.upgraded(&"longsword", ["sharpened"], res_roots)
+	_check(up.ok and is_equal_approx(float(up.value["values"]["damage"]), 60.5) and is_equal_approx(float(up.value["values"]["reach"]), 2.5) and up.value["cost"] == 100, "sharpened multiplies damage, adds reach, costs 100")
+	var up2 := ZzMedievalConfig.upgraded(&"longsword", ["sharpened", "balanced"], res_roots)
+	_check(up2.ok and up2.value["values"]["swing_ticks"] == 38 and up2.value["values"]["rays"] == 6 and up2.value["cost"] == 250, "balanced adds ticks, sets rays, costs add up")
+	_check(is_equal_approx(float(ZzMedievalConfig.load_all("", res_roots)["longsword"]["damage"]), 55.0), "applying upgrades leaves the row alone")
+	_check(not ZzMedievalConfig.upgraded(&"longsword", ["balanced"], res_roots).ok, "balanced without sharpened is refused")
+	_check(not ZzMedievalConfig.upgraded(&"longsword", ["balanced", "sharpened"], res_roots).ok, "a prerequisite must come first")
+	_check(not ZzMedievalConfig.upgraded(&"longsword", ["sharpened", "sharpened"], res_roots).ok, "an upgrade applies once")
+	_check(not ZzMedievalConfig.upgraded(&"longsword", ["nope"], res_roots).ok, "an unknown upgrade is refused")
+	var bow_up := ZzMedievalConfig.upgraded(&"bow", ["heavy_limbs"], res_roots)
+	_check(bow_up.ok and is_equal_approx(float(bow_up.value["values"]["speed"]), 79.2) and is_equal_approx(float(bow_up.value["values"]["damage"]), 85.0), "bow upgrade keeps the float keys floats")
+	var bad_up := _root("badup")
+	_write(bad_up.path_join("addons/zz_medieval_weapons/weapon/dagger/dagger.yml"), "name: \"Dagger\"\n")
+	_write(bad_up.path_join("addons/zz_medieval_weapons/weapon/dagger/upgrades/ghost.yml"), "add:\n  nokey: 1\n")
+	_write(bad_up.path_join("addons/zz_medieval_weapons/weapon/dagger/upgrades/wrong.yml"), "set:\n  damage: \"lots\"\n")
+	_check(not ZzMedievalConfig.upgraded(&"dagger", ["ghost"], PackedStringArray([bad_up])).ok, "an upgrade naming a missing key fails")
+	_check(not ZzMedievalConfig.upgraded(&"dagger", ["wrong"], PackedStringArray([bad_up])).ok, "an upgrade setting the wrong type fails")
+	# Bad yml: the weapon keeps the layer below and the rest still load.
+	var bad := _root("bad")
+	_write(bad.path_join("addons/zz_medieval_weapons/weapon/dagger.yml"), "extra: [unclosed\n  damage: {\n")
+	_write(bad.path_join("addons/zz_medieval_weapons/weapon/mace.yml"), "bogus_key: 1\n")
+	_write(bad.path_join("addons/zz_medieval_weapons/weapon/spear.yml"), "slot: 0\n")
+	_write(bad.path_join("addons/zz_medieval_weapons/weapon/bow.yml"), "fire_mode: \"plasma\"\n")
+	_write(bad.path_join("addons/zz_medieval_weapons/weapon/longsword.yml"), "extra:\n  damage: 12.0\n")
+	var broken := ZzMedievalConfig.load_all("", PackedStringArray([bad]))
+	_check(ZzMedievalConfig.errors.size() == 4, "four broken profiles are reported (%d)" % ZzMedievalConfig.errors.size())
+	_check(is_equal_approx(float(broken["dagger"]["damage"]), 28.0) and is_equal_approx(float(broken["mace"]["damage"]), 66.0), "a broken profile keeps its default row")
+	_check(int(broken["spear"]["slot"]) == 1 and is_equal_approx(float(broken["longsword"]["damage"]), 12.0), "and a good one beside it still loads")
+	# Old files still work, and sit below the profiles.
+	var old := _root("old")
+	_write(old.path_join("old.yml"), "longsword:\n  damage: 99.5\n  rays: 7\n  slot: 2\n")
+	var mixed_root := _root("mixed")
+	_write(mixed_root.path_join("addons/zz_medieval_weapons/weapon/longsword.yml"), "extra:\n  damage: 70.0\n  reach: 3.0\n")
+	var mixed := ZzMedievalConfig.load_all(old, PackedStringArray([mixed_root]))
+	_check(is_equal_approx(float(mixed["longsword"]["damage"]), 99.5), "an old file still beats the shipped profile")
+	_check(int(mixed["longsword"]["rays"]) == 7 and int(mixed["longsword"]["slot"]) == 2, "an old file's other keys apply, common ones too")
+	_check(is_equal_approx(float(mixed["longsword"]["reach"]), 3.0) and is_equal_approx(float(mixed["dagger"]["damage"]), 28.0), "and the rest comes from the profiles and defaults")
+	_check(is_equal_approx(float(ZzMedievalConfig.load_all(old, PackedStringArray([tmp.path_join("none")]))["longsword"]["damage"]), 99.5), "with no profiles the old file alone retunes")
 	_end()
 
 
@@ -230,7 +328,7 @@ func _workshop() -> void:
 	for d in defs:
 		var loaded: DotWeaponDef = load("res://weapons/%s.tres" % String(d.id))
 		_check(loaded != null and loaded.describe() == d.describe() and str(loaded.tuning.describe()) == str(d.tuning.describe()) and loaded.params == d.params, "%s .tres is not stale" % d.id)
-		_check(FileAccess.get_file_as_string("res://cfg/addons/zz_medieval_weapons/%s.yml" % String(d.id)) == ZzMedievalConfig.to_yaml(d.id), "%s yml matches defaults" % d.id)
+		_check(FileAccess.get_file_as_string(ZzMedievalConfig.profile_path(d.id)) == ZzMedievalConfig.to_yaml(d.id), "%s yml matches defaults" % d.id)
 	_end()
 
 

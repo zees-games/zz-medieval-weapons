@@ -1,7 +1,12 @@
 # Zee's Medieval Weapons: Dagger. Durations are ticks at 64 Hz.
-dagger:
-  name: "Dagger"
-  slot: 1
+name: "Dagger"
+slot: 1
+deploy_ticks: 12
+holster_ticks: 8
+menu:
+  category: melee
+  sort: 7
+extra:
   kind: "melee"
   damage_type: "pierce"
   damage: 28.0
@@ -9,6 +14,4 @@ dagger:
   arc_degrees: 20.0
   rays: 2
   swing_ticks: 20
-  deploy_ticks: 12
-  holster_ticks: 8
   stamina_cost: 4.0

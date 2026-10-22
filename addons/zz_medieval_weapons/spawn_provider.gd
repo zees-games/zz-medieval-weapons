@@ -15,7 +15,7 @@ const ROOT := "res://addons/zz_medieval_weapons/"
 ## [code]spawn.weapon[/code], or the row id) is one of those ids. [param types] is the game's
 ## damage table (id -> DotDamageType); an entry there replaces this pack's own of that id, so
 ## damage resolves against the game's resistances. Called with no argument it uses the pack's.
-## Numbers come from [method ZzMedievalConfig.load_all] (defaults under cfg/addons/zz_medieval_weapons/*.yml), so a server owner's yml retunes a weapon; with no cfg directory that is the built-in defaults. [param cfg_dir] reads that directory instead (the suite's temp tree).
+## Numbers come from [method ZzMedievalConfig.load_all] (weapon profiles under cfg/addons/zz_medieval_weapons/weapon), so a server owner's yml retunes a weapon; with no cfg directory that is the built-in defaults. [param cfg_dir] reads that directory instead (the suite's temp tree).
 static func weapon_defs(types: Dictionary = {}, cfg_dir: String = "") -> Array[DotWeaponDef]:
 	var table := ZzMedievalPack.damage_types()
 	for key in types:
@@ -43,6 +43,6 @@ static func spawn_entries() -> Array[Dictionary]:
 				"def": "res://weapons/%s.tres" % key,
 				"model": ROOT + "art/zz_medieval_models.gd",
 			},
-			"cfg_hint": "cfg/addons/zz_medieval_weapons/%s.yml" % key,
+			"cfg_hint": "cfg/addons/zz_medieval_weapons/weapon/%s.yml" % key,
 		})
 	return out

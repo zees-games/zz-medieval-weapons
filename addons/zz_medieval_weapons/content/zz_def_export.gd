@@ -36,14 +36,14 @@ static func provides(defs: Array[DotWeaponDef]) -> Dictionary:
 
 static func export_to(root: String) -> DotResult:
 	var defs := ZzMedievalPack.weapons()
-	for sub in ["weapons", "cfg/addons/zz_medieval_weapons"]:
+	for sub in ["weapons", "cfg/addons/zz_medieval_weapons/weapon"]:
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(root.path_join(sub)))
 	for def in defs:
 		var path := root.path_join("weapons/%s.tres" % String(def.id))
 		var saved := ResourceSaver.save(def, path)
 		if saved != OK:
 			return DotResult.fail(DotError.CODE_IO, "Cannot save %s (error %d)." % [path, saved])
-		var y := FileAccess.open(root.path_join("cfg/addons/zz_medieval_weapons/%s.yml" % String(def.id)), FileAccess.WRITE)
+		var y := FileAccess.open(ZzMedievalConfig.profile_path(def.id, root.path_join("cfg")), FileAccess.WRITE)
 		if y == null:
 			return DotResult.fail(DotError.CODE_IO, "Cannot write cfg for %s." % String(def.id))
 		y.store_string(ZzMedievalConfig.to_yaml(def.id))

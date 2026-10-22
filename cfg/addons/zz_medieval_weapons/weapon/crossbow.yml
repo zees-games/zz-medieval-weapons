@@ -1,7 +1,16 @@
 # Zee's Medieval Weapons: Crossbow. Durations are ticks at 64 Hz.
-crossbow:
-  name: "Crossbow"
-  slot: 3
+name: "Crossbow"
+slot: 3
+reload_ticks: 200
+magazine: 1
+reserve: 20
+deploy_ticks: 30
+holster_ticks: 16
+use_interval_ticks: 16
+menu:
+  category: ranged
+  sort: 6
+extra:
   kind: "crossbow"
   damage_type: "pierce"
   damage: 90.0
@@ -11,11 +20,5 @@ crossbow:
   gravity_scale: 0.55
   arrow_radius: 0.05
   life_ticks: 640
-  reload_ticks: 200
-  magazine: 1
-  reserve: 20
-  deploy_ticks: 30
-  holster_ticks: 16
-  use_interval_ticks: 16
   stamina_cost: 6.0
   projectile_id: "bolt"

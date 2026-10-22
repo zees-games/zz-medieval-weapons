@@ -1,7 +1,12 @@
 # Zee's Medieval Weapons: Mace. Durations are ticks at 64 Hz.
-mace:
-  name: "Mace"
-  slot: 1
+name: "Mace"
+slot: 1
+deploy_ticks: 28
+holster_ticks: 16
+menu:
+  category: melee
+  sort: 4
+extra:
   kind: "melee"
   damage_type: "strike"
   damage: 66.0
@@ -9,6 +14,4 @@ mace:
   arc_degrees: 36.0
   rays: 3
   swing_ticks: 56
-  deploy_ticks: 28
-  holster_ticks: 16
   stamina_cost: 16.0

@@ -8,3 +8,4 @@ build/
 /screenshots/
 __pycache__/
 .DS_Store
+art-src/reference/

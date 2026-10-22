@@ -1,6 +1,6 @@
 # Zee's Medieval Weapons
 
-Eight historical weapons on [dot-weapon](../dot-weapon): longsword, dagger, battle axe, mace, spear, round shield (bash and block), bow (a drawn shot with an arrow that drops) and crossbow (a slow reload, a flatter bolt). Built for Zombie Zone, usable by any game or server (`games: "*"` in `provides.json`). On `zees-games` (`git@github.com:zees-games/zz-medieval-weapons.git`).
+Ten historical weapons on [dot-weapon](../dot-weapon): longsword, dagger, battle axe, war axe, double axe, mace, spear, round shield (bash and block), bow (a drawn shot with an arrow that drops) and crossbow (a slow reload, a flatter bolt). Built for Zombie Zone, usable by any game or server (`games: "*"` in `provides.json`). On `zees-games` (`git@github.com:zees-games/zz-medieval-weapons.git`).
 
 ## Using it
 
@@ -20,7 +20,7 @@ A first-person view model with arms, a third-person world model, procedural swin
 
 ## Art
 
-Placeholders built from primitives; Sketchfab CC0/CC-BY replacements are chosen but not downloaded (needs a token). See [CREDITS.md](CREDITS.md).
+The war axe and double axe are CC0 models by Arms Museum on Sketchfab (decimated to 3k triangles, one 1024 px texture, worn look; author, URL and change note in [CREDITS.md](CREDITS.md)). The other eight are placeholders built from primitives.
 
 ## Testing
 

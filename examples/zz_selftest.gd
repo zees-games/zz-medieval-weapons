@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 349
+const CHECKS := 403
 
 var _entered := 0
 var _finished := 0
@@ -77,8 +77,8 @@ func _use(cat: DotWeaponCatalogue, id: StringName, charge: float = 1.0) -> DotWe
 func _config() -> void:
 	_begin("config")
 	var d := ZzMedievalConfig.defaults()
-	_check(d.size() == 8, "eight weapons")
-	_check(ZzMedievalConfig.IDS.size() == 8, "eight ids")
+	_check(d.size() == 10, "ten weapons")
+	_check(ZzMedievalConfig.IDS.size() == 10, "ten ids")
 	for id in ZzMedievalConfig.IDS:
 		_check(d.has(String(id)), "default row for %s" % id)
 	# Overrides: the fallback reader lays a yml over the defaults.
@@ -129,9 +129,9 @@ func _profiles() -> void:
 	var ids := Array(DotWeaponProfiles.list_ids(set))
 	var want: Array = ZzMedievalConfig.IDS.map(func(i: StringName) -> String: return String(i))
 	want.sort()
-	_check(ids == want, "list_ids finds the eight shipped profiles (%s)" % [ids])
+	_check(ids == want, "list_ids finds the ten shipped profiles (%s)" % [ids])
 	var menu := ZzMedievalConfig.menu_entries(res_roots)
-	_check(menu.size() == 8 and menu[0]["id"] == "longsword" and menu[7]["id"] == "dagger", "menu entries are in menu order")
+	_check(menu.size() == 10 and menu[0]["id"] == "longsword" and menu[7]["id"] == "dagger", "menu entries are in menu order")
 	var cats := {}
 	for m in menu:
 		cats[m["id"]] = m["category"]
@@ -142,7 +142,7 @@ func _profiles() -> void:
 		var res := set.load_profile(String(id))
 		if res.ok and str(DotWeaponProfiles.flat(res.value).get("damage")) == str(d[String(id)]["damage"]):
 			same += 1
-	_check(same == 8, "all eight profiles carry the default damage")
+	_check(same == 10, "all ten profiles carry the default damage")
 	_check(str(ZzMedievalConfig.load_all("", res_roots)) == str(d), "profiles build exactly the default rows")
 	_check(ZzMedievalConfig.errors.is_empty(), "no shipped profile fails")
 	var def_res := DotWeaponProfiles.load_def(set, "longsword")
@@ -300,6 +300,14 @@ func _models() -> void:
 		var n := ZzMedievalModels.build(id)
 		_check(n != null and n.get_child_count() > 0, "%s model builds" % id)
 		n.free()
+	for id in [&"war_axe", &"double_axe"]:
+		var v := ZzMedievalModels.build(id)
+		var mi := v.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+		var box := mi.mesh.get_aabb()
+		_check(not ZzMedievalModels.is_placeholder(id), "%s is a vendored glb" % id)
+		_check(box.position.y > -0.25 and box.end.y > 0.8 and box.end.y < 1.0, "%s: butt below the grip, head about a metre up (+Y along the weapon)" % id)
+		_check(mi.mesh.surface_get_array_len(0) < 4000, "%s stays under the vertex budget" % id)
+		v.free()
 	var arrow := ZzMedievalModels.projectile(&"arrow")
 	_check(arrow.get_child_count() == 2, "arrow has shaft and head")
 	arrow.free()
@@ -309,7 +317,7 @@ func _models() -> void:
 func _spawn() -> void:
 	_begin("spawn provider")
 	var rows := ZzMedievalSpawnProvider.spawn_entries()
-	_check(rows.size() == 8, "one row per weapon")
+	_check(rows.size() == 10, "one row per weapon")
 	for r in rows:
 		for k in ["category", "id", "name", "icon", "kind", "spawn", "cfg_hint"]:
 			_check(r.has(k), "%s has %s" % [r.get("id"), k])
@@ -323,7 +331,7 @@ func _workshop() -> void:
 	var defs := ZzMedievalPack.weapons()
 	var json: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://provides.json"))
 	_check(json is Dictionary and json["games"] == "*", "provides.json games *")
-	_check(json is Dictionary and json["entries"].size() == 8, "provides.json lists eight")
+	_check(json is Dictionary and json["entries"].size() == 10, "provides.json lists ten")
 	_check(FileAccess.get_file_as_string("res://provides.json") == JSON.stringify(ZzDefExport.provides(defs), "\t", false) + "\n", "provides.json is not stale")
 	for d in defs:
 		var loaded: DotWeaponDef = load("res://weapons/%s.tres" % String(d.id))

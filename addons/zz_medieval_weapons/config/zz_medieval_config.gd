@@ -27,6 +27,7 @@ static var errors: PackedStringArray = PackedStringArray()
 const IDS: Array[StringName] = [
 	&"longsword", &"bow", &"round_shield", &"battle_axe",
 	&"mace", &"spear", &"crossbow", &"dagger",
+	&"war_axe", &"double_axe",
 ]
 
 
@@ -46,6 +47,16 @@ static func defaults() -> Dictionary:
 			"name": "Battle Axe", "slot": 1, "kind": "melee", "damage_type": "slash",
 			"damage": 80.0, "reach": 2.1, "arc_degrees": 50.0, "rays": 4,
 			"swing_ticks": 70, "deploy_ticks": 34, "holster_ticks": 18, "stamina_cost": 22.0,
+		},
+		"war_axe": {
+			"name": "War Axe", "slot": 1, "kind": "melee", "damage_type": "slash",
+			"damage": 72.0, "reach": 2.0, "arc_degrees": 46.0, "rays": 4,
+			"swing_ticks": 62, "deploy_ticks": 32, "holster_ticks": 16, "stamina_cost": 20.0,
+		},
+		"double_axe": {
+			"name": "Double Axe", "slot": 1, "kind": "melee", "damage_type": "slash",
+			"damage": 90.0, "reach": 2.2, "arc_degrees": 70.0, "rays": 5,
+			"swing_ticks": 78, "deploy_ticks": 38, "holster_ticks": 20, "stamina_cost": 26.0,
 		},
 		"mace": {
 			"name": "Mace", "slot": 1, "kind": "melee", "damage_type": "strike",

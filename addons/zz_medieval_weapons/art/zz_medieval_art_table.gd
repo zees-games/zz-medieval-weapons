@@ -48,6 +48,20 @@ static func rows() -> Dictionary:
 			"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
 			"surface": "steel",
 		},
+		&"war_axe": {
+			"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
+			"offhand": Vector3(0, 0.38, 0),
+			"styles": [S.OVERHEAD, S.SLASH_R], "heft": 1.1, "weight": "heavy",
+			"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
+			"surface": "steel",
+		},
+		&"double_axe": {
+			"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
+			"offhand": Vector3(0, 0.38, 0),
+			"styles": [S.OVERHEAD, S.SLASH_R], "heft": 1.2, "weight": "heavy",
+			"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
+			"surface": "steel",
+		},
 		&"mace": {
 			"hold": Vector3(-30, 0, 0), "rest": Vector3(0.30, -0.34, -0.52), "side": 1,
 			"styles": [S.OVERHEAD, S.SLASH_L, S.SLASH_R], "heft": 1.0, "weight": "heavy",

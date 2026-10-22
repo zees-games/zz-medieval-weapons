@@ -142,6 +142,36 @@
 			"meta": {
 				"asset_root": "."
 			}
+		},
+		{
+			"kind": "weapon",
+			"id": "war_axe",
+			"name": "War Axe",
+			"def": "weapons/war_axe.tres",
+			"slot": 1,
+			"category": "melee",
+			"tags": [
+				"melee",
+				"medieval"
+			],
+			"meta": {
+				"asset_root": "."
+			}
+		},
+		{
+			"kind": "weapon",
+			"id": "double_axe",
+			"name": "Double Axe",
+			"def": "weapons/double_axe.tres",
+			"slot": 1,
+			"category": "melee",
+			"tags": [
+				"melee",
+				"medieval"
+			],
+			"meta": {
+				"asset_root": "."
+			}
 		}
 	]
 }

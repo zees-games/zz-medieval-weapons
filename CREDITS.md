@@ -19,4 +19,9 @@ The candidates below were found with the Sketchfab search API restricted to down
 
 ## Vendored
 
-None yet.
+| Weapon | Model | Author | Licence | URL | Change |
+| --- | --- | --- | --- | --- | --- |
+| double_axe | Decorative Double-Bladed Battle Axe | Arms Museum | CC0 1.0 | https://sketchfab.com/3d-models/decorative-double-bladed-battle-axe-f0bfbca7a2804efd9cf77fd0f5a806aa | Joined, decimated 10.3k to 3k triangles, re-UVed and baked to one 1024 px texture (JPEG), scaled to 1.1 m with the butt 0.2 m below the grip, desaturated with grime and rust (2026-10-22) |
+| war_axe | Decorative Battle Axe | Arms Museum | CC0 1.0 | https://sketchfab.com/3d-models/decorative-battle-axe-97575b982f5944baa0c9062d8107a983 | Same treatment, 11.3k to 3k triangles (2026-10-22) |
+
+Licence read from each download's `license.txt`. The two axes are new weapons (`war_axe`, `double_axe`); the other eight stay placeholders.

@@ -1,0 +1,17 @@
+# Zee's Medieval Weapons: Double Axe. Durations are ticks at 64 Hz.
+name: "Double Axe"
+slot: 1
+deploy_ticks: 38
+holster_ticks: 20
+menu:
+  category: melee
+  sort: 9
+extra:
+  kind: "melee"
+  damage_type: "slash"
+  damage: 90.0
+  reach: 2.2
+  arc_degrees: 70.0
+  rays: 5
+  swing_ticks: 78
+  stamina_cost: 26.0

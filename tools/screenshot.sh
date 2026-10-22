@@ -2,7 +2,7 @@
 # tools/screenshot.sh --sheet|--world [weapon ...]  eight-frame contact sheets of the weapon in
 # hands (first person, or a person seen from outside) -> screenshots/view_<id>.png, world_<id>.png.
 # tools/screenshot.sh [weapon ...]  renders each weapon's model to screenshots/<id>.png under Xvfb
-# (a --headless render is black). With no weapon, all eight. Look at the PNGs.
+# (a --headless render is black). With no weapon, all ten. Look at the PNGs.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 command -v Xvfb >/dev/null || { echo "Xvfb not installed" >&2; exit 3; }

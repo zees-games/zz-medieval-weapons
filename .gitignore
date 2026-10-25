@@ -2,6 +2,7 @@
 .import/
 # The dot-* addons are separate repositories and are linked in, never committed.
 /addons/dot_core
+/addons/dot_profile
 /addons/dot_combat
 /addons/dot_weapon
 build/

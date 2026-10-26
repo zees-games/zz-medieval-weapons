@@ -15,3 +15,4 @@ extra:
   rays: 2
   swing_ticks: 20
   stamina_cost: 4.0
+weight: 2

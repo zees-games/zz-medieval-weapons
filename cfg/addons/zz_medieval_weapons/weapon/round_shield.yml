@@ -19,3 +19,4 @@ extra:
   block_reduction: 0.8
   block_arc_degrees: 120.0
   block_stamina_per_damage: 0.3
+weight: 2

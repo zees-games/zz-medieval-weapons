@@ -43,37 +43,37 @@ static func defaults() -> Dictionary:
 			"swing_ticks": 42, "deploy_ticks": 26, "holster_ticks": 14, "stamina_cost": 12.0,
 		},
 		"dagger": {
-			"name": "Dagger", "slot": 1, "kind": "melee", "damage_type": "pierce",
+			"name": "Dagger", "weight": 2.0, "slot": 1, "kind": "melee", "damage_type": "pierce",
 			"damage": 28.0, "reach": 1.4, "arc_degrees": 20.0, "rays": 2,
 			"swing_ticks": 20, "deploy_ticks": 12, "holster_ticks": 8, "stamina_cost": 4.0,
 		},
 		"battle_axe": {
-			"name": "Battle Axe", "slot": 1, "kind": "melee", "damage_type": "slash",
+			"name": "Battle Axe", "weight": 2.0, "slot": 1, "kind": "melee", "damage_type": "slash",
 			"damage": 80.0, "reach": 2.1, "arc_degrees": 50.0, "rays": 4,
 			"swing_ticks": 70, "deploy_ticks": 34, "holster_ticks": 18, "stamina_cost": 22.0,
 		},
 		"war_axe": {
-			"name": "War Axe", "slot": 1, "kind": "melee", "damage_type": "slash",
+			"name": "War Axe", "weight": 2.0, "slot": 1, "kind": "melee", "damage_type": "slash",
 			"damage": 72.0, "reach": 2.0, "arc_degrees": 46.0, "rays": 4,
 			"swing_ticks": 62, "deploy_ticks": 32, "holster_ticks": 16, "stamina_cost": 20.0,
 		},
 		"double_axe": {
-			"name": "Double Axe", "slot": 1, "kind": "melee", "damage_type": "slash",
+			"name": "Double Axe", "weight": 2.0, "slot": 1, "kind": "melee", "damage_type": "slash",
 			"damage": 90.0, "reach": 2.2, "arc_degrees": 70.0, "rays": 5,
 			"swing_ticks": 78, "deploy_ticks": 38, "holster_ticks": 20, "stamina_cost": 26.0,
 		},
 		"mace": {
-			"name": "Mace", "slot": 1, "kind": "melee", "damage_type": "strike",
+			"name": "Mace", "weight": 2.0, "slot": 1, "kind": "melee", "damage_type": "strike",
 			"damage": 66.0, "reach": 1.9, "arc_degrees": 36.0, "rays": 3,
 			"swing_ticks": 56, "deploy_ticks": 28, "holster_ticks": 16, "stamina_cost": 16.0,
 		},
 		"spear": {
-			"name": "Spear", "slot": 1, "kind": "melee", "damage_type": "pierce",
+			"name": "Spear", "weight": 2.0, "slot": 1, "kind": "melee", "damage_type": "pierce",
 			"damage": 60.0, "reach": 3.3, "arc_degrees": 8.0, "rays": 1,
 			"swing_ticks": 52, "deploy_ticks": 30, "holster_ticks": 16, "stamina_cost": 14.0,
 		},
 		"round_shield": {
-			"name": "Round Shield", "slot": 2, "kind": "shield", "damage_type": "strike",
+			"name": "Round Shield", "weight": 2.0, "slot": 2, "kind": "shield", "damage_type": "strike",
 			"damage": 14.0, "reach": 1.7, "arc_degrees": 44.0, "rays": 3,
 			"swing_ticks": 56, "deploy_ticks": 22, "holster_ticks": 12, "stamina_cost": 10.0,
 			"knockback": 7.0,
@@ -92,7 +92,7 @@ static func defaults() -> Dictionary:
 			"projectile_id": "arrow",
 		},
 		"crossbow": {
-			"name": "Crossbow", "slot": 3, "kind": "crossbow", "damage_type": "pierce",
+			"name": "Crossbow", "weight": 2.0, "slot": 3, "kind": "crossbow", "damage_type": "pierce",
 			"damage": 90.0, "min_charge_damage": 1.0, "speed": 100.0, "min_speed": 100.0,
 			"gravity_scale": 0.55, "arrow_radius": 0.05, "life_ticks": 640,
 			"reload_ticks": 200, "magazine": 1, "reserve": 20, "deploy_ticks": 30,

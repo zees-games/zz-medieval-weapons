@@ -1,5 +1,6 @@
 # Zee's Medieval Weapons: Spear. Durations are ticks at 64 Hz.
 name: "Spear"
+weight: 2.0
 slot: 1
 deploy_ticks: 30
 holster_ticks: 16
@@ -15,4 +16,3 @@ extra:
   rays: 1
   swing_ticks: 52
   stamina_cost: 14.0
-weight: 2

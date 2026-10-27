@@ -36,6 +36,7 @@ params = {
 &"stamina_cost": 10.0
 }
 tuning = SubResource("Resource_g7tvd")
+weight = 2.0
 authored_tick_rate = 64
 slot = 2
 holster_ticks = 12

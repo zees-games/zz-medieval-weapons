@@ -32,6 +32,7 @@ params = {
 &"stamina_cost": 20.0
 }
 tuning = SubResource("Resource_gye3f")
+weight = 2.0
 authored_tick_rate = 64
 deploy_ticks = 32
 holster_ticks = 16

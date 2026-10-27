@@ -1,5 +1,6 @@
 # Zee's Medieval Weapons: Dagger. Durations are ticks at 64 Hz.
 name: "Dagger"
+weight: 2.0
 slot: 1
 deploy_ticks: 12
 holster_ticks: 8
@@ -15,4 +16,3 @@ extra:
   rays: 2
   swing_ticks: 20
   stamina_cost: 4.0
-weight: 2

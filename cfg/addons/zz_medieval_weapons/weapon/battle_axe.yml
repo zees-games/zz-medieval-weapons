@@ -1,5 +1,6 @@
 # Zee's Medieval Weapons: Battle Axe. Durations are ticks at 64 Hz.
 name: "Battle Axe"
+weight: 2.0
 slot: 1
 deploy_ticks: 34
 holster_ticks: 18
@@ -15,4 +16,3 @@ extra:
   rays: 4
   swing_ticks: 70
   stamina_cost: 22.0
-weight: 2

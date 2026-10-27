@@ -1,5 +1,6 @@
 # Zee's Medieval Weapons: Crossbow. Durations are ticks at 64 Hz.
 name: "Crossbow"
+weight: 2.0
 slot: 3
 reload_ticks: 200
 magazine: 1
@@ -22,4 +23,3 @@ extra:
   life_ticks: 640
   stamina_cost: 6.0
   projectile_id: "bolt"
-weight: 2

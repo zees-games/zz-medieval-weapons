@@ -32,6 +32,7 @@ params = {
 &"stamina_cost": 22.0
 }
 tuning = SubResource("Resource_slenp")
+weight = 2.0
 authored_tick_rate = 64
 deploy_ticks = 34
 holster_ticks = 18

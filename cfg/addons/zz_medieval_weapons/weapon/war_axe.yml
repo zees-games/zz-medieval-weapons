@@ -1,5 +1,6 @@
 # Zee's Medieval Weapons: War Axe. Durations are ticks at 64 Hz.
 name: "War Axe"
+weight: 2.0
 slot: 1
 deploy_ticks: 32
 holster_ticks: 16
@@ -15,4 +16,3 @@ extra:
   rays: 4
   swing_ticks: 62
   stamina_cost: 20.0
-weight: 2

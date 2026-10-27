@@ -32,6 +32,7 @@ params = {
 &"stamina_cost": 26.0
 }
 tuning = SubResource("Resource_2osab")
+weight = 2.0
 authored_tick_rate = 64
 deploy_ticks = 38
 holster_ticks = 20

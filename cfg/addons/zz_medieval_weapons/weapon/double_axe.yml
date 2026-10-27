@@ -1,5 +1,6 @@
 # Zee's Medieval Weapons: Double Axe. Durations are ticks at 64 Hz.
 name: "Double Axe"
+weight: 2.0
 slot: 1
 deploy_ticks: 38
 holster_ticks: 20
@@ -15,4 +16,3 @@ extra:
   rays: 5
   swing_ticks: 78
   stamina_cost: 26.0
-weight: 2

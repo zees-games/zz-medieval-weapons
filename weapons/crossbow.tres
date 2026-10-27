@@ -37,6 +37,7 @@ params = {
 &"stamina_cost": 6.0
 }
 tuning = SubResource("Resource_rjbhr")
+weight = 2.0
 authored_tick_rate = 64
 slot = 3
 deploy_ticks = 30

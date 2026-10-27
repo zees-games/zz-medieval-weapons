@@ -28,10 +28,14 @@ var show_arms: bool = true
 var spawn_flight: bool = true
 var flight_parent: Node = null
 
+## Play dot-audio's stock sound for each cue (silent when it is not linked); false when the game plays cues itself.
+var play_builtin_sounds: bool = true
+
 var anim := ZzWeaponAnim.new()
 var weapon_id: StringName = &""
 
 var _grip: Node3D
+var _voice: AudioStreamPlayer3D
 var _model: Node3D
 var _row: Dictionary = {}
 var _cfg: Dictionary = {}
@@ -118,6 +122,8 @@ func bind(id: StringName, cfg: Dictionary = {}) -> void:
 		_grip.add_child(_missile)
 	if not anim.loosed.is_connected(_on_loosed):
 		anim.loosed.connect(_on_loosed)
+	if not anim.cue.is_connected(_on_cue):
+		anim.cue.connect(_on_cue)
 	apply()
 
 
@@ -243,6 +249,22 @@ func _arm(a: Dictionary, s: Vector3, h: Vector3, side: float) -> void:
 	_span(a["upper"], s, elbow, true)
 	_span(a["fore"], elbow, hand, true)
 	(a["hand"] as Node3D).position = hand
+
+
+func _on_cue(cue: StringName) -> void:
+	if not play_builtin_sounds or not is_inside_tree():
+		return
+	var stream := ZzMedievalSound.stream_for(cue, weapon_id)
+	if stream == null:
+		return
+	if _voice == null:
+		_voice = AudioStreamPlayer3D.new()
+		_voice.unit_size = 6.0
+		_voice.max_distance = 60.0
+		add_child(_voice)
+	_voice.stream = stream
+	_voice.pitch_scale = randf_range(0.95, 1.05)
+	_voice.play()
 
 
 func _on_loosed(charge: float) -> void:

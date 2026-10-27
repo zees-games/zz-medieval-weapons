@@ -16,7 +16,7 @@ extends RefCounted
 ##
 ## [b]Sound is a signal, not a player.[/b] [signal cue] names what should be heard
 ## ([code]swing_light[/code], [code]draw[/code], [code]bow_loose[/code], [code]block[/code], ...);
-## the game maps the name to a sample. No recordings ship with the pack.
+## [ZzMedievalHeld] plays dot-audio's stock sound for each ([ZzMedievalSound]); the pack ships none.
 
 signal cue(name: StringName)
 ## A swing began. [param style] is a [enum ZzWeaponPose.Style].

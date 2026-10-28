@@ -1,0 +1,15 @@
+{
+	"format": 1,
+	"mirrors": [],
+	"origin": "https://dotgames.org/content",
+	"packs": [
+		{
+			"id": "gamemann/zz-medieval-weapons",
+			"into": "assets",
+			"kind": "store",
+			"manifest_sha256": "a2c7f4b31b5949e3de3486b9cffd88dd90fa492a0f806b072ab02dfaabc11558",
+			"optional": false,
+			"version": "0.1.0"
+		}
+	]
+}

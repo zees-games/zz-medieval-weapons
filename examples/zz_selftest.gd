@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 423
+const CHECKS := 425
 
 var _entered := 0
 var _finished := 0
@@ -35,6 +35,7 @@ func _ready() -> void:
 	_net()
 	_held()
 	_flight()
+	_sound()
 	print("%d sections entered, %d finished, %d checks (expected %d), %d failed" % [_entered, _finished, _checks, CHECKS, _failures])
 	if _entered != _finished or _checks != CHECKS:
 		_failures += 1
@@ -705,4 +706,16 @@ func _flight() -> void:
 	_check(burst.one_shot and burst.global_position.is_equal_approx(Vector3(1, 1, 1)), "a burst at the point")
 	_check(ZzMedievalImpacts.colour(&"flesh") != ZzMedievalImpacts.colour(&"wood"), "surfaces look different")
 	root.queue_free()
+	_end()
+
+
+func _sound() -> void:
+	_begin("sound cues")
+	var missing: PackedStringArray = []
+	for cue in ZzMedievalSound.CUES:
+		if DotWeaponSound.count(ZzMedievalSound.CUES[cue]) == 0:
+			missing.append(String(cue))
+	_check(missing.is_empty(), "every cue has stock files: %s" % ", ".join(missing))
+	var shared := DotWeaponSound.check_unique()
+	_check(shared.is_empty(), "no two sound classes share a recording: %s" % "; ".join(shared))
 	_end()

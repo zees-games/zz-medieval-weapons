@@ -4,7 +4,6 @@ extends RefCounted
 ## The catalogue: one [DotWeaponDef] per weapon, built from [ZzMedievalConfig]. Melee and projectile use
 ## dot-weapon's stock shapes, wrapped by two thin behaviours for what it has no place for: stamina, knockback, block.
 
-const CHANNEL := "zz.medieval.pack"
 const BEHAVIOUR_DIR := "res://addons/zz_medieval_weapons/behaviour/"
 const MELEE := BEHAVIOUR_DIR + "zz_melee.gd"
 const SHIELD := BEHAVIOUR_DIR + "zz_shield.gd"

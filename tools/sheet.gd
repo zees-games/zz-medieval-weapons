@@ -1,10 +1,6 @@
 extends Node3D
-## Contact sheets of every weapon in the hands, so a person can look at the motion no
-## assertion reaches. Run through tools/screenshot.sh (`--sheet` first person, `--world` a person
-## seen from outside), under Xvfb: a --headless render is a black PNG.
-##
-## One image per weapon, eight cells (4 x 2), at a fixed 60 fps step so the same frame is the
-## same picture every run. The cell order is printed with each file.
+## Contact sheets of every weapon in the hands (tools/screenshot.sh `--sheet` first person, `--world` from
+## outside), under Xvfb: a --headless render is black. Eight cells per weapon at a fixed 60 fps step.
 
 const CELL := Vector2i(400, 300)
 const STEP := 1.0 / 60.0

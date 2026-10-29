@@ -1,22 +1,9 @@
 class_name ZzMedievalNet
 extends RefCounted
 
-## What has to travel so a watcher sees somebody else's sword swing, shield come up and string
-## draw. [DotWeaponNetSync] carries the slot, the magazine and the reserve; none of that says
-## "that player just swung", so this adds the picture's fields and a game concatenates the two
-## spec lists ([method all_specs]), exactly as zee-dot-weapons does for guns. This is an
-## independent minimal version: it duck-types the rig (reads `fire_seq`-style properties by
-## name) and never names zee-dot-weapons, which this pack does not depend on.
-##
-## [b]A counter for the swing, levels for the stances.[/b] A swing is an event that is worthless
-## late, so it is a four-bit counter inside the snapshot (a watcher who missed one sees it jump
-## by two and plays one swing, the correct amount of wrong; [method uses_between] is wrap-aware
-## because subtraction goes negative every sixteen swings). A raised guard, the draw and a
-## crossbow mid-reload are held states, so they are levels the watcher eases toward.
-##
-## The draw is four bits (sixteen steps) because a watcher cannot read a finer string, and it
-## is public: a drawn bow is visible to the room. Ammunition stays [DotWeaponNetSync]'s
-## owner-only business.
+## What travels so a watcher sees a swing, guard and string draw; a game concatenates this with
+## [DotWeaponNetSync]'s specs ([method all_specs]). A swing is a wrap-aware 4-bit counter ([method uses_between]);
+## guard, draw and reload are levels eased toward. The draw is public; ammunition stays owner-only.
 
 const SEQ_BITS := 4
 const SEQ_WRAP := 1 << SEQ_BITS

@@ -1,22 +1,9 @@
 class_name ZzWeaponAnim
 extends RefCounted
 
-## One weapon's animation state: which swing is playing and how far through it, whether the
-## guard is up, how far the string is drawn, whether the crossbow is cocked. Pure state and
-## time: it holds no nodes, so the same object drives a first-person view model, a
-## third-person world model and a test, and a watcher's copy is stepped by what
-## [ZzMedievalNet] says rather than by input.
-##
-## [b]It animates; it does not decide.[/b] Whether a swing happened, whether a hit landed and
-## how much a draw was worth are the simulation's ([DotWeaponArsenal] and the game's damage
-## path). A host calls [method start_use] when the arsenal's [code]used[/code] fires,
-## [method set_blocking] while the guard key is held, [method hold_draw] while the bow's
-## button is, [method set_reloading] from the arsenal, and [method hit] when a swing found
-## something. Nothing here reads an input device.
-##
-## [b]Sound is a signal, not a player.[/b] [signal cue] names what should be heard
-## ([code]swing_light[/code], [code]draw[/code], [code]bow_loose[/code], [code]block[/code], ...);
-## [ZzMedievalHeld] plays dot-audio's stock sound for each ([ZzMedievalSound]); the pack ships none.
+## One weapon's animation state (swing, guard, string draw, crossbow cocked): pure state and time, no nodes,
+## so one object drives a view model, a world model and a test. [b]It animates; it does not decide[/b]: the
+## simulation owns hits. Sound is a signal, not a player: [signal cue] names what to hear for [ZzMedievalHeld].
 
 signal cue(name: StringName)
 ## A swing began. [param style] is a [enum ZzWeaponPose.Style].

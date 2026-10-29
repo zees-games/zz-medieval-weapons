@@ -1,16 +1,9 @@
 class_name ZzMedievalConfig
 extends RefCounted
 
-## Every number a server owner would tune, with the built-in default, and the loader that
-## layers weapon profiles (`weapon/<id>.yml`, see [DotWeaponProfiles]) over them.
-##
-## [b]Why the defaults live in code as well as in the shipped yml.[/b] A server with no cfg
-## directory (a delivered pack, a unit test) must still have a complete catalogue, so the
-## table here is the floor and a yml file only overrides keys it names. The shipped yml
-## files are the same numbers written out, and the suite fails when they drift.
-##
-## [b]Durations are ticks at [constant TICK_RATE], never seconds, like the rest of the
-## family; the definition's authored_tick_rate scales them to the running rate.
+## Every number a server owner would tune, with its built-in default, and the loader that layers
+## `weapon/<id>.yml` profiles ([DotWeaponProfiles]) over them. The defaults live in code so a pack with no cfg
+## directory still has a full catalogue; durations are ticks at [constant TICK_RATE], scaled by authored_tick_rate.
 
 const CHANNEL := "zz.medieval.config"
 const ADDON := "zz_medieval_weapons"
@@ -102,10 +95,9 @@ static func defaults() -> Dictionary:
 	}
 
 
-## Defaults, then the `weapon` profiles of every tier, then any old-style ymls, environment and
-## command line on top (an old file is an operator's own tuning, so it still wins; delete it once
-## migrated). [param dir] reads that directory as the old-style yml (a map of weapon id to keys,
-## name order, later wins) instead of the cfg tree; [param roots] replaces the profile config roots (tests); [param layer] is a runtime layer (id -> {path: value}) over the files.
+## Defaults, then `weapon` profiles of every tier, then old-style ymls (an operator's own tuning, still wins),
+## environment and command line. [param dir] reads old-style ymls instead of the cfg tree; [param roots]
+## replaces the profile roots (tests); [param layer] is a runtime layer (id -> {path: value}).
 static func load_all(dir: String = "", roots: PackedStringArray = PackedStringArray(), layer: Variant = null) -> Dictionary:
 	errors = PackedStringArray()
 	var merged := defaults()

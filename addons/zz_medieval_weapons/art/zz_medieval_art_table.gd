@@ -1,28 +1,9 @@
 class_name ZzMedievalArtTable
 extends RefCounted
 
-## Everything about how a weapon is HELD and MOVES that is not a number the server owns: the
-## only place that knows a model's grip, where its string is, which swings it uses. Replacing
-## a placeholder with a .glb is editing the row here (and dropping the file in assets/); no
-## script elsewhere names a weapon.
-##
-## All positions are in the aim frame at the resting hand (x right, y up, -z forward) or, for
-## [code]offhand[/code] and [code]string[/code], in the model's own space (origin at the grip,
-## +Y along the weapon). Rotations are degrees. The convention for models is the one
-## [ZzMedievalModels] states: +Y along the weapon, origin at the grip.
-##
-## Keys:
-## [br]- [code]hold[/code]: the weapon's rotation at rest (Euler, degrees).
-## [br]- [code]rest[/code]: where the hand sits at rest. [code]side[/code]: +1 right hand, -1 left.
-## [br]- [code]offhand[/code]: where the other hand grips, model space; absent = a loose fist.
-## [br]- [code]styles[/code]: the swings, in the order they are cycled.
-## [br]- [code]scale[/code]: uniform size of the model in the hand (a 1.4 m bow is too big for a view); absent = 1.
-## [br]- [code]heft[/code]: scales the swing's amplitude. [code]weight[/code]: "light" or "heavy", for the sound cue.
-## [br]- [code]block[/code]: {pos, rot} overriding the guard. Absent = [constant ZzWeaponPose.GUARD_POS].
-## [br]- [code]string[/code]: {tips: [a, b], axis, rest, travel}: a drawn string, redrawn by the view
-##   because a model's own string cannot move (the node named "string" is hidden).
-## [br]- [code]projectile[/code]: the nocked arrow or bolt; [code]nock_axis[/code] the way it points, model space.
-## [br]- [code]surface[/code]: what the weapon is made of, for the impact it leaves when it hits something hard.
+## How a weapon is HELD and MOVES, apart from the server's numbers: the one place that knows a model's grip,
+## string and swings, so swapping in a .glb is a row edit. Aim-frame positions (-z forward); offhand and string
+## are model space. Keys: hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface.
 
 const S := ZzWeaponPose.Style
 

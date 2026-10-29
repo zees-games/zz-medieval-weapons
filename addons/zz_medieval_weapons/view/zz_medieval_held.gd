@@ -1,17 +1,9 @@
 class_name ZzMedievalHeld
 extends Node3D
 
-## A weapon in somebody's hands: the model, two arms, the string, the nocked arrow, all driven
-## by one [ZzWeaponAnim]. [ZzMedievalViewModel] (first person, under the camera) and
-## [ZzMedievalWorldModel] (third person, at a carrier's chest) are this with different
-## shoulders, so a swing is one curve in both.
-##
-## The node's own frame is the aim frame: x right, y up, -z forward. Parent it to the camera, or
-## to a node at the carrier's shoulders that turns with their aim.
-##
-## [b]Art comes from one place.[/b] [method ZzMedievalModels.build] returns a vendored .glb if
-## there is one and a placeholder otherwise; where the hands go, which swings exist and where
-## the string is are rows of [ZzMedievalArtTable]. Nothing here names a weapon.
+## A weapon in somebody's hands (model, arms, string, nocked arrow) driven by one [ZzWeaponAnim]; the first and
+## third person views are this with different shoulders. The node's frame is the aim frame (-z forward).
+## Art comes from [ZzMedievalModels] and [ZzMedievalArtTable]; nothing here names a weapon.
 
 ## The visual arrow left the string. [param xf] is its world transform, -Z the way it flies.
 signal projectile_loosed(xf: Transform3D, charge: float)

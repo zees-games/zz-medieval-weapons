@@ -1,12 +1,9 @@
 class_name ZzProjectileFlight
 extends Node3D
 
-## The picture of an arrow or bolt in the air: a model flown along the same arc the
-## simulation's projectile takes (speed from the draw, drop from [code]gravity_scale[/code]),
-## stuck in whatever it meets. [b]It is not the projectile.[/b] Damage and the true flight are
-## [DotWeaponProjectile]'s on the server; this is what a client draws for one it did not
-## spawn itself (a watcher seeing another player loose an arrow). A game that draws the real
-## projectile turns the view's [code]spawn_flight[/code] off, so nothing flies twice.
+## The picture of an arrow or bolt in flight, on the same arc as the simulation's projectile. [b]It is not
+## the projectile[/b]: damage and the true flight are [DotWeaponProjectile]'s; this is what a client draws for
+## one it did not spawn. A game drawing the real projectile turns [code]spawn_flight[/code] off.
 
 signal landed(point: Vector3, normal: Vector3, collider: Object)
 

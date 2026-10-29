@@ -1,12 +1,8 @@
 class_name ZzMedievalPack
 extends RefCounted
 
-## The catalogue: one [DotWeaponDef] per weapon, built from [ZzMedievalConfig].
-##
-## [b]Melee and projectile weapons are dot-weapon's stock shapes[/b] ([DotWeaponMelee] as a
-## sweep of rays, [DotWeaponProjectile] with [constant DotWeaponDef.Fire.CHARGE] for a drawn
-## bow), wrapped by this pack's two thin behaviours only to add what a medieval fight needs
-## and dot-weapon has no place for: a stamina cost, a knockback, a block.
+## The catalogue: one [DotWeaponDef] per weapon, built from [ZzMedievalConfig]. Melee and projectile use
+## dot-weapon's stock shapes, wrapped by two thin behaviours for what it has no place for: stamina, knockback, block.
 
 const CHANNEL := "zz.medieval.pack"
 const BEHAVIOUR_DIR := "res://addons/zz_medieval_weapons/behaviour/"

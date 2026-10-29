@@ -1,9 +1,7 @@
 extends DotWeaponProjectile
 
-## The stock projectile, with the projectile's name from the row ("arrow", "bolt") so a game
-## picks the model, and the stamina a draw costs. Speed, damage and drop come from the
-## ballistics through the draw ([member DotWeaponContext.charge]); an arrow loosed at half draw
-## is slower, weaker and drops sooner, which is what a drawn bow is.
+## The stock projectile, named from the row ("arrow", "bolt") so a game picks the model, plus the stamina
+## a draw costs. Speed, damage and drop scale with [member DotWeaponContext.charge].
 
 func _use(ctx: DotWeaponContext) -> DotWeaponOutcome:
 	var out := super._use(ctx)

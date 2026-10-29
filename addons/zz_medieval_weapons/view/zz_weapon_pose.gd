@@ -1,20 +1,9 @@
 class_name ZzWeaponPose
 extends RefCounted
 
-## The hand's motion for each kind of use, as pure functions of time: no nodes, no art, so the
-## suite can sample them and a watcher's copy of a weapon plays the same curve as its owner's.
-##
-## [b]Offsets from the rest pose, in the aim frame[/b] (x right, y up, -z forward), metres and
-## degrees. Rotation is applied about the hand, in the aim frame, after the weapon's resting
-## hold: a positive X turn takes the weapon's tip back toward the carrier (a wind-up), a
-## negative one throws it forward (a strike); positive Z leans it left. A pose never names a
-## weapon; [member ZzMedievalArtTable] scales it ([code]heft[/code]) and picks which styles a
-## weapon uses, so a new weapon is a table row, not a new curve.
-##
-## [b]Phases are fractions of the swing[/b], not seconds, because the duration is the weapon's
-## [code]swing_ticks[/code] and the same curve must serve a dagger and an axe. The strike lands
-## at [constant STRIKE_AT], which is where [signal ZzWeaponAnim.struck] fires and a game that
-## wants to line a hit up with the blade should look.
+## The hand's motion for each use, as pure functions of time: offsets from the rest pose in the aim frame
+## (x right, y up, -z forward; metres, degrees). A pose never names a weapon; [member ZzMedievalArtTable]
+## scales it. Phases are fractions of the swing because duration is the weapon's; the strike lands at [constant STRIKE_AT].
 
 enum Style { NONE, SLASH_R, SLASH_L, OVERHEAD, THRUST, BASH, LOOSE, FIRE }
 

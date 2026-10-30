@@ -14,6 +14,10 @@ const CUES := {
 }
 
 
+## Cues that are deliberately silent (a stance change, a string settling); every other cue ZzWeaponAnim emits has a CUES entry.
+const SILENT: Array[StringName] = [&"guard_up", &"draw_relax", &"nock"]
+
+
 static func stream_for(cue: StringName, weapon_id: StringName = &"") -> AudioStream:
 	var sound: StringName = CUES.get(cue, &"")
 	if sound == &"" and String(cue).begins_with("hit_"):

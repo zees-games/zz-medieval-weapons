@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 425
+const CHECKS := 429
 
 var _entered := 0
 var _finished := 0
@@ -716,6 +716,20 @@ func _sound() -> void:
 		if DotWeaponSound.count(ZzMedievalSound.CUES[cue]) == 0:
 			missing.append(String(cue))
 	_check(missing.is_empty(), "every cue has stock files: %s" % ", ".join(missing))
+	var silent_ok := true
+	for id: StringName in ZzMedievalArtTable.rows():
+		var heard: Array[StringName] = [ZzMedievalArtTable.cue(id, &"swing"), ZzMedievalArtTable.cue(id, &"bash"), ZzMedievalArtTable.cue(id, &"hit")]
+		for c in heard:
+			if ZzMedievalSound.stream_for(c, id) == null:
+				silent_ok = false
+				print("  silent cue %s for %s" % [c, id])
+	for c: StringName in [&"draw", &"draw_full", &"bow_loose", &"bolt_fire", &"reload_start", &"reload_done", &"hit_flesh", &"hit_wood", &"hit_steel", &"hit_stone"]:
+		if ZzMedievalSound.stream_for(c) == null:
+			silent_ok = false
+			print("  silent cue %s" % c)
+	_check(silent_ok, "every swing, bash, hit and draw cue of every weapon plays a stock sound")
+	for c in ZzMedievalSound.SILENT:
+		_check(not ZzMedievalSound.CUES.has(c), "%s is declared silent and has no sound" % c)
 	var shared := DotWeaponSound.check_unique()
 	_check(shared.is_empty(), "no two sound classes share a recording: %s" % "; ".join(shared))
 	_end()

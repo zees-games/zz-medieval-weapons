@@ -28,5 +28,3 @@ jobs:
         uses: modcommunity/dot-ci/.github/workflows/release.yml@v1
         permissions:
             contents: write
-        with:
-            pack: true

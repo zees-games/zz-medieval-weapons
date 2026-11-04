@@ -688,7 +688,7 @@ func _held() -> void:
 	wm.bind(&"longsword")
 	vm.bind(&"longsword")
 	_check(wm.grip_transform().origin.y < vm.grip_transform().origin.y - 0.1, "a world model's hand hangs lower than the eye's")
-	root.queue_free()
+	root.free()
 	_end()
 
 
@@ -705,7 +705,7 @@ func _flight() -> void:
 	var burst := ZzMedievalImpacts.burst(root, Vector3(1, 1, 1), Vector3.UP, &"steel")
 	_check(burst.one_shot and burst.global_position.is_equal_approx(Vector3(1, 1, 1)), "a burst at the point")
 	_check(ZzMedievalImpacts.colour(&"flesh") != ZzMedievalImpacts.colour(&"wood"), "surfaces look different")
-	root.queue_free()
+	root.free()
 	_end()
 
 

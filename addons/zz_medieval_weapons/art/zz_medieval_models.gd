@@ -14,17 +14,87 @@ const BRASS := Color(0.75, 0.6, 0.25)
 const STRING := Color(0.9, 0.9, 0.8)
 
 
+## Where the glbs are, first hit wins: `assets/` beside the project; for a pack a host mounted (dot-cloud puts it under
+## `<prefix>/addons/zz_medieval_weapons/`) `<prefix>/assets/`; and for an addon that is only symlinked into a game's `addons/`
+## (the glbs stay in the pack's own checkout, outside the game's `res://`) the `assets/` beside the link's target, an absolute
+## path that [method build] reads at run time. Pass [param link_target] (addon dir `res://...` -> real directory, "" if not a link)
+## to test the lookup without a real symlink.
+static func asset_dirs(script_path: String = "", link_target: Callable = Callable()) -> Array[String]:
+	if script_path == "":
+		script_path = (ZzMedievalModels as Script).resource_path
+	var dirs: Array[String] = []
+	var at := script_path.find("/addons/")
+	if at > 0:
+		dirs.append(script_path.substr(0, at + 1) + "assets/")
+	if not dirs.has(ASSET_DIR):
+		dirs.append(ASSET_DIR)
+	if at >= 0:
+		var addon_end := script_path.find("/", at + 8)
+		var real: String = (link_target if link_target.is_valid() else _resolve_link).call(script_path.substr(0, addon_end) if addon_end > 0 else script_path)
+		if real != "":
+			# <checkout>/addons/<addon> -> <checkout>/assets/
+			dirs.append(real.get_base_dir().get_base_dir().path_join("assets") + "/")
+	return dirs
+
+
+static func model_path(id: StringName) -> String:
+	var file := String(id) + ".glb"
+	for dir in asset_dirs():
+		if _exists(dir + file):
+			return dir + file
+	return ASSET_DIR + file
+
+
 static func build(id: StringName) -> Node3D:
-	var path := ASSET_DIR + String(id) + ".glb"
-	if ResourceLoader.exists(path):
-		var scene: PackedScene = load(path)
-		if scene != null:
-			return scene.instantiate() as Node3D
-	return placeholder(id)
+	var path := model_path(id)
+	var model: Node3D = null
+	if path.begins_with("res://"):
+		if ResourceLoader.exists(path):
+			var scene: PackedScene = load(path)
+			if scene != null:
+				model = scene.instantiate() as Node3D
+	elif FileAccess.file_exists(path):
+		model = _read_glb(path)
+	if model == null:
+		return placeholder(id)
+	model.transform = ZzMedievalArtTable.model_transform(id)
+	return model
 
 
 static func is_placeholder(id: StringName) -> bool:
-	return not ResourceLoader.exists(ASSET_DIR + String(id) + ".glb")
+	return not _exists(model_path(id))
+
+
+## Whether the glb is a path the engine's importer owns (`res://`), which a host's rig can load, rather than one found beside a linked addon.
+static func is_imported(id: StringName) -> bool:
+	return model_path(id).begins_with("res://") and not is_placeholder(id)
+
+
+static func _exists(path: String) -> bool:
+	return ResourceLoader.exists(path) if path.begins_with("res://") else FileAccess.file_exists(path)
+
+
+## A glb read straight from disk, for a pack outside the project (no import, so no .godot cache to go stale).
+static func _read_glb(path: String) -> Node3D:
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	if doc.append_from_file(path, state) != OK:
+		return null
+	return doc.generate_scene(state) as Node3D
+
+
+## Where `res://addons/<pack>` really lives when it is a symlink (followed through a chain of links), else "".
+static func _resolve_link(addon_res: String) -> String:
+	var path := ProjectSettings.globalize_path(addon_res)
+	var followed := false
+	for _hop in 8:
+		var dir := DirAccess.open(path.get_base_dir())
+		if dir == null or not dir.is_link(path):
+			break
+		var to := dir.read_link(path)
+		path = to if to.is_absolute_path() else path.get_base_dir().path_join(to).simplify_path()
+		followed = true
+	return path if followed else ""
 
 
 static func placeholder(id: StringName) -> Node3D:

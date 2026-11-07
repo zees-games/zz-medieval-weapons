@@ -3,7 +3,9 @@ extends RefCounted
 
 ## How a weapon is HELD and MOVES, apart from the server's numbers: the one place that knows a model's grip,
 ## string and swings, so swapping in a .glb is a row edit. Aim-frame positions (-z forward); offhand and string
-## are model space. Keys: hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface.
+## are model space. Keys: align, grip, hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface.
+## `align` (Euler degrees) and `grip` are for a vendored glb that was not modelled upright: `align` turns it so the weapon stands along
+## +Y (head or blade up), `grip` is then the point in that aligned space that goes to the hand (the origin). Both default to none.
 
 const S := ZzWeaponPose.Style
 
@@ -17,8 +19,10 @@ static func rows() -> Dictionary:
 			"surface": "steel",
 		},
 		&"dagger": {
+			# The glb's blade leans about 29 degrees off +Y and its guard is rolled; align stands it up, grip is its handle.
+			"align": Vector3(26.9, -53.2, 11.5), "grip": Vector3(-0.043, -0.052, 0.003),
 			"hold": Vector3(-40, 0, 0), "rest": Vector3(0.26, -0.30, -0.44), "side": 1,
-			"styles": [S.THRUST, S.SLASH_R, S.SLASH_L], "heft": 0.7, "scale": 1.3, "weight": "light",
+			"styles": [S.THRUST, S.SLASH_R, S.SLASH_L], "heft": 0.7, "scale": 1.0, "weight": "light",
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},
 			"surface": "steel",
 		},
@@ -44,8 +48,10 @@ static func rows() -> Dictionary:
 			"surface": "steel",
 		},
 		&"mace": {
+			# The glb's haft leans 53.6 degrees off +Y (head to the right) and is 1.07 m; align stands it up, scale makes it 0.77 m.
+			"align": Vector3(0, 0, 53.6), "grip": Vector3(-0.156, -0.274, 0),
 			"hold": Vector3(-30, 0, 0), "rest": Vector3(0.30, -0.34, -0.52), "side": 1,
-			"styles": [S.OVERHEAD, S.SLASH_L, S.SLASH_R], "heft": 1.0, "weight": "heavy",
+			"styles": [S.OVERHEAD, S.SLASH_L, S.SLASH_R], "heft": 1.0, "scale": 0.72, "weight": "heavy",
 			"block": {"pos": Vector3(-0.20, 0.20, -0.04), "rot": Vector3(40, 0, 50)},
 			"surface": "iron",
 		},
@@ -91,6 +97,14 @@ static func rows() -> Dictionary:
 
 static func row(id: StringName) -> Dictionary:
 	return rows().get(id, {})
+
+
+## The transform that stands a vendored model upright with its grip at the origin: identity for a row without `align` or `grip`.
+static func model_transform(id: StringName) -> Transform3D:
+	var r := row(id)
+	var a: Vector3 = r.get("align", Vector3.ZERO)
+	var basis := Basis.from_euler(Vector3(deg_to_rad(a.x), deg_to_rad(a.y), deg_to_rad(a.z)))
+	return Transform3D(basis, -(r.get("grip", Vector3.ZERO) as Vector3))
 
 
 static func has(id: StringName) -> bool:

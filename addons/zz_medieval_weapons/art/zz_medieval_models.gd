@@ -14,8 +14,20 @@ const BRASS := Color(0.75, 0.6, 0.25)
 const STRING := Color(0.9, 0.9, 0.8)
 
 
+## Where the glbs are: `assets/` beside the project, or, for a pack a host mounted (dot-cloud puts it under
+## `<prefix>/addons/zz_medieval_weapons/`), `<prefix>/assets/`.
+static func model_path(id: StringName) -> String:
+	var here: String = (ZzMedievalModels as Script).resource_path
+	var at := here.find("/addons/")
+	var prefix := here.substr(0, at + 1) if at > 0 else "res://"
+	for dir in [prefix + "assets/", ASSET_DIR]:
+		if ResourceLoader.exists(dir + String(id) + ".glb"):
+			return dir + String(id) + ".glb"
+	return ASSET_DIR + String(id) + ".glb"
+
+
 static func build(id: StringName) -> Node3D:
-	var path := ASSET_DIR + String(id) + ".glb"
+	var path := model_path(id)
 	if ResourceLoader.exists(path):
 		var scene: PackedScene = load(path)
 		if scene != null:
@@ -24,7 +36,7 @@ static func build(id: StringName) -> Node3D:
 
 
 static func is_placeholder(id: StringName) -> bool:
-	return not ResourceLoader.exists(ASSET_DIR + String(id) + ".glb")
+	return not ResourceLoader.exists(model_path(id))
 
 
 static func placeholder(id: StringName) -> Node3D:

@@ -33,6 +33,20 @@ static func weapon_defs_with(layer: Dictionary, types: Dictionary = {}) -> Array
 	return out
 
 
+## The pack's own models as zee's art resources, one per weapon id (the optional hook zz_packs.gd and zee's `ZeePackSource` call).
+## Empty when zee-dot-weapons is not installed: this pack names none of its classes, see [ZzMedievalZeeArt].
+static func weapon_art() -> Array:
+	return ZzMedievalZeeArt.build()
+
+
+## Every weapon id's model scene as a path, for a host or a test that wants the glb without a rig.
+static func model_paths() -> Dictionary:
+	var out := {}
+	for id in ZzMedievalConfig.IDS:
+		out[id] = ZzMedievalModels.model_path(id)
+	return out
+
+
 static func spawn_entries() -> Array[Dictionary]:
 	var cfg := ZzMedievalConfig.load_all()
 	var out: Array[Dictionary] = []

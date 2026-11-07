@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 429
+const CHECKS := 442
 
 var _entered := 0
 var _finished := 0
@@ -24,6 +24,7 @@ func _ready() -> void:
 	_shield()
 	_models()
 	_spawn()
+	_weapon_art_hook()
 	_workshop()
 	_pack_cfg()
 	_packs()
@@ -344,6 +345,27 @@ func _spawn() -> void:
 			_check(r.has(k), "%s has %s" % [r.get("id"), k])
 		_check(ResourceLoader.exists(r["icon"]), "%s icon exists" % r["id"])
 	_check(rows[0]["category"] == "Weapons" and rows[0]["kind"] == "weapon", "category and kind")
+	_end()
+
+
+func _weapon_art_hook() -> void:
+	_begin("weapon_art hook")
+	var paths := ZzMedievalSpawnProvider.model_paths()
+	_check(paths.size() == ZzMedievalConfig.IDS.size(), "model_paths names every weapon id")
+	for id in ZzMedievalConfig.IDS:
+		var scene := load(String(paths.get(id, ""))) as PackedScene
+		var node := scene.instantiate() if scene != null else null
+		_check(node != null and not node.find_children("*", "MeshInstance3D", true, false).is_empty(), "%s: its model path loads as a scene with a mesh" % id)
+		if node != null:
+			node.free()
+	var art := ZzMedievalSpawnProvider.weapon_art()
+	# zee-dot-weapons is not a dependency: without it the hook answers nothing, with it one art per id on this pack's models.
+	var zee := ProjectSettings.get_global_class_list().any(func(e: Dictionary) -> bool: return e.get("class", "") == "ZeeWeaponArt")
+	_check(art.size() == (ZzMedievalConfig.IDS.size() if zee else 0), "without zee the hook is empty, with it one art per weapon id")
+	var ids_ok := true
+	for a: Resource in art:
+		ids_ok = ids_ok and paths.get(a.get(&"id"), "") == a.get(&"model_path")
+	_check(ids_ok, "every art carries the pack's model for its id")
 	_end()
 
 

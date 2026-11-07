@@ -4,7 +4,7 @@ extends Node
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 429
+const CHECKS := 464
 
 var _entered := 0
 var _finished := 0
@@ -24,6 +24,9 @@ func _ready() -> void:
 	_shield()
 	_models()
 	_spawn()
+	_weapon_art_hook()
+	_model_lookup()
+	_model_upright()
 	_workshop()
 	_pack_cfg()
 	_packs()
@@ -345,6 +348,92 @@ func _spawn() -> void:
 		_check(ResourceLoader.exists(r["icon"]), "%s icon exists" % r["id"])
 	_check(rows[0]["category"] == "Weapons" and rows[0]["kind"] == "weapon", "category and kind")
 	_end()
+
+
+func _weapon_art_hook() -> void:
+	_begin("weapon_art hook")
+	var paths := ZzMedievalSpawnProvider.model_paths()
+	_check(paths.size() == ZzMedievalConfig.IDS.size(), "model_paths names every weapon id")
+	for id in ZzMedievalConfig.IDS:
+		var scene := load(String(paths.get(id, ""))) as PackedScene
+		var node := scene.instantiate() if scene != null else null
+		_check(node != null and not node.find_children("*", "MeshInstance3D", true, false).is_empty(), "%s: its model path loads as a scene with a mesh" % id)
+		if node != null:
+			node.free()
+	var art := ZzMedievalSpawnProvider.weapon_art()
+	# zee-dot-weapons is not a dependency: without it the hook answers nothing, with it one art per id on this pack's models.
+	var zee := ProjectSettings.get_global_class_list().any(func(e: Dictionary) -> bool: return e.get("class", "") == "ZeeWeaponArt")
+	_check(art.size() == (ZzMedievalConfig.IDS.size() if zee else 0), "without zee the hook is empty, with it one art per weapon id")
+	var ids_ok := true
+	for a: Resource in art:
+		ids_ok = ids_ok and paths.get(a.get(&"id"), "") == a.get(&"model_path")
+	_check(ids_ok, "every art carries the pack's model for its id")
+	_end()
+
+
+## Every melee model stands along +Y with its grip at the origin once built (the dagger and mace glbs are modelled leaning).
+func _model_upright() -> void:
+	_begin("models stand upright in the hand")
+	for id in [&"longsword", &"dagger", &"mace", &"battle_axe", &"war_axe", &"double_axe", &"spear"]:
+		var n := ZzMedievalModels.build(id)
+		var lo := Vector3(INF, INF, INF)
+		var hi := -lo
+		for m in n.find_children("*", "MeshInstance3D", true, false):
+			var mi := m as MeshInstance3D
+			var xf := n.transform * mi.transform
+			for s in mi.mesh.get_surface_count():
+				for v: Vector3 in mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]:
+					var p := xf * v
+					lo = lo.min(p)
+					hi = hi.max(p)
+		var size := hi - lo
+		var wide := maxf(size.x, size.z)
+		_check(size.y > 2.0 * wide, "%s: more than twice as long along +Y as across (%s)" % [id, size])
+		_check(lo.y < 0.0 and hi.y > 0.3, "%s: the grip (origin) lies between its butt and its head" % id)
+		if id == &"mace" or id == &"dagger":
+			var row := ZzMedievalArtTable.row(id)
+			var s := float(row.get("scale", 1.0))
+			_check(size.y * s > 0.3 and size.y * s < 0.9, "%s: %.2f m long in the hand" % [id, size.y * s])
+		n.free()
+	_end()
+
+
+## The model lookup finds the glbs for a project, a mounted pack and an addon that is only symlinked into a game.
+func _model_lookup() -> void:
+	_begin("model lookup")
+	var mounted := ZzMedievalModels.asset_dirs("res://game/addons/zz_medieval_weapons/art/zz_medieval_models.gd", func(_d: String) -> String: return "")
+	_check(mounted == ["res://game/assets/", "res://assets/"], "a mounted pack: <prefix>/assets/, then res://assets/ (%s)" % [mounted])
+	var linked := ZzMedievalModels.asset_dirs("res://addons/zz_medieval_weapons/art/zz_medieval_models.gd", func(d: String) -> String:
+		return "/opt/packs/zz-medieval-weapons/addons/zz_medieval_weapons" if d == "res://addons/zz_medieval_weapons" else "")
+	_check(linked == ["res://assets/", "/opt/packs/zz-medieval-weapons/assets/"], "a linked addon: also the assets beside the link target (%s)" % [linked])
+	var plain := ZzMedievalModels.asset_dirs("res://addons/zz_medieval_weapons/art/zz_medieval_models.gd", func(_d: String) -> String: return "")
+	_check(plain == ["res://assets/"], "an addon in the project itself: just res://assets/ (%s)" % [plain])
+
+	# A real symlink: user://<tmp>/addons/zz_medieval_weapons -> this project's addon dir; the link is followed, and a glb that is
+	# only reachable through it (an absolute path outside res://) is read at run time.
+	var tmp := ProjectSettings.globalize_path("user://link_check")
+	DirAccess.make_dir_recursive_absolute(tmp.path_join("addons"))
+	var link := tmp.path_join("addons/zz_medieval_weapons")
+	var target := ProjectSettings.globalize_path("res://addons/zz_medieval_weapons")
+	if not FileAccess.file_exists(link) and not DirAccess.dir_exists_absolute(link):
+		OS.execute("ln", ["-s", target, link])
+	if DirAccess.dir_exists_absolute(link):
+		_check(ZzMedievalModels._resolve_link("res://addons/zz_medieval_weapons") == "", "a real directory is not a link")
+		var real := ZzMedievalModels.asset_dirs("res://addons/zz_medieval_weapons/art/zz_medieval_models.gd", func(_d: String) -> String: return _link_target(link))
+		_check(real.back() == ProjectSettings.globalize_path("res://assets/"), "a symlink resolves to the checkout's assets/ (%s)" % [real])
+		var read := ZzMedievalModels._read_glb(real.back() + "mace.glb")
+		_check(read != null and not read.find_children("*", "MeshInstance3D", true, false).is_empty(), "a glb outside res:// reads as a scene with a mesh")
+		if read != null:
+			read.free()
+		OS.execute("rm", [link])
+	else:
+		print("  (no symlink support here: the real-link checks are skipped)")
+	_end()
+
+
+static func _link_target(link: String) -> String:
+	var dir := DirAccess.open(link.get_base_dir())
+	return dir.read_link(link) if dir != null and dir.is_link(link) else ""
 
 
 func _workshop() -> void:

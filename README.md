@@ -1,4 +1,4 @@
-Ten medieval weapons for [dot-weapon](https://github.com/modcommunity/dot-weapon): longsword, dagger, battle axe, war axe, double axe, mace, spear, round shield (bash and block), bow (a drawn shot with a dropping arrow) and crossbow (slow reload, flatter bolt). Made for Zombie Zone, usable in any game or server (`games: "*"` in `provides.json`).
+Ten medieval weapons for [dot-weapon](https://github.com/gamespice-platform/weapon): longsword, dagger, battle axe, war axe, double axe, mace, spear, round shield (bash and block), bow (a drawn shot with a dropping arrow) and crossbow (slow reload, flatter bolt). Made for Zombie Zone, usable in any game or server (`games: "*"` in `provides.json`).
 
 ## Using it
 

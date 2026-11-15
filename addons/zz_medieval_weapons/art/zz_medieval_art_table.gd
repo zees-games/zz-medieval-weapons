@@ -1,11 +1,9 @@
 class_name ZzMedievalArtTable
 extends RefCounted
 
-## How a weapon is HELD and MOVES, apart from the server's numbers: the one place that knows a model's grip,
-## string and swings, so swapping in a .glb is a row edit. Aim-frame positions (-z forward); offhand and string
-## are model space. Keys: align, grip, hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface.
-## `align` (Euler degrees) and `grip` are for a vendored glb that was not modelled upright: `align` turns it so the weapon stands along
-## +Y (head or blade up), `grip` is then the point in that aligned space that goes to the hand (the origin). Both default to none.
+## How a weapon is HELD and MOVES, apart from the server's numbers: the one place that knows a model's grip, string and swings, so swapping in a .glb is a row edit. Aim-frame positions (-z forward); offhand and string
+## are model space. Keys: align, grip, hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface. `align` (Euler degrees) and `grip` are for a vendored glb that was not modelled upright:
+## `align` turns it so the weapon stands along +Y (head or blade up), `grip` is then the point in that aligned space that goes to the hand (the origin). Both default to none.
 
 const S := ZzWeaponPose.Style
 

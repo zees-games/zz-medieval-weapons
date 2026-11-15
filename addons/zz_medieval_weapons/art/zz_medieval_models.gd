@@ -14,11 +14,9 @@ const BRASS := Color(0.75, 0.6, 0.25)
 const STRING := Color(0.9, 0.9, 0.8)
 
 
-## Where the glbs are, first hit wins: `assets/` beside the project; for a pack a host mounted (dot-cloud puts it under
-## `<prefix>/addons/zz_medieval_weapons/`) `<prefix>/assets/`; and for an addon that is only symlinked into a game's `addons/`
-## (the glbs stay in the pack's own checkout, outside the game's `res://`) the `assets/` beside the link's target, an absolute
-## path that [method build] reads at run time. Pass [param link_target] (addon dir `res://...` -> real directory, "" if not a link)
-## to test the lookup without a real symlink.
+## Where the glbs are, first hit wins: `assets/` beside the project; for a pack a host mounted (dot-cloud puts it under `<prefix>/addons/zz_medieval_weapons/`) `<prefix>/assets/`; and for an addon
+## only symlinked into a game's `addons/` (the glbs stay in the pack's own checkout, outside the game's `res://`) the `assets/` beside the link's target, an absolute path [method build] reads at run time.
+## Pass [param link_target] (addon dir `res://...` -> real directory, "" if not a link) to test the lookup without a real symlink.
 static func asset_dirs(script_path: String = "", link_target: Callable = Callable()) -> Array[String]:
 	if script_path == "":
 		script_path = (ZzMedievalModels as Script).resource_path

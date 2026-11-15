@@ -26,27 +26,9 @@ static func rows() -> Dictionary:
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},
 			"surface": "steel",
 		},
-		&"battle_axe": {
-			"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
-			"offhand": Vector3(0, 0.38, 0),
-			"styles": [S.OVERHEAD, S.SLASH_R], "heft": 1.15, "weight": "heavy",
-			"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
-			"surface": "steel",
-		},
-		&"war_axe": {
-			"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
-			"offhand": Vector3(0, 0.38, 0),
-			"styles": [S.OVERHEAD, S.SLASH_R], "heft": 1.1, "weight": "heavy",
-			"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
-			"surface": "steel",
-		},
-		&"double_axe": {
-			"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
-			"offhand": Vector3(0, 0.38, 0),
-			"styles": [S.OVERHEAD, S.SLASH_R], "heft": 1.2, "weight": "heavy",
-			"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
-			"surface": "steel",
-		},
+		&"battle_axe": _axe(1.15),
+		&"war_axe": _axe(1.1),
+		&"double_axe": _axe(1.2),
 		&"mace": {
 			# The glb's haft leans 53.6 degrees off +Y (head to the right) and is 1.07 m; align stands it up, scale makes it 0.77 m.
 			"align": Vector3(0, 0, 53.6), "grip": Vector3(-0.156, -0.274, 0),
@@ -92,6 +74,17 @@ static func rows() -> Dictionary:
 			"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.06),
 			"surface": "iron",
 		},
+	}
+
+
+## The three axes share one grip, rest and block and differ only in heft.
+static func _axe(heft: float) -> Dictionary:
+	return {
+		"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
+		"offhand": Vector3(0, 0.38, 0),
+		"styles": [S.OVERHEAD, S.SLASH_R], "heft": heft, "weight": "heavy",
+		"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
+		"surface": "steel",
 	}
 
 

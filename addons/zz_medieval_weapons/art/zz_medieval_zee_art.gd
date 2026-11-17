@@ -66,12 +66,12 @@ static func view_placement(id: StringName, default_offset: Vector3 = Vector3.ZER
 	}
 
 
-## id -> {model, motion, world_scale}, the plain-data form zee's `ZeeArtDress` reads; `model` is "" while an id has no glb zee can load (none vendored, or the pack is a symlinked addon whose glbs are outside `res://`).
+## id -> {model, motion, world_scale}, the plain-data form zee's `ZeeArtDress` reads; `model` is "" while an id has no glb vendored (a symlinked addon's glbs are outside `res://`: an absolute path, which zee's model cache reads at run time).
 static func art_rows() -> Dictionary:
 	var out := {}
 
 	for id: StringName in ZzMedievalConfig.IDS:
-		out[id] = {"model": ZzMedievalModels.model_path(id) if ZzMedievalModels.is_imported(id) else "", "motion": "melee", "world_scale": float(ZzMedievalArtTable.row(id).get("scale", 1.0))}
+		out[id] = {"model": ZzMedievalModels.model_path(id) if not ZzMedievalModels.is_placeholder(id) else "", "motion": "melee", "world_scale": float(ZzMedievalArtTable.row(id).get("scale", 1.0))}
 
 	return out
 

@@ -2,7 +2,7 @@ class_name ZzMedievalArtTable
 extends RefCounted
 
 ## How a weapon is HELD and MOVES, apart from the server's numbers: the one place that knows a model's grip, string and swings, so swapping in a .glb is a row edit. Aim-frame positions (-z forward); offhand and string
-## are model space. Keys: align, grip, hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface. `align` (Euler degrees) and `grip` are for a vendored glb that was not modelled upright:
+## are model space. Keys: align, grip, world_turn, hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface. `align` (Euler degrees) and `grip` are for a vendored glb that was not modelled upright:
 ## `align` turns it so the weapon stands along +Y (head or blade up), `grip` is then the point in that aligned space that goes to the hand (the origin). Both default to none.
 
 const S := ZzWeaponPose.Style
@@ -45,6 +45,8 @@ static func rows() -> Dictionary:
 		&"round_shield": {
 			# Left hand; the front faces -Z once rotated half a turn about Y.
 			"hold": Vector3(0, 180, 0), "rest": Vector3(-0.34, -0.26, -0.50), "side": -1,
+			# Third person, carried like any melee weapon (+Y forward): a quarter turn about its long axis stands the disc up facing out.
+			"world_turn": Vector3(0, 90, 0),
 			"styles": [S.BASH], "heft": 1.0, "scale": 0.62, "weight": "heavy",
 			"block": {"pos": Vector3(0.30, 0.34, -0.12), "rot": Vector3(-6, 0, 0)},
 			"surface": "wood",

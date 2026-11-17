@@ -34,12 +34,15 @@ static func build(dressed: bool = true) -> Array:
 		var row := ZzMedievalArtTable.row(id)
 		var model := ZzMedievalArtTable.model_transform(id)
 		# Third person: the same upright-and-gripped correction, for a glb that was not modelled that way.
-		art.set(&"world_rotation", model.basis.get_euler() * (180.0 / PI))
+		var turned := Basis.from_euler(_radians(row.get("world_turn", Vector3.ZERO))) * model.basis
+		art.set(&"world_rotation", turned.get_euler() * (180.0 / PI))
 		art.set(&"world_offset", model.origin * float(rows[id]["world_scale"]))
 		var placed := view_placement(id, art.get(&"view_offset"))
 		art.set(&"view_offset", placed["offset"])
 		art.set(&"view_rotation", placed["rotation"])
 		art.set(&"view_scale", placed["scale"])
+		# The third-person size is the row's scale; the first-person hands frame keeps treating the model as life size.
+		art.set(&"hands_life", 1.0)
 		art.set(&"weight", 1.4 if row.get("weight", "light") == "heavy" else 1.0)
 
 	return out
@@ -68,9 +71,13 @@ static func art_rows() -> Dictionary:
 	var out := {}
 
 	for id: StringName in ZzMedievalConfig.IDS:
-		out[id] = {"model": ZzMedievalModels.model_path(id) if ZzMedievalModels.is_imported(id) else "", "motion": "melee", "world_scale": 1.0}
+		out[id] = {"model": ZzMedievalModels.model_path(id) if ZzMedievalModels.is_imported(id) else "", "motion": "melee", "world_scale": float(ZzMedievalArtTable.row(id).get("scale", 1.0))}
 
 	return out
+
+
+static func _radians(degrees: Vector3) -> Vector3:
+	return degrees * (PI / 180.0)
 
 
 ## A global class's script by name, or null when its addon is not installed.

@@ -39,7 +39,8 @@ static func model_path(id: StringName) -> String:
 	var file := String(id) + ".glb"
 	for dir in asset_dirs():
 		if _exists(dir + file):
-			return dir + file
+			# `.deps` is `.gdignore`d: the engine never imports it, so the glb there loads only from disk.
+			return ProjectSettings.globalize_path(dir + file) if dir.begins_with("res://.deps/") else dir + file
 	return ASSET_DIR + file
 
 

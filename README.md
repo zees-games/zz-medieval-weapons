@@ -1,5 +1,3 @@
-# Zee's Medieval Weapons
-
 Ten medieval weapons for [dot-weapon](https://github.com/gamespice-platform/weapon), each with a real PBR model and its own tuned profile: a longsword, a dagger, three axes, a mace, a spear, a round shield that blocks and bashes, a bow with a real draw and a dropping arrow, and a crossbow with a slow reload and a flatter bolt. Every number below is a default read straight from the pack's data, and every one can be changed per game or per server without touching the pack. Made for Zombie Zone, usable in any game or server (`provides.json`, kind `weapon`, games `*`). The addon is `addons/zz_medieval_weapons`.
 
 ### In GameSpice and Fatal Contact

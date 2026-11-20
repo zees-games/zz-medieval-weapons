@@ -219,6 +219,12 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Carry weight | 2 |
 <!-- /gen_readme:weapons -->
 
+<!-- gen_readme:quality -->
+## Quality and ongoing improvement
+
+The models, textures, sounds and animations in this pack are being improved over time, and some of them are low quality today. Improvement is driven by the Nightly queue, a work queue where agents pick up items, and by a visual judge loop that views rendered frames and files defects until each asset passes repeated clean reviews. Known defects are filed there and fixed in later releases, and the screenshots in this README are regenerated as the assets improve.
+<!-- /gen_readme:quality -->
+
 ## Credits
 
 Every model was decimated, re-textured and given a worn look. Author, URL and change notes are in [CREDITS.md](CREDITS.md). The code is MIT, see [LICENSE](LICENSE).

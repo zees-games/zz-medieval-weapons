@@ -1,4 +1,29 @@
-Ten medieval weapons for [dot-weapon](https://github.com/gamespice-platform/weapon): longsword, dagger, battle axe, war axe, double axe, mace, spear, round shield (bash and block), bow (a drawn shot with a dropping arrow) and crossbow (slow reload, flatter bolt). Made for Zombie Zone, usable in any game or server (`games: "*"` in `provides.json`).
+# Zee's Medieval Weapons
+
+Ten medieval weapons for [dot-weapon](https://github.com/gamespice-platform/weapon), each with a real PBR model and its own tuned profile: a longsword, a dagger, three axes, a mace, a spear, a round shield that blocks and bashes, a bow with a real draw and a dropping arrow, and a crossbow with a slow reload and a flatter bolt. Every number below is a default read straight from the pack's data, and every one can be changed per game or per server without touching the pack. Made for Zombie Zone, usable in any game or server (`provides.json`, kind `weapon`, games `*`). The addon is `addons/zz_medieval_weapons`.
+
+### In GameSpice and Fatal Contact
+
+- **GameSpice:** the pack is published to the Workshop as `zz-medieval-weapons`. Add it to a server's or game's pack list and its weapons appear in the spawn menu under Melee, Shields and Ranged; players get it with the server's pack overlay, so there is nothing to install.
+- **Fatal Contact:** add `zz_medieval_weapons` to `weapons.packs` in `cfg/addon/game_arena_weapons/*.yml`. Its weapons join the catalogue after the game's own (see Fatal Contact's `docs/weapons.md`).
+- **Your own Godot game:** link or copy `addons/zz_medieval_weapons` beside dot-weapon and use the code in [Using it](#using-it).
+
+Stamina, knockback and blocking come out of the pack as events and a helper the game applies (see [Using it](#using-it)). A weapon's carry weight is in its profile.
+
+<!-- gen_readme:summary -->
+| | Weapon | Class | Damage | Rate |
+| --- | --- | --- | --- | --- |
+| <a href="#longsword"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/longsword_thumb.webp" width="160" alt="Longsword"></a> | [Longsword](#longsword) | Sword | 55 | 91 rpm |
+| <a href="#dagger"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/dagger_thumb.webp" width="160" alt="Dagger"></a> | [Dagger](#dagger) | Dagger | 28 | 192 rpm |
+| <a href="#battle-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/battle_axe_thumb.webp" width="160" alt="Battle Axe"></a> | [Battle Axe](#battle-axe) | Axe | 80 | 55 rpm |
+| <a href="#war-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/war_axe_thumb.webp" width="160" alt="War Axe"></a> | [War Axe](#war-axe) | Axe | 72 | 62 rpm |
+| <a href="#double-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/double_axe_thumb.webp" width="160" alt="Double Axe"></a> | [Double Axe](#double-axe) | Axe | 90 | 49 rpm |
+| <a href="#mace"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/mace_thumb.webp" width="160" alt="Mace"></a> | [Mace](#mace) | Mace | 66 | 69 rpm |
+| <a href="#spear"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/spear_thumb.webp" width="160" alt="Spear"></a> | [Spear](#spear) | Spear | 60 | 74 rpm |
+| <a href="#round-shield"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/round_shield_thumb.webp" width="160" alt="Round Shield"></a> | [Round Shield](#round-shield) | Shield | 14 | 69 rpm |
+| <a href="#bow"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/bow_thumb.webp" width="160" alt="Bow"></a> | [Bow](#bow) | Bow | 75 | 40 rpm |
+| <a href="#crossbow"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/crossbow_thumb.webp" width="160" alt="Crossbow"></a> | [Crossbow](#crossbow) | Crossbow | 90 | 18 rpm |
+<!-- /gen_readme:summary -->
 
 ## Using it
 
@@ -25,6 +50,176 @@ Durations are ticks at 64 Hz. A game overrides keys in `cfg/game/<game>/weapon/<
 ## Testing
 
 `./game.sh test` parses every script and runs the pack's suite. `tools/screenshot.sh [weapon ...]` renders each model to `screenshots/`.
+
+The weapon gallery in this README is generated: `tools/gen_readme.sh` renders the studio shots on a GPU box (`tools/readme_shot.sh`, settings in `tools/readme.cfg`), turns them into `docs/img/*.webp`, and rewrites the tables from the profiles and `docs/readme/weapons.yml`. `tools/gen_readme.sh --check` fails when the README is out of date.
+
+<!-- gen_readme:weapons -->
+## The weapons
+
+### Longsword
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/longsword.webp" width="1280" alt="Longsword, studio render">
+
+**Sword** `longsword`. A Type XVIa longsword, the all-rounder. Long reach, a wide cut and a quick recovery for its stamina.
+
+| Default | |
+| --- | --- |
+| Damage | 55 (slash) |
+| Swing rate | 91 rpm |
+| Reach | 2.4 m |
+| Swing arc | 60 deg |
+| Stamina | 12 per swing |
+| Draw time | 0.41 s |
+
+### Dagger
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/dagger.webp" width="1280" alt="Dagger, studio render">
+
+**Dagger** `dagger`. The fastest swing in the pack and the cheapest on stamina. Short reach and a narrow thrust, so it rewards getting close.
+
+| Default | |
+| --- | --- |
+| Damage | 28 (pierce) |
+| Swing rate | 192 rpm |
+| Reach | 1.4 m |
+| Swing arc | 20 deg |
+| Stamina | 4 per swing |
+| Draw time | 0.19 s |
+| Carry weight | 2 |
+
+### Battle Axe
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/battle_axe.webp" width="1280" alt="Battle Axe, studio render">
+
+**Axe** `battle_axe`. A crescent-bladed battle axe. Heavy cuts with a broad arc, paid for in stamina and a slow recovery.
+
+| Default | |
+| --- | --- |
+| Damage | 80 (slash) |
+| Swing rate | 55 rpm |
+| Reach | 2.1 m |
+| Swing arc | 50 deg |
+| Stamina | 22 per swing |
+| Draw time | 0.53 s |
+| Carry weight | 2 |
+
+### War Axe
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/war_axe.webp" width="1280" alt="War Axe, studio render">
+
+**Axe** `war_axe`. A decorated bearded axe, a step lighter than the battle axe. A little less damage for a quicker swing.
+
+| Default | |
+| --- | --- |
+| Damage | 72 (slash) |
+| Swing rate | 62 rpm |
+| Reach | 2 m |
+| Swing arc | 46 deg |
+| Stamina | 20 per swing |
+| Draw time | 0.5 s |
+| Carry weight | 2 |
+
+### Double Axe
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/double_axe.webp" width="1280" alt="Double Axe, studio render">
+
+**Axe** `double_axe`. A double-bladed long axe. The hardest hitter and the widest arc in the pack, and the slowest and most tiring swing.
+
+| Default | |
+| --- | --- |
+| Damage | 90 (slash) |
+| Swing rate | 49 rpm |
+| Reach | 2.2 m |
+| Swing arc | 70 deg |
+| Stamina | 26 per swing |
+| Draw time | 0.59 s |
+| Carry weight | 2 |
+
+### Mace
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/mace.webp" width="1280" alt="Mace, studio render">
+
+**Mace** `mace`. A spiked-head mace that strikes rather than cuts. A tight arc, steady damage and a mid-weight swing.
+
+| Default | |
+| --- | --- |
+| Damage | 66 (strike) |
+| Swing rate | 69 rpm |
+| Reach | 1.9 m |
+| Swing arc | 36 deg |
+| Stamina | 16 per swing |
+| Draw time | 0.44 s |
+| Carry weight | 2 |
+
+### Spear
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/spear.webp" width="1280" alt="Spear, studio render">
+
+**Spear** `spear`. The longest reach in the pack on a narrow thrust. Keeps a horde at arm's length if the aim is good.
+
+| Default | |
+| --- | --- |
+| Damage | 60 (pierce) |
+| Swing rate | 74 rpm |
+| Reach | 3.3 m |
+| Swing arc | 8 deg |
+| Stamina | 14 per swing |
+| Draw time | 0.47 s |
+| Carry weight | 2 |
+
+### Round Shield
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/round_shield.webp" width="1280" alt="Round Shield, studio render">
+
+**Shield** `round_shield`. A worn wooden round shield with an iron boss and rim. Raised, it stops most of a hit from the front for stamina; swung, it bashes and knocks the target back.
+
+| Default | |
+| --- | --- |
+| Damage | 14 (strike) |
+| Swing rate | 69 rpm |
+| Reach | 1.7 m |
+| Swing arc | 44 deg |
+| Knockback | 7 impulse |
+| Block | stops 80 % of a hit within 120 deg, 0.3 stamina per damage stopped |
+| Stamina | 10 per swing |
+| Draw time | 0.34 s |
+| Carry weight | 2 |
+
+### Bow
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/bow.webp" width="1280" alt="Bow, studio render">
+
+**Bow** `bow`. A wooden self bow. Damage and arrow speed grow with the draw, and the arrow drops over distance. Loosed early it is weak and slow.
+
+| Default | |
+| --- | --- |
+| Damage | 75 (pierce) |
+| Fire rate | 40 rpm at full draw |
+| Projectile speed | 72 m/s (22 m/s undrawn) |
+| Drop | 1 x gravity |
+| Pull to full draw | 1.12 s |
+| Undrawn damage | 20 % |
+| Stamina | 8 per shot |
+| Draw time | 0.44 s |
+
+### Crossbow
+
+<img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/crossbow.webp" width="1280" alt="Crossbow, studio render">
+
+**Crossbow** `crossbow`. A stirrup crossbow. Full power on every shot and a flatter, faster bolt than the bow, but each bolt takes a long reload.
+
+| Default | |
+| --- | --- |
+| Damage | 90 (pierce) |
+| Fire rate | 18 rpm with reloads |
+| Magazine | 1 + 20 reserve |
+| Reload | 3.12 s |
+| Projectile speed | 100 m/s |
+| Drop | 0.55 x gravity |
+| Stamina | 6 per shot |
+| Draw time | 0.47 s |
+| Carry weight | 2 |
+<!-- /gen_readme:weapons -->
 
 ## Credits
 

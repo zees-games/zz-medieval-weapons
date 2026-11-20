@@ -1,0 +1,38 @@
+# Words for the generated parts of README.md (tools/gen_readme.py). Numbers never go here: every stat in the
+# README is read from weapons/<id>.tres and cfg/addons/zz_medieval_weapons/weapon/**/<id>.yml (ticks at 64 Hz).
+# order: the README order, by menu (missing ids are appended alphabetically). class: the summary's Class column.
+id_prefix: ""
+summary_before: "## Using it"
+weapons_before: "## Credits"
+order: [longsword, dagger, battle_axe, war_axe, double_axe, mace, spear, round_shield, bow, crossbow]
+weapons:
+  longsword:
+    class: Sword
+    blurb: A Type XVIa longsword, the all-rounder. Long reach, a wide cut and a quick recovery for its stamina.
+  dagger:
+    class: Dagger
+    blurb: The fastest swing in the pack and the cheapest on stamina. Short reach and a narrow thrust, so it rewards getting close.
+  battle_axe:
+    class: Axe
+    blurb: A crescent-bladed battle axe. Heavy cuts with a broad arc, paid for in stamina and a slow recovery.
+  war_axe:
+    class: Axe
+    blurb: A decorated bearded axe, a step lighter than the battle axe. A little less damage for a quicker swing.
+  double_axe:
+    class: Axe
+    blurb: A double-bladed long axe. The hardest hitter and the widest arc in the pack, and the slowest and most tiring swing.
+  mace:
+    class: Mace
+    blurb: A spiked-head mace that strikes rather than cuts. A tight arc, steady damage and a mid-weight swing.
+  spear:
+    class: Spear
+    blurb: The longest reach in the pack on a narrow thrust. Keeps a horde at arm's length if the aim is good.
+  round_shield:
+    class: Shield
+    blurb: A worn wooden round shield with an iron boss and rim. Raised, it stops most of a hit from the front for stamina; swung, it bashes and knocks the target back.
+  bow:
+    class: Bow
+    blurb: A wooden self bow. Damage and arrow speed grow with the draw, and the arrow drops over distance. Loosed early it is weak and slow.
+  crossbow:
+    class: Crossbow
+    blurb: A stirrup crossbow. Full power on every shot and a flatter, faster bolt than the bow, but each bolt takes a long reload.

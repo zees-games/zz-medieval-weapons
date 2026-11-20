@@ -223,7 +223,8 @@ func _held() -> void:
 	for f in 20:
 		bow.step(1.0 / 60.0)
 	var held_pull := bow.grip_transform().origin
-	_check(held_pull.y > -0.1 and held_pull.x > -0.2, "a drawing bow is raised toward the aim line (%s)" % held_pull)
+	# Low anchor: the grip comes up to just under the eye line, about -0.10.
+	_check(held_pull.y > -0.13 and held_pull.x > -0.2, "a drawing bow is raised toward the aim line (%s)" % held_pull)
 	var wm := ZzMedievalWorldModel.new()
 	var vm := ZzMedievalViewModel.new()
 	root.add_child(wm)

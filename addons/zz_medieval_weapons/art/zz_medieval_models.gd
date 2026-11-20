@@ -11,7 +11,7 @@ const WOOD := Color(0.42, 0.28, 0.15)
 const LEATHER := Color(0.25, 0.15, 0.1)
 const IRON := Color(0.32, 0.32, 0.35)
 const BRASS := Color(0.75, 0.6, 0.25)
-const STRING := Color(0.9, 0.9, 0.8)
+const STRING := Color(0.80, 0.76, 0.64)   # waxed linen
 
 
 ## Where the glbs are, first hit wins: `assets/` beside the project; for a pack a host mounted (dot-cloud puts it under `<prefix>/addons/zz_medieval_weapons/`) `<prefix>/assets/`; and for an addon
@@ -45,15 +45,7 @@ static func model_path(id: StringName) -> String:
 
 
 static func build(id: StringName) -> Node3D:
-	var path := model_path(id)
-	var model: Node3D = null
-	if path.begins_with("res://"):
-		if ResourceLoader.exists(path):
-			var scene: PackedScene = load(path)
-			if scene != null:
-				model = scene.instantiate() as Node3D
-	elif FileAccess.file_exists(path):
-		model = _read_glb(path)
+	var model := _vendored(id)
 	if model == null:
 		return placeholder(id)
 	model.transform = ZzMedievalArtTable.model_transform(id)
@@ -142,8 +134,25 @@ static func placeholder(id: StringName) -> Node3D:
 	return root
 
 
-## The arrow or bolt a bow or crossbow looses: along -Z, the way a projectile flies.
+## `assets/<id>.glb` instanced, or null when there is none.
+static func _vendored(id: StringName) -> Node3D:
+	var path := model_path(id)
+	if path.begins_with("res://"):
+		if ResourceLoader.exists(path):
+			var scene: PackedScene = load(path)
+			if scene != null:
+				return scene.instantiate() as Node3D
+	elif FileAccess.file_exists(path):
+		return _read_glb(path)
+	return null
+
+
+## The arrow or bolt a bow or crossbow looses: along -Z, the way a projectile flies, centred, [method projectile_length]
+## long. `assets/arrow.glb` / `bolt.glb` when present (shaft, head, fletching), else a primitive.
 static func projectile(projectile_id: StringName) -> Node3D:
+	var vendored := _vendored(projectile_id)
+	if vendored != null:
+		return vendored
 	var root := Node3D.new()
 	var length := 0.9 if projectile_id == &"arrow" else 0.4
 	_segment(root, Vector3(0, 0, length * 0.5), Vector3(0, 0, -length * 0.5), 0.016, WOOD)

@@ -283,7 +283,7 @@ func _models() -> void:
 	_check(probe.get_parent() == host and probe.update_mode == ReflectionProbe.UPDATE_ONCE, "a probe hangs on the host and captures once")
 	host.free()
 	var arrow := ZzMedievalModels.projectile(&"arrow")
-	_check(arrow.get_child_count() == 2, "arrow has shaft and head")
+	_check(not arrow.find_children("*", "MeshInstance3D", true, false).is_empty(), "arrow has a mesh (the vendored glb)")
 	arrow.free()
 	_end()
 

@@ -54,24 +54,37 @@ static func rows() -> Dictionary:
 		&"bow": {
 			# Bulge toward the target: model -X to world -Z is a quarter turn about Y.
 			"hold": Vector3(0, -90, 0), "rest": Vector3(-0.30, -0.18, -0.58), "side": -1,
+			# At full draw the grip is at arm's length just left of and below the line of sight and the nock is
+			# anchored low at the jaw (0.04, -0.15, -0.12), so the drawing hand stays out of frame and the arrow
+			# climbs from the bottom of the view to the rest; the stave is canted a little.
+			"aim": {"pos": Vector3(0.23, 0.08, -0.187), "rot": Vector3(7, 8, -6)},
 			"styles": [S.LOOSE], "heft": 1.0, "scale": 0.8, "weight": "light",
+			# The glb is modelled at full draw; its rig (a root and three bones up each limb) bends it back:
+			# `flex` turns limb joint i by angle * share[i] about +Z, `braced` degrees at pull 0, `drawn` at 1.
+			# The tips are the glb's nocks as modelled; the string keeps its braced length, so the nock is
+			# wherever that length reaches with the limbs bent (see [method string_point]).
 			"string": {
-				"tips": [Vector3(0.52, -0.7, 0), Vector3(0.52, 0.7, 0)],
-				"axis": Vector3(1, 0, 0), "rest": Vector3(0.52, 0, 0), "travel": 0.40,
+				"tips": [Vector3(0.562, -0.695, -0.02), Vector3(0.562, 0.695, -0.02)],
+				"axis": Vector3(1, 0, 0), "nock_height": 0.04,
+				"flex": {
+					"joints": [Vector2(0.039, 0.09), Vector2(0.1174, 0.29), Vector2(0.2154, 0.49)],
+					"share": [0.2, 0.3, 0.5], "braced": 40.0, "drawn": 18.0, "bone": "limb_%s_%d",
+				},
 			},
-			"projectile": "arrow", "nock_axis": Vector3(-1, 0, 0),
+			# The arrow lies from the nock to the rest above the bow hand, on the left of the stave.
+			"projectile": "arrow", "nock_axis": Vector3(-1, 0, 0), "arrow_rest": Vector3(0.0, 0.04, 0.02),
 			"surface": "wood",
 		},
 		&"crossbow": {
 			"hold": Vector3(-90, 0, 0), "rest": Vector3(0.20, -0.26, -0.50), "side": 1,
-			"offhand": Vector3(0, 0.62, -0.04),
+			"offhand": Vector3(0, 0.16, -0.012),   # under the fore-stock, behind the prod
 			"styles": [S.FIRE], "heft": 1.0, "scale": 0.9, "weight": "heavy",
 			"string": {
-				"tips": [Vector3(-0.437, 0.255, -0.026), Vector3(0.437, 0.255, -0.026)],
-				# Cocked is pull 1: the string drawn back toward the stock.
-				"axis": Vector3(0, -1, 0), "rest": Vector3(0, 0.235, -0.02), "travel": 0.2,
+				"tips": [Vector3(-0.426, 0.25, -0.032), Vector3(0.426, 0.25, -0.032)],   # in the prod's tip hooks
+				# Cocked is pull 1: the string drawn back and up over the stock into the nut (y 0.12, top of the stock z 0.017).
+				"axis": Vector3(0, -0.944, 0.33), "rest": Vector3(0, 0.235, -0.02), "travel": 0.122,
 			},
-			"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.06),
+			"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.008),
 			"surface": "iron",
 		},
 	}
@@ -115,7 +128,52 @@ static func string_point(id: StringName, pull: float) -> Vector3:
 	var s: Dictionary = row(id).get("string", {})
 	if s.is_empty():
 		return Vector3.ZERO
+	if s.has("flex"):
+		# Each half of the string keeps its braced length; the nock sits where both halves reach.
+		var t := string_tips(id, pull)
+		var b := string_tips(id, 0.0)
+		var h := float(s.get("nock_height", 0.0))
+		var lo: Vector3 = t[0]
+		var hi: Vector3 = t[1]
+		var len_lo := absf(h - (b[0] as Vector3).y)
+		var len_hi := absf((b[1] as Vector3).y - h)
+		var reach := minf(sqrt(maxf(len_lo * len_lo - (h - lo.y) * (h - lo.y), 0.0)), sqrt(maxf(len_hi * len_hi - (hi.y - h) * (hi.y - h), 0.0)))
+		return Vector3((lo.x + hi.x) * 0.5, h, hi.z) + (s["axis"] as Vector3) * reach
 	return (s["rest"] as Vector3) + (s["axis"] as Vector3) * float(s["travel"]) * clampf(pull, 0.0, 1.0)
+
+
+## How far, in degrees, each limb is bent back from the glb's pose at [param pull] (0 for a rigid row).
+static func flex_angle(id: StringName, pull: float) -> float:
+	var f: Dictionary = (row(id).get("string", {}) as Dictionary).get("flex", {})
+	if f.is_empty():
+		return 0.0
+	return lerpf(float(f["braced"]), float(f["drawn"]), clampf(pull, 0.0, 1.0))
+
+
+## The string's two ends at [param pull], model space: the table tips carried through the limb joints by
+## [method flex_angle], the same turns [ZzMedievalHeld] gives the glb's bones.
+static func string_tips(id: StringName, pull: float) -> Array:
+	var s: Dictionary = row(id).get("string", {})
+	if s.is_empty():
+		return []
+	var tips: Array = (s["tips"] as Array).duplicate()
+	var f: Dictionary = s.get("flex", {})
+	if f.is_empty():
+		return tips
+	var ang := deg_to_rad(flex_angle(id, pull))
+	var joints: Array = f["joints"]
+	var share: Array = f["share"]
+	for k in tips.size():
+		var p: Vector3 = tips[k]
+		var sg := signf(p.y)
+		# Outermost joint first: each turn carries what lies beyond it, as a bone chain does.
+		for i in range(joints.size() - 1, -1, -1):
+			var j: Vector2 = joints[i]
+			var c := Vector2(j.x, j.y * sg)
+			var q := (Vector2(p.x, p.y) - c).rotated(ang * float(share[i]) * sg) + c
+			p = Vector3(q.x, q.y, p.z)
+		tips[k] = p
+	return tips
 
 
 ## The sounds a weapon asks for. A game connects [signal ZzWeaponAnim.cue] to its audio; these

@@ -6,6 +6,7 @@ const CELL := Vector2i(400, 300)
 const STEP := 1.0 / 60.0
 
 var _world := false
+var _frames_out := false   ## --frames: also save every cell at full size to screenshots/frames/
 var _holder: Node3D
 var _held: ZzMedievalHeld
 var _cam: Camera3D
@@ -16,6 +17,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "--world":
 			_world = true
+		elif a == "--frames":
+			_frames_out = true
 		else:
 			ids.append(StringName(a))
 	if ids.is_empty():
@@ -156,6 +159,8 @@ func _sheet(id: StringName) -> void:
 		await RenderingServer.frame_post_draw
 		var img := get_viewport().get_texture().get_image()
 		img.convert(Image.FORMAT_RGBA8)
+		if _frames_out:
+			img.save_png("res://screenshots/frames/%s_%s_%d.png" % ["world" if _world else "view", String(id), i])
 		img.resize(CELL.x, CELL.y, Image.INTERPOLATE_BILINEAR)
 		sheet.blit_rect(img, Rect2i(Vector2i.ZERO, CELL), Vector2i((i % 4) * CELL.x, (i / 4) * CELL.y))
 	var out := "res://screenshots/%s_%s.png" % ["world" if _world else "view", String(id)]

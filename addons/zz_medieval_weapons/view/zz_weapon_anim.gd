@@ -161,6 +161,7 @@ func loose() -> void:
 		draw = 0.0
 		nocked = false
 		_nock_wait = 0.32
+		_follow = 0.28
 	style = ZzWeaponPose.Style.NONE
 	style_t = 0.0
 
@@ -182,6 +183,14 @@ func force(which: int, t: float) -> void:
 
 
 var _prev_draw: float = 0.0
+var _aim: float = 0.0        ## how far the bow is raised to the eye, eased so a loose follows through
+var _off: float = 0.0        ## the draw hand's pull toward the string, eased so it leaves the string, not teleports
+var _follow: float = 0.0     ## seconds the bow stays up after a loose
+
+## How far a bow is raised to the eye, 0..1 (0 for anything else).
+func aim_weight() -> float:
+	return _aim
+
 
 func _last_draw() -> float:
 	return _prev_draw
@@ -215,6 +224,15 @@ func advance(dt: float) -> void:
 				cue.emit(&"draw_full")
 		else:
 			draw = move_toward(draw, 0.0, dt * 4.0)
+		# The bow comes up with the draw at once, holds through the loose, then settles.
+		var aim_to := smoothstep(0.0, 0.25, draw)
+		_follow = maxf(_follow - dt, 0.0)
+		if aim_to >= _aim:
+			_aim = aim_to
+		elif _follow <= 0.0:
+			_aim = move_toward(_aim, aim_to, dt * 2.2)
+		var off_to := smoothstep(0.0, 0.12, draw) if nocked else 0.0
+		_off = off_to if off_to >= _off else move_toward(_off, off_to, dt * 3.0)
 		if not nocked:
 			_nock_wait -= dt
 			if _nock_wait <= 0.0:
@@ -250,12 +268,11 @@ func pose() -> Dictionary:
 	var off_string := 0.0
 	if is_bow:
 		# The bow is raised to the eye and the arm extended as the string comes back.
-		var aim := smoothstep(0.0, 0.25, draw)
-		pos += ZzWeaponPose.AIM_POS * aim
-		rot += ZzWeaponPose.AIM_ROT * aim
-		off_string = smoothstep(0.0, 0.12, draw)
-		if not nocked:
-			off_string = 0.0
+		# The row's `aim` puts the nock at the cheek under the eye at full draw.
+		var a: Dictionary = _row.get("aim", {})
+		pos += (a.get("pos", ZzWeaponPose.AIM_POS) as Vector3) * _aim
+		rot += (a.get("rot", ZzWeaponPose.AIM_ROT) as Vector3) * _aim
+		off_string = _off
 	elif ZzMedievalArtTable.has_string(id):
 		if reloading:
 			var p := clampf(_load_t / maxf(load_s, 0.01), 0.0, 1.0)

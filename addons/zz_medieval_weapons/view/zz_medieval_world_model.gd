@@ -7,6 +7,9 @@ extends ZzMedievalHeld
 
 ## Added to every resting hand: a hand at the hip, not in front of the eye.
 var hip_offset: Vector3 = Vector3(-0.02, -0.26, 0.12)
+## Replaces [member hip_offset] as a bow comes up: the view model's eye anchor moved from the eye
+## to these shoulders, so the nock sits at the cheek beside the head, not inside the chest.
+var aim_offset: Vector3 = Vector3(0.05, 0.33, -0.03)
 
 
 func _init() -> void:
@@ -17,5 +20,5 @@ func _init() -> void:
 
 func grip_transform() -> Transform3D:
 	var t := super.grip_transform()
-	t.origin += hip_offset
+	t.origin += hip_offset.lerp(aim_offset, anim.aim_weight())
 	return t

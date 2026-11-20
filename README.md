@@ -1,9 +1,9 @@
 Ten medieval weapons for [dot-weapon](https://github.com/gamespice-platform/weapon), each with a real PBR model and its own tuned profile: a longsword, a dagger, three axes, a mace, a spear, a round shield that blocks and bashes, a bow with a real draw and a dropping arrow, and a crossbow with a slow reload and a flatter bolt. Every number below is a default read straight from the pack's data, and every one can be changed per game or per server without touching the pack. Made for Zombie Zone, usable in any game or server (`provides.json`, kind `weapon`, games `*`). The addon is `addons/zz_medieval_weapons`.
 
-### In GameSpice and Fatal Contact
+### In GameSpice
 
 - **GameSpice:** the pack is published to the Workshop as `zz-medieval-weapons`. Add it to a server's or game's pack list and its weapons appear in the spawn menu under Melee, Shields and Ranged; players get it with the server's pack overlay, so there is nothing to install.
-- **Fatal Contact:** add `zz_medieval_weapons` to `weapons.packs` in `cfg/addon/game_arena_weapons/*.yml`. Its weapons join the catalogue after the game's own (see Fatal Contact's `docs/weapons.md`).
+- **Playlot:** Playlot automatically places the pack's items into its spawn menu so you can test them there, or use the [Workbench](https://github.com/gamespice-platform/workbench) tool.
 - **Your own Godot game:** link or copy `addons/zz_medieval_weapons` beside dot-weapon and use the code in [Using it](#using-it).
 
 Stamina, knockback and blocking come out of the pack as events and a helper the game applies (see [Using it](#using-it)). A weapon's carry weight is in its profile.

@@ -51,42 +51,52 @@ static func rows() -> Dictionary:
 			"block": {"pos": Vector3(0.30, 0.34, -0.12), "rot": Vector3(-6, 0, 0)},
 			"surface": "wood",
 		},
-		&"bow": {
-			# Bulge toward the target: model -X to world -Z is a quarter turn about Y.
-			"hold": Vector3(0, -90, 0), "rest": Vector3(-0.30, -0.18, -0.58), "side": -1,
-			# At full draw the grip is at arm's length just left of and below the line of sight and the nock is
-			# anchored low at the jaw (0.04, -0.15, -0.12), so the drawing hand stays out of frame and the arrow
-			# climbs from the bottom of the view to the rest; the stave is canted a little.
-			"aim": {"pos": Vector3(0.23, 0.08, -0.187), "rot": Vector3(7, 8, -6)},
-			"styles": [S.LOOSE], "heft": 1.0, "scale": 0.8, "weight": "light",
-			# The glb is modelled at full draw; its rig (a root and three bones up each limb) bends it back:
-			# `flex` turns limb joint i by angle * share[i] about +Z, `braced` degrees at pull 0, `drawn` at 1.
-			# The tips are the glb's nocks as modelled; the string keeps its braced length, so the nock is
-			# wherever that length reaches with the limbs bent (see [method string_point]).
-			"string": {
-				"tips": [Vector3(0.562, -0.695, -0.02), Vector3(0.562, 0.695, -0.02)],
-				"axis": Vector3(1, 0, 0), "nock_height": 0.04,
-				"flex": {
-					"joints": [Vector2(0.039, 0.09), Vector2(0.1174, 0.29), Vector2(0.2154, 0.49)],
-					"share": [0.2, 0.3, 0.5], "braced": 40.0, "drawn": 18.0, "bone": "limb_%s_%d",
-				},
+		&"bow": _bow(),
+		&"crossbow": _crossbow(),
+	}
+
+
+## The longbow: a rigged glb whose limbs flex with the draw.
+static func _bow() -> Dictionary:
+	return {
+		# Bulge toward the target: model -X to world -Z is a quarter turn about Y.
+		"hold": Vector3(0, -90, 0), "rest": Vector3(-0.30, -0.18, -0.58), "side": -1,
+		# At full draw the grip is at arm's length just left of and below the line of sight and the nock is
+		# anchored low at the jaw (0.04, -0.15, -0.12), so the drawing hand stays out of frame and the arrow
+		# climbs from the bottom of the view to the rest; the stave is canted a little.
+		"aim": {"pos": Vector3(0.23, 0.08, -0.187), "rot": Vector3(7, 8, -6)},
+		"styles": [S.LOOSE], "heft": 1.0, "scale": 0.8, "weight": "light",
+		# The glb is modelled at full draw; its rig (a root and three bones up each limb) bends it back:
+		# `flex` turns limb joint i by angle * share[i] about +Z, `braced` degrees at pull 0, `drawn` at 1.
+		# The tips are the glb's nocks as modelled; the string keeps its braced length, so the nock is
+		# wherever that length reaches with the limbs bent (see [method string_point]).
+		"string": {
+			"tips": [Vector3(0.562, -0.695, -0.02), Vector3(0.562, 0.695, -0.02)],
+			"axis": Vector3(1, 0, 0), "nock_height": 0.04,
+			"flex": {
+				"joints": [Vector2(0.039, 0.09), Vector2(0.1174, 0.29), Vector2(0.2154, 0.49)],
+				"share": [0.2, 0.3, 0.5], "braced": 40.0, "drawn": 18.0, "bone": "limb_%s_%d",
 			},
-			# The arrow lies from the nock to the rest above the bow hand, on the left of the stave.
-			"projectile": "arrow", "nock_axis": Vector3(-1, 0, 0), "arrow_rest": Vector3(0.0, 0.04, 0.02),
-			"surface": "wood",
 		},
-		&"crossbow": {
-			"hold": Vector3(-90, 0, 0), "rest": Vector3(0.20, -0.26, -0.50), "side": 1,
-			"offhand": Vector3(0, 0.16, -0.012),   # under the fore-stock, behind the prod
-			"styles": [S.FIRE], "heft": 1.0, "scale": 0.9, "weight": "heavy",
-			"string": {
-				"tips": [Vector3(-0.426, 0.25, -0.032), Vector3(0.426, 0.25, -0.032)],   # in the prod's tip hooks
-				# Cocked is pull 1: the string drawn back and up over the stock into the nut (y 0.12, top of the stock z 0.017).
-				"axis": Vector3(0, -0.944, 0.33), "rest": Vector3(0, 0.235, -0.02), "travel": 0.122,
-			},
-			"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.008),
-			"surface": "iron",
+		# The arrow lies from the nock to the rest above the bow hand, on the left of the stave.
+		"projectile": "arrow", "nock_axis": Vector3(-1, 0, 0), "arrow_rest": Vector3(0.0, 0.04, 0.02),
+		"surface": "wood",
+	}
+
+
+## The crossbow: shouldered, cocked by a reload, the bolt in the groove.
+static func _crossbow() -> Dictionary:
+	return {
+		"hold": Vector3(-90, 0, 0), "rest": Vector3(0.20, -0.26, -0.50), "side": 1,
+		"offhand": Vector3(0, 0.16, -0.012),   # under the fore-stock, behind the prod
+		"styles": [S.FIRE], "heft": 1.0, "scale": 0.9, "weight": "heavy",
+		"string": {
+			"tips": [Vector3(-0.426, 0.25, -0.032), Vector3(0.426, 0.25, -0.032)],   # in the prod's tip hooks
+			# Cocked is pull 1: the string drawn back and up over the stock into the nut (y 0.12, top of the stock z 0.017).
+			"axis": Vector3(0, -0.944, 0.33), "rest": Vector3(0, 0.235, -0.02), "travel": 0.122,
 		},
+		"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.008),
+		"surface": "iron",
 	}
 
 

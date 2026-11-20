@@ -4,7 +4,7 @@ Ten medieval weapons for [gs-weapon](https://github.com/gamespice-platform/weapo
 
 ### In GameSpice
 
-- [**GameSpice**](https://gamespice.net):** the pack is published to the Workshop as `zz-medieval-weapons`. Add it to a server's or game's pack list and its weapons appear in the spawn menu under Melee, Shields and Ranged; players get it with the server's pack overlay, so there is nothing to install.
+- **[GameSpice](https://gamespice.net)**: the pack is published to the Workshop as `zz-medieval-weapons`. Add it to a server's or game's pack list and its weapons appear in the spawn menu under Melee, Shields and Ranged; players get it with the server's pack overlay, so there is nothing to install.
 - **Playlot:** Playlot automatically places the pack's items into its spawn menu so you can test them there, or use the [Workbench](https://github.com/gamespice-platform/workbench) tool.
 - **Your own Godot game:** link or copy `addons/zz_medieval_weapons` beside gs-weapon and use the code in [Using it](#using-it).
 

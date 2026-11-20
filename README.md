@@ -9,18 +9,20 @@ Ten medieval weapons for [dot-weapon](https://github.com/gamespice-platform/weap
 Stamina, knockback and blocking come out of the pack as events and a helper the game applies (see [Using it](#using-it)). A weapon's carry weight is in its profile.
 
 <!-- gen_readme:summary -->
-| | Weapon | Class | Damage | Rate |
+| | Weapon | Class | Damage | Fire rate |
 | --- | --- | --- | --- | --- |
-| <a href="#longsword"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/longsword_thumb.webp" width="160" alt="Longsword"></a> | [Longsword](#longsword) | Sword | 55 | 91 rpm |
-| <a href="#dagger"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/dagger_thumb.webp" width="160" alt="Dagger"></a> | [Dagger](#dagger) | Dagger | 28 | 192 rpm |
-| <a href="#battle-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/battle_axe_thumb.webp" width="160" alt="Battle Axe"></a> | [Battle Axe](#battle-axe) | Axe | 80 | 55 rpm |
-| <a href="#war-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/war_axe_thumb.webp" width="160" alt="War Axe"></a> | [War Axe](#war-axe) | Axe | 72 | 62 rpm |
-| <a href="#double-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/double_axe_thumb.webp" width="160" alt="Double Axe"></a> | [Double Axe](#double-axe) | Axe | 90 | 49 rpm |
-| <a href="#mace"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/mace_thumb.webp" width="160" alt="Mace"></a> | [Mace](#mace) | Mace | 66 | 69 rpm |
-| <a href="#spear"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/spear_thumb.webp" width="160" alt="Spear"></a> | [Spear](#spear) | Spear | 60 | 74 rpm |
-| <a href="#round-shield"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/round_shield_thumb.webp" width="160" alt="Round Shield"></a> | [Round Shield](#round-shield) | Shield | 14 | 69 rpm |
-| <a href="#bow"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/bow_thumb.webp" width="160" alt="Bow"></a> | [Bow](#bow) | Bow | 75 | 40 rpm |
-| <a href="#crossbow"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/crossbow_thumb.webp" width="160" alt="Crossbow"></a> | [Crossbow](#crossbow) | Crossbow | 90 | 18 rpm |
+| <a href="#longsword"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/longsword_thumb.webp" width="160" alt="Longsword"></a> | [Longsword](#longsword) | Sword | 55 | one swing every 0.66 s |
+| <a href="#dagger"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/dagger_thumb.webp" width="160" alt="Dagger"></a> | [Dagger](#dagger) | Dagger | 28 | one swing every 0.31 s |
+| <a href="#battle-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/battle_axe_thumb.webp" width="160" alt="Battle Axe"></a> | [Battle Axe](#battle-axe) | Axe | 80 | one swing every 1.09 s |
+| <a href="#war-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/war_axe_thumb.webp" width="160" alt="War Axe"></a> | [War Axe](#war-axe) | Axe | 72 | one swing every 0.97 s |
+| <a href="#double-axe"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/double_axe_thumb.webp" width="160" alt="Double Axe"></a> | [Double Axe](#double-axe) | Axe | 90 | one swing every 1.22 s |
+| <a href="#mace"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/mace_thumb.webp" width="160" alt="Mace"></a> | [Mace](#mace) | Mace | 66 | one swing every 0.88 s |
+| <a href="#spear"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/spear_thumb.webp" width="160" alt="Spear"></a> | [Spear](#spear) | Spear | 60 | one swing every 0.81 s |
+| <a href="#round-shield"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/round_shield_thumb.webp" width="160" alt="Round Shield"></a> | [Round Shield](#round-shield) | Shield | 14 | one swing every 0.88 s |
+| <a href="#bow"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/bow_thumb.webp" width="160" alt="Bow"></a> | [Bow](#bow) | Bow | 75 | one shot every 1.5 s at full draw |
+| <a href="#crossbow"><img src="https://raw.githubusercontent.com/zees-games/zz-medieval-weapons/main/docs/img/crossbow_thumb.webp" width="160" alt="Crossbow"></a> | [Crossbow](#crossbow) | Crossbow | 90 | one shot every 3.38 s with reloads |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 <!-- /gen_readme:summary -->
 
 ## Using it
@@ -63,11 +65,13 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 55 (slash) |
-| Swing rate | 91 rpm |
+| Fire rate | one swing every 0.66 s |
 | Reach | 2.4 m |
 | Swing arc | 60 deg |
 | Stamina | 12 per swing |
 | Draw time | 0.41 s |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Dagger
 
@@ -78,12 +82,14 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 28 (pierce) |
-| Swing rate | 192 rpm |
+| Fire rate | one swing every 0.31 s |
 | Reach | 1.4 m |
 | Swing arc | 20 deg |
 | Stamina | 4 per swing |
 | Draw time | 0.19 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Battle Axe
 
@@ -94,12 +100,14 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 80 (slash) |
-| Swing rate | 55 rpm |
+| Fire rate | one swing every 1.09 s |
 | Reach | 2.1 m |
 | Swing arc | 50 deg |
 | Stamina | 22 per swing |
 | Draw time | 0.53 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### War Axe
 
@@ -110,12 +118,14 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 72 (slash) |
-| Swing rate | 62 rpm |
+| Fire rate | one swing every 0.97 s |
 | Reach | 2 m |
 | Swing arc | 46 deg |
 | Stamina | 20 per swing |
 | Draw time | 0.5 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Double Axe
 
@@ -126,12 +136,14 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 90 (slash) |
-| Swing rate | 49 rpm |
+| Fire rate | one swing every 1.22 s |
 | Reach | 2.2 m |
 | Swing arc | 70 deg |
 | Stamina | 26 per swing |
 | Draw time | 0.59 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Mace
 
@@ -142,12 +154,14 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 66 (strike) |
-| Swing rate | 69 rpm |
+| Fire rate | one swing every 0.88 s |
 | Reach | 1.9 m |
 | Swing arc | 36 deg |
 | Stamina | 16 per swing |
 | Draw time | 0.44 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Spear
 
@@ -158,12 +172,14 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 60 (pierce) |
-| Swing rate | 74 rpm |
+| Fire rate | one swing every 0.81 s |
 | Reach | 3.3 m |
 | Swing arc | 8 deg |
 | Stamina | 14 per swing |
 | Draw time | 0.47 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Round Shield
 
@@ -174,7 +190,7 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 14 (strike) |
-| Swing rate | 69 rpm |
+| Fire rate | one swing every 0.88 s |
 | Reach | 1.7 m |
 | Swing arc | 44 deg |
 | Knockback | 7 impulse |
@@ -182,6 +198,8 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Stamina | 10 per swing |
 | Draw time | 0.34 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Bow
 
@@ -192,13 +210,15 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 75 (pierce) |
-| Fire rate | 40 rpm at full draw |
+| Fire rate | one shot every 1.5 s at full draw |
 | Projectile speed | 72 m/s (22 m/s undrawn) |
 | Drop | 1 x gravity |
 | Pull to full draw | 1.12 s |
 | Undrawn damage | 20 % |
 | Stamina | 8 per shot |
 | Draw time | 0.44 s |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 
 ### Crossbow
 
@@ -209,7 +229,7 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Default | |
 | --- | --- |
 | Damage | 90 (pierce) |
-| Fire rate | 18 rpm with reloads |
+| Fire rate | one shot every 3.38 s with reloads |
 | Magazine | 1 + 20 reserve |
 | Reload | 3.12 s |
 | Projectile speed | 100 m/s |
@@ -217,6 +237,8 @@ The weapon gallery in this README is generated: `tools/gen_readme.sh` renders th
 | Stamina | 6 per shot |
 | Draw time | 0.47 s |
 | Carry weight | 2 |
+
+*Rates are the time between shots and ignore reloading; rpm is the cyclic rate of an automatic weapon.*
 <!-- /gen_readme:weapons -->
 
 <!-- gen_readme:quality -->

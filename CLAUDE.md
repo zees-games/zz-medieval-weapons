@@ -10,3 +10,7 @@ Zee's Medieval Weapons: ten historical weapons on dot-weapon, as a Workshop pack
 - `ZzMedievalArtTable` is the only file that knows how a weapon is held and moves; `ZzWeaponAnim` holds no nodes and reads no input. A lambda connected to an anim must not capture the anim (a reference cycle, caught by the suite's leak check).
 - Check: `./game.sh test`; render with `tools/screenshot.sh` (`--sheet`, `--world`) and look at the frames.
 - A delivered pack ships its profiles: `export_to` writes the `cfg/addons/<addon>/weapon` tree (upgrades included) under the export root. After mounting, set `ZzMedievalConfig.pack_cfg_root` to `DotCloudMounter.cfg_root_of(key)`; it is the weakest config root, so `cfg/addons`, `cfg/game` and `cfg/server` still override it. No dot-core change was needed (`DotProfileSet.roots` is weakest first).
+
+## Visual quality
+
+A visual change (a weapon model, its animation, arms or effects) is done only when a fresh judge says so: follow dot-game's brief, `../dot-game/docs/visual-judge-brief.md` (GPU capture, never llvmpipe; three consecutive zero-defect passes; `--audit` before you report). Your own reading of the sheets never counts.

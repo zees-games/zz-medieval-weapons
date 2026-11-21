@@ -23,7 +23,7 @@ var show_arms: bool = true
 var spawn_flight: bool = true
 var flight_parent: Node = null
 
-## Play dot-audio's stock sound for each cue (silent when it is not linked); false when the game plays cues itself.
+## Play gs-audio's stock sound for each cue (silent when it is not linked); false when the game plays cues itself.
 var play_builtin_sounds: bool = true
 
 var anim := ZzWeaponAnim.new()

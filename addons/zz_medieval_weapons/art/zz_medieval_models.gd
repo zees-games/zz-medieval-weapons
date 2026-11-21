@@ -14,7 +14,7 @@ const BRASS := Color(0.75, 0.6, 0.25)
 const STRING := Color(0.80, 0.76, 0.64)   # waxed linen
 
 
-## Where the glbs are, first hit wins: `assets/` beside the project; for a pack a host mounted (dot-cloud puts it under `<prefix>/addons/zz_medieval_weapons/`) `<prefix>/assets/`; and for an addon
+## Where the glbs are, first hit wins: `assets/` beside the project; for a pack a host mounted (gs-cloud puts it under `<prefix>/addons/zz_medieval_weapons/`) `<prefix>/assets/`; and for an addon
 ## only symlinked into a game's `addons/` (the glbs stay in the pack's own checkout, outside the game's `res://`) the `assets/` beside the link's target, an absolute path [method build] reads at run time.
 ## Pass [param link_target] (addon dir `res://...` -> real directory, "" if not a link) to test the lookup without a real symlink.
 static func asset_dirs(script_path: String = "", link_target: Callable = Callable()) -> Array[String]:

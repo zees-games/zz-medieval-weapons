@@ -1,7 +1,7 @@
 class_name ZzDefExport
 extends RefCounted
 
-## Writes the Workshop form (the contract is dot-cloud's docs/workshop.md): a `.tres` per
+## Writes the Workshop form (the contract is gs-cloud's docs/workshop.md): a `.tres` per
 ## weapon, `provides.json` (games "*", kind weapon) and the default cfg yml. The code table
 ## stays the source of truth; the suite fails when the files are stale.
 

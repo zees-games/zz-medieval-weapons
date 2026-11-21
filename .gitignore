@@ -1,13 +1,13 @@
 .godot/
 .import/
-# The dot-* addons are separate repositories and are linked in, never committed.
-/addons/dot_core
-/addons/dot_profile
-/addons/dot_combat
-/addons/dot_weapon
+# The gs-* addons are separate repositories and are linked in, never committed.
+/addons/gs_core
+/addons/gs_profile
+/addons/gs_combat
+/addons/gs_weapon
 build/
 /screenshots/
 __pycache__/
 .DS_Store
 art-src/reference/
-/addons/dot_audio
+/addons/gs_audio

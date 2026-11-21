@@ -1,8 +1,8 @@
 [gd_resource type="Resource" script_class="GSWeaponDef" format=3]
 
-[ext_resource type="Script" path="res://addons/dot_weapon/core/dot_weapon_def.gd" id="1_o1s60"]
-[ext_resource type="Script" path="res://addons/dot_combat/core/dot_damage_type.gd" id="2_uphtn"]
-[ext_resource type="Script" path="res://addons/dot_weapon/tuning/dot_weapon_ballistics.gd" id="3_q1q0y"]
+[ext_resource type="Script" path="res://addons/gs_weapon/core/gs_weapon_def.gd" id="1_o1s60"]
+[ext_resource type="Script" path="res://addons/gs_combat/core/gs_damage_type.gd" id="2_uphtn"]
+[ext_resource type="Script" path="res://addons/gs_weapon/tuning/gs_weapon_ballistics.gd" id="3_q1q0y"]
 
 [sub_resource type="Resource" id="Resource_7ossb"]
 script = ExtResource("2_uphtn")

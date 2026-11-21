@@ -1,8 +1,8 @@
 class_name ZzMedievalSound
 extends RefCounted
 
-## Which dot-audio stock weapon sound a [signal ZzWeaponAnim.cue] name plays ([GSWeaponSound]).
-## Null when the cue is silent by design or dot-audio is not linked; a game that wants its own
+## Which gs-audio stock weapon sound a [signal ZzWeaponAnim.cue] name plays ([GSWeaponSound]).
+## Null when the cue is silent by design or gs-audio is not linked; a game that wants its own
 ## audio connects the cue itself and sets [member ZzMedievalHeld.play_builtin_sounds] false.
 
 const CUES := {

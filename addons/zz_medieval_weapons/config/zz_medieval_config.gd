@@ -157,8 +157,8 @@ static func _overlay(row: Dictionary, p: GSProfile) -> void:
 		row[k] = p.extra[k]
 
 
-## dot-core's GSAddonConfig, reached by reflection so this pack parses (and falls back)
-## where dot-core predates it. It also layers environment and the command line.
+## gs-core's GSAddonConfig, reached by reflection so this pack parses (and falls back)
+## where gs-core predates it. It also layers environment and the command line.
 static func _from_core(defs: Dictionary) -> Dictionary:
 	for entry: Dictionary in ProjectSettings.get_global_class_list():
 		if entry.get("class", "") != "GSAddonConfig":

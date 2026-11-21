@@ -34,7 +34,7 @@ static func weapon_defs_with(layer: Dictionary, types: Dictionary = {}) -> Array
 
 
 ## The pack's own models as zee's art resources, one per weapon id (the optional hook zz_packs.gd and zee's `ZeePackSource` call).
-## Empty when zee-dot-weapons is not installed: this pack names none of its classes, see [ZzMedievalZeeArt].
+## Empty when zee-gs-weapons is not installed: this pack names none of its classes, see [ZzMedievalZeeArt].
 static func weapon_art() -> Array:
 	return ZzMedievalZeeArt.build()
 

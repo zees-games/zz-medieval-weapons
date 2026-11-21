@@ -1,6 +1,6 @@
 # View model, world model and replication
 
-zee-dot-weapons has a rig, a view model and a net codec for guns. This pack has its own minimal, independent version for what a medieval weapon does, because a swing, a raised guard and a drawn string are not a recoil kick. Nothing here depends on or names zee-dot-weapons; the only hard dependency stays dot-core (dot-weapon is already this pack's).
+zee-gs-weapons has a rig, a view model and a net codec for guns. This pack has its own minimal, independent version for what a medieval weapon does, because a swing, a raised guard and a drawn string are not a recoil kick. Nothing here depends on or names zee-gs-weapons; the only hard dependency stays gs-core (gs-weapon is already this pack's).
 
 ## The pieces
 
@@ -17,7 +17,7 @@ zee-dot-weapons has a rig, a view model and a net codec for guns. This pack has 
 
 - Own player: add a `ZzMedievalViewModel` under the camera, `bind(id)`; call `anim.start_use()` when the arsenal's `used` fires, `anim.set_blocking(held)`, `anim.hold_draw(held)` for the bow, `anim.set_reloading(arsenal.is_reloading())` for the crossbow, `impact(point, normal, surface)` when a swing finds something. Nothing reads an input device.
 - Sounds: connect `anim.cue` (`swing_light`, `swing_heavy`, `bash`, `guard_up`, `draw`, `draw_full`, `draw_relax`, `bow_loose`, `bolt_fire`, `nock`, `reload_start`, `reload_done`, `hit_<surface>`). No recordings ship with the pack; the names are the interface.
-- Replication: concatenate `ZzMedievalNet.all_specs()` (dot-weapon's plus five public fields, 13 bits). The authority makes a `ZzMedievalNet.Sender`, `attach(anim)` once and `pull(anim, target)` per tick. A watcher keeps one integer per player and calls `seq = ZzMedievalNet.apply(source, anim, seq)`. The swing is a counter (it is worthless late); the guard, the draw and the reload are levels the watcher eases toward.
+- Replication: concatenate `ZzMedievalNet.all_specs()` (gs-weapon's plus five public fields, 13 bits). The authority makes a `ZzMedievalNet.Sender`, `attach(anim)` once and `pull(anim, target)` per tick. A watcher keeps one integer per player and calls `seq = ZzMedievalNet.apply(source, anim, seq)`. The swing is a counter (it is worthless late); the guard, the draw and the reload are levels the watcher eases toward.
 - If the game draws the real projectile itself, set `spawn_flight = false` so nothing flies twice.
 
 ## Looking at it

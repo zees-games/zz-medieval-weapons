@@ -21,7 +21,7 @@ static func specs() -> Array[Dictionary]:
 	]
 
 
-## dot-weapon's specs, then these. A game makes this one call.
+## gs-weapon's specs, then these. A game makes this one call.
 static func all_specs() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	out.append_array(GSWeaponNetSync.specs())

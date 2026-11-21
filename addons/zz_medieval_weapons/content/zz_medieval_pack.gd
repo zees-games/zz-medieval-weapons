@@ -2,7 +2,7 @@ class_name ZzMedievalPack
 extends RefCounted
 
 ## The catalogue: one [GSWeaponDef] per weapon, built from [ZzMedievalConfig]. Melee and projectile use
-## dot-weapon's stock shapes, wrapped by two thin behaviours for what it has no place for: stamina, knockback, block.
+## gs-weapon's stock shapes, wrapped by two thin behaviours for what it has no place for: stamina, knockback, block.
 
 const BEHAVIOUR_DIR := "res://addons/zz_medieval_weapons/behaviour/"
 const MELEE := BEHAVIOUR_DIR + "zz_melee.gd"

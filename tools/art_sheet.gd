@@ -1,7 +1,7 @@
 extends Node3D
 
 ## Contact sheet for the weapon_art() hook: each weapon is a pair, the bare zee stand-in on the left and the pack's own model on the right.
-## Needs zee-dot-weapons beside the pack (the hook is empty without it); without it only the pack's models are drawn.
+## Needs zee-gs-weapons beside the pack (the hook is empty without it); without it only the pack's models are drawn.
 ## `-- --pack zz_modern_weapons --shot out.png`; run under Xvfb (tools/art_sheet.sh), a headless frame is black.
 
 const PIXELS_PER_METRE := 90.0

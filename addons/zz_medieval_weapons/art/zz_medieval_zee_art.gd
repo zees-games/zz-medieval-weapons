@@ -1,7 +1,7 @@
 class_name ZzMedievalZeeArt
 extends RefCounted
 
-## The pack's own models as zee-dot-weapons' `ZeeWeaponArt` resources, for a host (game-zombie-zone) that draws weapons with zee's rig: [method build] backs `ZzMedievalSpawnProvider.weapon_art()`.
+## The pack's own models as zee-gs-weapons' `ZeeWeaponArt` resources, for a host (game-zombie-zone) that draws weapons with zee's rig: [method build] backs `ZzMedievalSpawnProvider.weapon_art()`.
 ## This pack does not require zee, so no zee class is named: each is looked up by its global name when called, and without zee the answer is empty (the pack draws itself with [ZzMedievalViewModel]).
 ## Every weapon is a melee-style carry (along +Y, origin at the grip); zee's knife lends the arm pose, and hip place and size come from [ZzMedievalArtTable] (`rest`, `hold`, `scale`), the rows the pack's own view uses.
 

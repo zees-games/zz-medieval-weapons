@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tools/art_sheet.sh PACK_DIR [out.png]: contact sheet of the weapon_art() hook, the bare zee stand-in beside the pack's own model.
-# Needs zee-dot-weapons linked into addons/ (a dev-only link: zee is not a dependency of the pack) and a display, so it runs under Xvfb.
+# Needs zee-gs-weapons linked into addons/ (a dev-only link: zee is not a dependency of the pack) and a display, so it runs under Xvfb.
 # Run as `heavy -- tools/art_sheet.sh zz_modern_weapons`.
 set -uo pipefail
 cd "$(dirname "$0")/.."

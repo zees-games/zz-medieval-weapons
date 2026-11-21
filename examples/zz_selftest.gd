@@ -70,7 +70,7 @@ func _config() -> void:
 	for def in ZzMedievalSpawnProvider.weapon_defs():
 		if def.id == &"dagger": untuned = float(def.tuning.get("damage"))
 	_check(not is_equal_approx(tuned, untuned), "a yml override changes the dagger through weapon_defs")
-	# The shipped cfg directory, read through dot-core, equals the built-in table.
+	# The shipped cfg directory, read through gs-core, equals the built-in table.
 	_check(str(ZzMedievalConfig.load_all()) == str(d), "shipped yml equals the defaults")
 	_end()
 
@@ -311,7 +311,7 @@ func _weapon_art_hook() -> void:
 		if node != null:
 			node.free()
 	var art := ZzMedievalSpawnProvider.weapon_art()
-	# zee-dot-weapons is not a dependency: without it the hook answers nothing, with it one art per id on this pack's models.
+	# zee-gs-weapons is not a dependency: without it the hook answers nothing, with it one art per id on this pack's models.
 	var zee := ProjectSettings.get_global_class_list().any(func(e: Dictionary) -> bool: return e.get("class", "") == "ZeeWeaponArt")
 	_check(art.size() == (ZzMedievalConfig.IDS.size() if zee else 0), "without zee the hook is empty, with it one art per weapon id")
 	var ids_ok := true
@@ -422,10 +422,10 @@ func _pack_cfg() -> void:
 		for d in DirAccess.get_directories_at(src.path_join(rel).path_join(sub)):
 			stack.append(sub.path_join(d))
 		for n in DirAccess.get_files_at(src.path_join(rel).path_join(sub)):
-			pck.add_file("res://dot_cloud/zzcfg/1".path_join(rel).path_join(sub).path_join(n), ProjectSettings.globalize_path(src.path_join(rel).path_join(sub).path_join(n)))
+			pck.add_file("res://gs_cloud/zzcfg/1".path_join(rel).path_join(sub).path_join(n), ProjectSettings.globalize_path(src.path_join(rel).path_join(sub).path_join(n)))
 	pck.flush()
 	_check(ProjectSettings.load_resource_pack(pck_path), "pack mounts")
-	ZzMedievalConfig.pack_cfg_root = "res://dot_cloud/zzcfg/1/cfg"
+	ZzMedievalConfig.pack_cfg_root = "res://gs_cloud/zzcfg/1/cfg"
 	ZzMedievalConfig.base_roots = PackedStringArray(["user://cfg"])
 	_check(is_equal_approx(_pack_damage(), 777.0), "a delivered pack's profile numbers reach weapon_defs()")
 	var srv := FileAccess.open("user://cfg/server/addons/zz_medieval_weapons/weapon/dagger.yml", FileAccess.WRITE)
@@ -504,7 +504,7 @@ func _net() -> void:
 		bits += int(sp["bits"])
 		_check(sp["owner_only"] == false and sp["interpolated"] == false, "%s is public and uninterpolated" % sp["property"])
 	_check(bits == 4 + 3 + 1 + 4 + 1, "thirteen bits")
-	_check(ZzMedievalNet.all_specs().size() == GSWeaponNetSync.specs().size() + 5, "all_specs adds to dot-weapon's")
+	_check(ZzMedievalNet.all_specs().size() == GSWeaponNetSync.specs().size() + 5, "all_specs adds to gs-weapon's")
 	_check(ZzMedievalNet.uses_between(14, 2) == 4 and ZzMedievalNet.uses_between(3, 3) == 0, "uses_between is wrap-aware")
 	_check(absf(ZzMedievalNet.dequantise_draw(ZzMedievalNet.quantise_draw(0.5)) - 0.5) < 0.04, "draw survives quantising")
 	# Owner swings, a watcher copies it from the fields alone.

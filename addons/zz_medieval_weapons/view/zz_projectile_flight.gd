@@ -2,7 +2,7 @@ class_name ZzProjectileFlight
 extends Node3D
 
 ## The picture of an arrow or bolt in flight, on the same arc as the simulation's projectile. [b]It is not
-## the projectile[/b]: damage and the true flight are [DotWeaponProjectile]'s; this is what a client draws for
+## the projectile[/b]: damage and the true flight are [GSWeaponProjectile]'s; this is what a client draws for
 ## one it did not spawn. A game drawing the real projectile turns [code]spawn_flight[/code] off.
 
 signal landed(point: Vector3, normal: Vector3, collider: Object)

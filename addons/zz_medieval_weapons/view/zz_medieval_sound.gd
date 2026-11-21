@@ -1,7 +1,7 @@
 class_name ZzMedievalSound
 extends RefCounted
 
-## Which dot-audio stock weapon sound a [signal ZzWeaponAnim.cue] name plays ([DotWeaponSound]).
+## Which dot-audio stock weapon sound a [signal ZzWeaponAnim.cue] name plays ([GSWeaponSound]).
 ## Null when the cue is silent by design or dot-audio is not linked; a game that wants its own
 ## audio connects the cue itself and sets [member ZzMedievalHeld.play_builtin_sounds] false.
 
@@ -25,4 +25,4 @@ static func stream_for(cue: StringName, weapon_id: StringName = &"") -> AudioStr
 	# A bow or crossbow "draw" is the string, not a blade leaving a sheath.
 	if cue == &"draw" and weapon_id in [&"bow", &"crossbow"]:
 		sound = &"bow_draw" if weapon_id == &"bow" else &"crossbow_load"
-	return DotWeaponSound.pick(sound, randi()) if sound != &"" else null
+	return GSWeaponSound.pick(sound, randi()) if sound != &"" else null

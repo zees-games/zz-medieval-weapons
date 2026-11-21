@@ -12,13 +12,13 @@ const CATEGORIES: Array[Dictionary] = [
 ]
 
 
-static func category_for(def: DotWeaponDef) -> String:
+static func category_for(def: GSWeaponDef) -> String:
 	if def.has_tag(&"shield"):
 		return "shield"
 	return "ranged" if def.has_tag(&"ranged") else "melee"
 
 
-static func provides(defs: Array[DotWeaponDef]) -> Dictionary:
+static func provides(defs: Array[GSWeaponDef]) -> Dictionary:
 	var entries: Array = []
 	for def in defs:
 		entries.append({
@@ -34,7 +34,7 @@ static func provides(defs: Array[DotWeaponDef]) -> Dictionary:
 	}
 
 
-static func export_to(root: String) -> DotResult:
+static func export_to(root: String) -> GSResult:
 	var defs := ZzMedievalPack.weapons()
 	for sub in ["weapons", "cfg/addons/zz_medieval_weapons/weapon"]:
 		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(root.path_join(sub)))
@@ -45,26 +45,26 @@ static func export_to(root: String) -> DotResult:
 		var path := root.path_join("weapons/%s.tres" % String(def.id))
 		var saved := ResourceSaver.save(def, path)
 		if saved != OK:
-			return DotResult.fail(DotError.CODE_IO, "Cannot save %s (error %d)." % [path, saved])
+			return GSResult.fail(GSError.CODE_IO, "Cannot save %s (error %d)." % [path, saved])
 		var y := FileAccess.open(ZzMedievalConfig.profile_path(def.id, root.path_join("cfg")), FileAccess.WRITE)
 		if y == null:
-			return DotResult.fail(DotError.CODE_IO, "Cannot write cfg for %s." % String(def.id))
+			return GSResult.fail(GSError.CODE_IO, "Cannot write cfg for %s." % String(def.id))
 		y.store_string(ZzMedievalConfig.to_yaml(def.id))
 		y.close()
 	var f := FileAccess.open(root.path_join("provides.json"), FileAccess.WRITE)
 	if f == null:
-		return DotResult.fail(DotError.CODE_IO, "Cannot write provides.json.")
+		return GSResult.fail(GSError.CODE_IO, "Cannot write provides.json.")
 	f.store_string(JSON.stringify(provides(defs), "\t", false) + "\n")
 	f.close()
-	return DotResult.success(defs.size())
+	return GSResult.success(defs.size())
 
 
 ## Copies the shipped `cfg/addons/<addon>/weapon` tree (upgrades included) under [param root] when it is not the project's own.
-static func _copy_cfg(root: String, rel: String) -> DotResult:
+static func _copy_cfg(root: String, rel: String) -> GSResult:
 	var from := "res://cfg".path_join(rel)
 	var to := root.path_join("cfg").path_join(rel)
 	if root.trim_suffix("/") == "res:/" or to == from or not DirAccess.dir_exists_absolute(from):
-		return DotResult.success(0)
+		return GSResult.success(0)
 	var n := 0
 	var stack: Array[String] = [""]
 	while not stack.is_empty():
@@ -78,8 +78,8 @@ static func _copy_cfg(root: String, rel: String) -> DotResult:
 			var text := FileAccess.get_file_as_string(from.path_join(sub).path_join(f))
 			var o := FileAccess.open(to.path_join(sub).path_join(f), FileAccess.WRITE)
 			if o == null:
-				return DotResult.fail(DotError.CODE_IO, "Cannot write cfg %s." % f)
+				return GSResult.fail(GSError.CODE_IO, "Cannot write cfg %s." % f)
 			o.store_string(text)
 			o.close()
 			n += 1
-	return DotResult.success(n)
+	return GSResult.success(n)

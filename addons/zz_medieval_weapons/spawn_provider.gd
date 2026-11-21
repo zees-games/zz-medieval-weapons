@@ -8,26 +8,26 @@ const ROOT := "res://addons/zz_medieval_weapons/"
 
 
 ## The contract game-zombie-zone's zz_packs.gd reads by path and name: [code]weapon_defs(types := {})[/code]
-## returns every definition. [param types] (id -> DotDamageType) replaces this pack's own entry of that id.
+## returns every definition. [param types] (id -> GSDamageType) replaces this pack's own entry of that id.
 ## Numbers come from [method ZzMedievalConfig.load_all]; [param cfg_dir] reads another directory (tests).
-static func weapon_defs(types: Dictionary = {}, cfg_dir: String = "") -> Array[DotWeaponDef]:
+static func weapon_defs(types: Dictionary = {}, cfg_dir: String = "") -> Array[GSWeaponDef]:
 	var table := ZzMedievalPack.damage_types()
 	for key in types:
 		table[String(key)] = types[key]
 	var cfg := ZzMedievalConfig.load_all(cfg_dir)
-	var out: Array[DotWeaponDef] = []
+	var out: Array[GSWeaponDef] = []
 	for id in ZzMedievalConfig.IDS:
 		out.append(ZzMedievalPack.build(id, cfg[String(id)], table))
 	return out
 
 
 ## [method weapon_defs] rebuilt over a host's live profile edits ([param layer]: id -> {path: value}).
-static func weapon_defs_with(layer: Dictionary, types: Dictionary = {}) -> Array[DotWeaponDef]:
+static func weapon_defs_with(layer: Dictionary, types: Dictionary = {}) -> Array[GSWeaponDef]:
 	var table := ZzMedievalPack.damage_types()
 	for key in types:
 		table[String(key)] = types[key]
 	var cfg := ZzMedievalConfig.load_all("", PackedStringArray(), layer)
-	var out: Array[DotWeaponDef] = []
+	var out: Array[GSWeaponDef] = []
 	for id in ZzMedievalConfig.IDS:
 		out.append(ZzMedievalPack.build(id, cfg[String(id)], table))
 	return out

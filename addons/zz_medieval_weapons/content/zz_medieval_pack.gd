@@ -1,7 +1,7 @@
 class_name ZzMedievalPack
 extends RefCounted
 
-## The catalogue: one [DotWeaponDef] per weapon, built from [ZzMedievalConfig]. Melee and projectile use
+## The catalogue: one [GSWeaponDef] per weapon, built from [ZzMedievalConfig]. Melee and projectile use
 ## dot-weapon's stock shapes, wrapped by two thin behaviours for what it has no place for: stamina, knockback, block.
 
 const BEHAVIOUR_DIR := "res://addons/zz_medieval_weapons/behaviour/"
@@ -10,11 +10,11 @@ const SHIELD := BEHAVIOUR_DIR + "zz_shield.gd"
 const PROJECTILE := BEHAVIOUR_DIR + "zz_projectile.gd"
 
 
-static func weapons(cfg: Dictionary = {}) -> Array[DotWeaponDef]:
+static func weapons(cfg: Dictionary = {}) -> Array[GSWeaponDef]:
 	if cfg.is_empty():
 		cfg = ZzMedievalConfig.load_all()
 	var types := damage_types()
-	var out: Array[DotWeaponDef] = []
+	var out: Array[GSWeaponDef] = []
 	for id in ZzMedievalConfig.IDS:
 		out.append(build(id, cfg[String(id)], types))
 	return out
@@ -23,26 +23,26 @@ static func weapons(cfg: Dictionary = {}) -> Array[DotWeaponDef]:
 static func damage_types() -> Dictionary:
 	var out: Dictionary = {}
 	for id in ["slash", "pierce", "strike"]:
-		var t := DotDamageType.new()
+		var t := GSDamageType.new()
 		t.id = StringName(id)
 		t.display_name = id.capitalize()
 		out[id] = t
 	return out
 
 
-static func build(id: StringName, c: Dictionary, types: Dictionary) -> DotWeaponDef:
-	var d := DotWeaponDef.new()
+static func build(id: StringName, c: Dictionary, types: Dictionary) -> GSWeaponDef:
+	var d := GSWeaponDef.new()
 	d.id = id
 	d.deploy_ticks = 24
 	d.holster_ticks = 14
-	DotWeaponProfiles.apply_common(d, c)
+	GSWeaponProfiles.apply_common(d, c)
 	d.authored_tick_rate = ZzMedievalConfig.TICK_RATE
 	d.cost_per_use = 0
 	d.reload_ticks = 0
 	d.auto_reload = false
 
 	var kind := String(c["kind"])
-	var b := DotWeaponBallistics.new()
+	var b := GSWeaponBallistics.new()
 	b.damage = float(c["damage"])
 	b.damage_type = types.get(String(c["damage_type"]))
 	b.spread = 0.0
@@ -84,7 +84,7 @@ static func build(id: StringName, c: Dictionary, types: Dictionary) -> DotWeapon
 			b.max_range = 400.0
 			d.cost_per_use = 1
 			if kind == "bow":
-				d.fire_mode = DotWeaponDef.Fire.CHARGE
+				d.fire_mode = GSWeaponDef.Fire.CHARGE
 				d.charge_ticks = int(c["draw_ticks"])
 				d.charge_requires_min = true
 				d.min_charge = float(c["min_charge"])

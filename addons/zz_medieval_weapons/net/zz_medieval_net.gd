@@ -2,7 +2,7 @@ class_name ZzMedievalNet
 extends RefCounted
 
 ## What travels so a watcher sees a swing, guard and string draw; a game concatenates this with
-## [DotWeaponNetSync]'s specs ([method all_specs]). A swing is a wrap-aware 4-bit counter ([method uses_between]);
+## [GSWeaponNetSync]'s specs ([method all_specs]). A swing is a wrap-aware 4-bit counter ([method uses_between]);
 ## guard, draw and reload are levels eased toward. The draw is public; ammunition stays owner-only.
 
 const SEQ_BITS := 4
@@ -24,13 +24,13 @@ static func specs() -> Array[Dictionary]:
 ## dot-weapon's specs, then these. A game makes this one call.
 static func all_specs() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	out.append_array(DotWeaponNetSync.specs())
+	out.append_array(GSWeaponNetSync.specs())
 	out.append_array(specs())
 	return out
 
 
 static func estimated_bits() -> int:
-	return DotWeaponNetSync.estimated_bits() + SEQ_BITS + ZzWeaponPose.STYLE_BITS + 1 + DRAW_BITS + 1
+	return GSWeaponNetSync.estimated_bits() + SEQ_BITS + ZzWeaponPose.STYLE_BITS + 1 + DRAW_BITS + 1
 
 
 static func quantise_draw(fraction: float) -> int:

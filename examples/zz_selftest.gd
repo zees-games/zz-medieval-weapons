@@ -81,7 +81,7 @@ func _profiles() -> void:
 	var res_roots := PackedStringArray(["res://cfg"])
 	var set := ZzMedievalConfig.profile_set(res_roots)
 	# Listing opens no profile; the order is by id, the menu order is by sort.
-	var ids := Array(DotWeaponProfiles.list_ids(set))
+	var ids := Array(GSWeaponProfiles.list_ids(set))
 	var want: Array = ZzMedievalConfig.IDS.map(func(i: StringName) -> String: return String(i))
 	want.sort()
 	_check(ids == want, "list_ids finds the ten shipped profiles (%s)" % [ids])
@@ -95,12 +95,12 @@ func _profiles() -> void:
 	var same := 0
 	for id in ZzMedievalConfig.IDS:
 		var res := set.load_profile(String(id))
-		if res.ok and str(DotWeaponProfiles.flat(res.value).get("damage")) == str(d[String(id)]["damage"]):
+		if res.ok and str(GSWeaponProfiles.flat(res.value).get("damage")) == str(d[String(id)]["damage"]):
 			same += 1
 	_check(same == 10, "all ten profiles carry the default damage")
 	_check(str(ZzMedievalConfig.load_all("", res_roots)) == str(d), "profiles build exactly the default rows")
 	_check(ZzMedievalConfig.errors.is_empty(), "no shipped profile fails")
-	var def_res := DotWeaponProfiles.load_def(set, "longsword")
+	var def_res := GSWeaponProfiles.load_def(set, "longsword")
 	set.clear_cache()
 	_check(def_res.ok and def_res.value.slot == 1 and def_res.value.deploy_ticks == 26 and def_res.value.display_name == "Longsword", "load_def fills the common fields")
 	_check(def_res.ok and is_equal_approx(float(def_res.value.params["damage"]), 55.0), "load_def keeps the pack keys as params")
@@ -117,8 +117,8 @@ func _profiles() -> void:
 	var no_game := ZzMedievalConfig.load_all("", PackedStringArray(["res://cfg", tmp]))
 	_check(is_equal_approx(float(no_game["longsword"]["damage"]), 55.0), "another game does not see the game tier")
 	# Upgrades.
-	_check(Array(DotWeaponProfiles.list_upgrades(set, "longsword")) == ["balanced", "sharpened"], "longsword lists two upgrades")
-	_check(DotWeaponProfiles.list_upgrades(set, "dagger").is_empty(), "dagger has none")
+	_check(Array(GSWeaponProfiles.list_upgrades(set, "longsword")) == ["balanced", "sharpened"], "longsword lists two upgrades")
+	_check(GSWeaponProfiles.list_upgrades(set, "dagger").is_empty(), "dagger has none")
 	_check(Array(set.child_kinds("longsword")) == ["upgrades"], "the folder form has an upgrades child")
 	var up := ZzMedievalConfig.upgraded(&"longsword", ["sharpened"], res_roots)
 	_check(up.ok and is_equal_approx(float(up.value["values"]["damage"]), 60.5) and is_equal_approx(float(up.value["values"]["reach"]), 2.5) and up.value["cost"] == 100, "sharpened multiplies damage, adds reach, costs 100")
@@ -170,8 +170,8 @@ func _defs() -> void:
 		_check(def.validate().ok, "%s validates" % id)
 		_check(def.authored_tick_rate == 64, "%s authored at 64" % id)
 		_check(cat.instantiate(id).ok, "%s behaviour resolves" % id)
-	_check(cat.get_def(&"bow").fire_mode == DotWeaponDef.Fire.CHARGE, "bow is a drawn shot")
-	_check(cat.get_def(&"crossbow").fire_mode == DotWeaponDef.Fire.SEMI, "crossbow is one use per press")
+	_check(cat.get_def(&"bow").fire_mode == GSWeaponDef.Fire.CHARGE, "bow is a drawn shot")
+	_check(cat.get_def(&"crossbow").fire_mode == GSWeaponDef.Fire.SEMI, "crossbow is one use per press")
 	_end()
 
 
@@ -394,7 +394,7 @@ func _workshop() -> void:
 	_check(json is Dictionary and json["entries"].size() == 10, "provides.json lists ten")
 	_check(FileAccess.get_file_as_string("res://provides.json") == JSON.stringify(ZzDefExport.provides(defs), "\t", false) + "\n", "provides.json is not stale")
 	for d in defs:
-		var loaded: DotWeaponDef = load("res://weapons/%s.tres" % String(d.id))
+		var loaded: GSWeaponDef = load("res://weapons/%s.tres" % String(d.id))
 		_check(loaded != null and loaded.describe() == d.describe() and str(loaded.tuning.describe()) == str(d.tuning.describe()) and loaded.params == d.params, "%s .tres is not stale" % d.id)
 		_check(FileAccess.get_file_as_string(ZzMedievalConfig.profile_path(d.id)) == ZzMedievalConfig.to_yaml(d.id), "%s yml matches defaults" % d.id)
 	_end()
@@ -461,16 +461,16 @@ func _packs() -> void:
 	var defs: Array = provider.call(&"weapon_defs")
 	var ids := PackedStringArray()
 	for def: Variant in defs:
-		_check(def is DotWeaponDef, "weapon_defs holds only DotWeaponDef")
-		if def is DotWeaponDef:
+		_check(def is GSWeaponDef, "weapon_defs holds only GSWeaponDef")
+		if def is GSWeaponDef:
 			ids.append(String(def.id))
 	_check(ids.size() == ZzMedievalConfig.IDS.size(), "one definition per weapon id")
 	# Through the source Callable zee calls, with the game's damage table as `types`.
-	var types := {"slash": DotDamageType.new()}
+	var types := {"slash": GSDamageType.new()}
 	var via: Array = Callable(provider.get_script(), &"weapon_defs").call(types)
 	_check(via.size() == ids.size(), "the source Callable returns the same set")
 	var slash_used := false
-	for def: DotWeaponDef in via:
+	for def: GSWeaponDef in via:
 		if def.tuning != null and def.tuning.damage_type == types["slash"]:
 			slash_used = true
 	_check(slash_used, "the game's damage type replaces the pack's own")
@@ -504,7 +504,7 @@ func _net() -> void:
 		bits += int(sp["bits"])
 		_check(sp["owner_only"] == false and sp["interpolated"] == false, "%s is public and uninterpolated" % sp["property"])
 	_check(bits == 4 + 3 + 1 + 4 + 1, "thirteen bits")
-	_check(ZzMedievalNet.all_specs().size() == DotWeaponNetSync.specs().size() + 5, "all_specs adds to dot-weapon's")
+	_check(ZzMedievalNet.all_specs().size() == GSWeaponNetSync.specs().size() + 5, "all_specs adds to dot-weapon's")
 	_check(ZzMedievalNet.uses_between(14, 2) == 4 and ZzMedievalNet.uses_between(3, 3) == 0, "uses_between is wrap-aware")
 	_check(absf(ZzMedievalNet.dequantise_draw(ZzMedievalNet.quantise_draw(0.5)) - 0.5) < 0.04, "draw survives quantising")
 	# Owner swings, a watcher copies it from the fields alone.

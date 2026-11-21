@@ -28,18 +28,18 @@ func _check(ok: bool, what: String) -> void:
 		print("  FAIL [%s] %s" % [_section, what])
 
 
-func _catalogue(cfg: Dictionary = {}) -> DotWeaponCatalogue:
-	var cat := DotWeaponCatalogue.new()
+func _catalogue(cfg: Dictionary = {}) -> GSWeaponCatalogue:
+	var cat := GSWeaponCatalogue.new()
 	for d in ZzMedievalPack.weapons(cfg):
 		cat.add(d)
 	return cat
 
 
-func _use(cat: DotWeaponCatalogue, id: StringName, charge: float = 1.0) -> DotWeaponOutcome:
+func _use(cat: GSWeaponCatalogue, id: StringName, charge: float = 1.0) -> GSWeaponOutcome:
 	var made := cat.instantiate(id)
-	var beh: DotWeaponBehaviour = made.value
+	var beh: GSWeaponBehaviour = made.value
 	beh.setup(cat.get_def(id))
-	var ctx := DotWeaponContext.make(1, 100, Vector3(0, 1.6, 0), Vector3.FORWARD)
+	var ctx := GSWeaponContext.make(1, 100, Vector3(0, 1.6, 0), Vector3.FORWARD)
 	ctx.charge = charge
 	return beh.use(ctx)
 
@@ -55,7 +55,7 @@ func _root(name: String) -> String:
 	return OS.get_temp_dir().path_join("zz_prof_%s_%d" % [name, Time.get_ticks_usec()])
 
 
-func _event(out: DotWeaponOutcome, type: String) -> Variant:
+func _event(out: GSWeaponOutcome, type: String) -> Variant:
 	for e in out.events:
 		if e.get("type") == type:
 			return e
@@ -257,7 +257,7 @@ func _sound() -> void:
 	_begin("sound cues")
 	var missing: PackedStringArray = []
 	for cue in ZzMedievalSound.CUES:
-		if DotWeaponSound.count(ZzMedievalSound.CUES[cue]) == 0:
+		if GSWeaponSound.count(ZzMedievalSound.CUES[cue]) == 0:
 			missing.append(String(cue))
 	_check(missing.is_empty(), "every cue has stock files: %s" % ", ".join(missing))
 	var silent_ok := true
@@ -274,6 +274,6 @@ func _sound() -> void:
 	_check(silent_ok, "every swing, bash, hit and draw cue of every weapon plays a stock sound")
 	for c in ZzMedievalSound.SILENT:
 		_check(not ZzMedievalSound.CUES.has(c), "%s is declared silent and has no sound" % c)
-	var shared := DotWeaponSound.check_unique()
+	var shared := GSWeaponSound.check_unique()
 	_check(shared.is_empty(), "no two sound classes share a recording: %s" % "; ".join(shared))
 	_end()

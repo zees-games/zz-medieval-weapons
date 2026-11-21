@@ -2,7 +2,7 @@ class_name ZzMedievalConfig
 extends RefCounted
 
 ## Every number a server owner would tune, with its built-in default, and the loader that layers
-## `weapon/<id>.yml` profiles ([DotWeaponProfiles]) over them. The defaults live in code so a pack with no cfg
+## `weapon/<id>.yml` profiles ([GSWeaponProfiles]) over them. The defaults live in code so a pack with no cfg
 ## directory still has a full catalogue; durations are ticks at [constant TICK_RATE], scaled by authored_tick_rate.
 
 const CHANNEL := "zz.medieval.config"
@@ -13,9 +13,9 @@ const TICK_RATE := 64
 static var fallback_dir: String = "res://cfg/addons/zz_medieval_weapons"
 ## The game id for the game tier (`cfg/game/<game>/weapon`); empty skips it.
 static var game: String = ""
-## A mounted pack's `cfg` root (`DotCloudMounter.cfg_root_of`), the weakest root when [method profile_set] gets none.
+## A mounted pack's `cfg` root (`GSCloudMounter.cfg_root_of`), the weakest root when [method profile_set] gets none.
 static var pack_cfg_root: String = ""
-## Roots stacked over [member pack_cfg_root]; empty means [method DotProfileSet.default_roots]. Tests set it to hide the project's own `res://cfg`.
+## Roots stacked over [member pack_cfg_root]; empty means [method GSProfileSet.default_roots]. Tests set it to hide the project's own `res://cfg`.
 static var base_roots: PackedStringArray = PackedStringArray()
 ## Profiles that failed to load in the last [method load_all]; their weapons keep the layer below.
 static var errors: PackedStringArray = PackedStringArray()
@@ -108,7 +108,7 @@ static func load_all(dir: String = "", roots: PackedStringArray = PackedStringAr
 		var res := set.load_profile(id)
 		if not res.ok:
 			errors.append(res.error.message)
-			DotLog.error(CHANNEL, "weapon profile skipped", {"id": id, "why": res.error.message})
+			GSLog.error(CHANNEL, "weapon profile skipped", {"id": id, "why": res.error.message})
 			continue
 		_overlay(merged[id], res.value)
 	set.clear_cache()
@@ -123,33 +123,33 @@ static func load_all(dir: String = "", roots: PackedStringArray = PackedStringAr
 	return merged
 
 
-## The profile set the weapons load from. A set caches its profiles, which point back at it: call [method DotProfileSet.clear_cache] when done or it leaks.
-static func profile_set(roots: PackedStringArray = PackedStringArray(), layer: Variant = null) -> DotProfileSet:
+## The profile set the weapons load from. A set caches its profiles, which point back at it: call [method GSProfileSet.clear_cache] when done or it leaks.
+static func profile_set(roots: PackedStringArray = PackedStringArray(), layer: Variant = null) -> GSProfileSet:
 	if roots.is_empty() and pack_cfg_root != "":
-		roots = PackedStringArray([pack_cfg_root]) + (base_roots if not base_roots.is_empty() else DotProfileSet.default_roots())
-	return DotWeaponProfiles.make_set(ADDON, game, roots, layer)
+		roots = PackedStringArray([pack_cfg_root]) + (base_roots if not base_roots.is_empty() else GSProfileSet.default_roots())
+	return GSWeaponProfiles.make_set(ADDON, game, roots, layer)
 
 
 ## Weapon menu entries (id, category, icon, sort) in menu order, from the profiles' `menu:` keys.
 static func menu_entries(roots: PackedStringArray = PackedStringArray()) -> Array:
 	var set := profile_set(roots)
-	var out := DotWeaponProfiles.menu_entries(set)
+	var out := GSWeaponProfiles.menu_entries(set)
 	set.clear_cache()
 	return out
 
 
 ## Weapon [param id] with the upgrades [param ids] applied to its tuned row; value `{values, cost}`.
-static func upgraded(id: StringName, ids: Array, roots: PackedStringArray = PackedStringArray()) -> DotResult:
+static func upgraded(id: StringName, ids: Array, roots: PackedStringArray = PackedStringArray()) -> GSResult:
 	var base: Dictionary = load_all("", roots).get(String(id), {})
 	if base.is_empty():
-		return DotResult.fail(DotError.CODE_INVALID, "no weapon %s" % id)
-	var ups := DotWeaponProfiles.upgrade_set(profile_set(roots), String(id))
-	var res := DotWeaponProfiles.apply_upgrades(base, ups, ids)
+		return GSResult.fail(GSError.CODE_INVALID, "no weapon %s" % id)
+	var ups := GSWeaponProfiles.upgrade_set(profile_set(roots), String(id))
+	var res := GSWeaponProfiles.apply_upgrades(base, ups, ids)
 	ups.clear_cache()
 	return res
 
 
-static func _overlay(row: Dictionary, p: DotProfile) -> void:
+static func _overlay(row: Dictionary, p: GSProfile) -> void:
 	for k in p.values:
 		if row.has(k):
 			row[k] = p.values[k]
@@ -157,11 +157,11 @@ static func _overlay(row: Dictionary, p: DotProfile) -> void:
 		row[k] = p.extra[k]
 
 
-## dot-core's DotAddonConfig, reached by reflection so this pack parses (and falls back)
+## dot-core's GSAddonConfig, reached by reflection so this pack parses (and falls back)
 ## where dot-core predates it. It also layers environment and the command line.
 static func _from_core(defs: Dictionary) -> Dictionary:
 	for entry: Dictionary in ProjectSettings.get_global_class_list():
-		if entry.get("class", "") != "DotAddonConfig":
+		if entry.get("class", "") != "GSAddonConfig":
 			continue
 		var script: Script = load(String(entry["path"]))
 		if script == null or not script.has_method("load_dir"):
@@ -169,7 +169,7 @@ static func _from_core(defs: Dictionary) -> Dictionary:
 		var got: Variant = script.call("load_dir", ADDON, defs)
 		if got is Object:
 			if not got.get("ok"):
-				DotLog.error(CHANNEL, "cfg did not load; using built-in defaults")
+				GSLog.error(CHANNEL, "cfg did not load; using built-in defaults")
 				return {}
 			got = got.get("value")
 		return got if got is Dictionary else {}
@@ -189,7 +189,7 @@ static func _from_files(dir: String) -> Dictionary:
 	for file: String in names:
 		var res: Variant = yaml.call("parse_file", dir.path_join(file))
 		if not (res is Object and res.get("ok") and res.get("value") is Dictionary):
-			DotLog.warn(CHANNEL, "Ignored %s: it does not parse." % file)
+			GSLog.warn(CHANNEL, "Ignored %s: it does not parse." % file)
 			continue
 		for id in res.get("value"):
 			if out.has(id) and out[id] is Dictionary and res.get("value")[id] is Dictionary:
@@ -201,7 +201,7 @@ static func _from_files(dir: String) -> Dictionary:
 
 static func _yaml() -> Script:
 	for entry: Dictionary in ProjectSettings.get_global_class_list():
-		if entry.get("class", "") == "DotYaml":
+		if entry.get("class", "") == "GSYaml":
 			return load(String(entry["path"]))
 	return null
 
@@ -211,7 +211,7 @@ static func _yaml() -> Script:
 static func to_yaml(id: StringName) -> String:
 	var row: Dictionary = defaults()[String(id)]
 	var common := PackedStringArray()
-	for f: Dictionary in DotWeaponProfiles.schema():
+	for f: Dictionary in GSWeaponProfiles.schema():
 		common.append(f["name"])
 	var top: PackedStringArray = ["# Zee's Medieval Weapons: %s. Durations are ticks at 64 Hz." % row["name"]]
 	var extra: PackedStringArray = ["extra:"]

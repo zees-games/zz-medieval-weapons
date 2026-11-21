@@ -4,7 +4,7 @@ extends "res://addons/zz_medieval_weapons/behaviour/zz_melee.gd"
 ## (a use is an edge; blocking is a held stance) so it is [ZzMedievalBlock], a pure function
 ## the game's damage path calls with its own "is blocking" input.
 
-func _use(ctx: DotWeaponContext) -> DotWeaponOutcome:
+func _use(ctx: GSWeaponContext) -> GSWeaponOutcome:
 	var out := super._use(ctx)
 	if not ctx.replayed:
 		out.add_event({

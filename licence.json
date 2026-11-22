@@ -37,15 +37,6 @@
  },
  {
   "paths": [
-   "assets/bow"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "ana.stakflett",
-  "url": "https://sketchfab.com/3d-models/d5680d6d851d4411941f8f40f7feab94",
-  "title": "Medieval Bow and Arrow"
- },
- {
-  "paths": [
    "assets/round_shield"
   ],
   "licence": "CC-BY-4.0",
@@ -55,48 +46,12 @@
  },
  {
   "paths": [
-   "assets/battle_axe"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "CaptainHC",
-  "url": "https://sketchfab.com/3d-models/79115d20afec46928ca10dd948b4ced6",
-  "title": "Medieval Battle Axe"
- },
- {
-  "paths": [
    "assets/mace"
   ],
   "licence": "CC-BY-4.0",
   "author": "Kama Modeling",
   "url": "https://sketchfab.com/3d-models/83217215a0c541b2956a8e87a4ae62fe",
   "title": "Medieval Mace"
- },
- {
-  "paths": [
-   "assets/spear"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "iedalton",
-  "url": "https://sketchfab.com/3d-models/f61070945153418fa11c4abae286b292",
-  "title": "Medieval Spear"
- },
- {
-  "paths": [
-   "assets/crossbow"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "iedalton",
-  "url": "https://sketchfab.com/3d-models/cc36ed347db340d59bd2ec7b06ae0d63",
-  "title": "Medieval Crossbow"
- },
- {
-  "paths": [
-   "assets/dagger"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "Whatevvs",
-  "url": "https://sketchfab.com/3d-models/519b1fc1390747038cfc9f4ea158f660",
-  "title": "Medieval Dagger"
  },
  {
   "paths": [
@@ -127,15 +82,6 @@
  },
  {
   "paths": [
-   "assets/_imported/bow"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "ana.stakflett",
-  "url": "https://sketchfab.com/3d-models/d5680d6d851d4411941f8f40f7feab94",
-  "title": "Medieval Bow and Arrow"
- },
- {
-  "paths": [
    "assets/_imported/round_shield"
   ],
   "licence": "CC-BY-4.0",
@@ -145,48 +91,12 @@
  },
  {
   "paths": [
-   "assets/_imported/battle_axe"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "CaptainHC",
-  "url": "https://sketchfab.com/3d-models/79115d20afec46928ca10dd948b4ced6",
-  "title": "Medieval Battle Axe"
- },
- {
-  "paths": [
    "assets/_imported/mace"
   ],
   "licence": "CC-BY-4.0",
   "author": "Kama Modeling",
   "url": "https://sketchfab.com/3d-models/83217215a0c541b2956a8e87a4ae62fe",
   "title": "Medieval Mace"
- },
- {
-  "paths": [
-   "assets/_imported/spear"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "iedalton",
-  "url": "https://sketchfab.com/3d-models/f61070945153418fa11c4abae286b292",
-  "title": "Medieval Spear"
- },
- {
-  "paths": [
-   "assets/_imported/crossbow"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "iedalton",
-  "url": "https://sketchfab.com/3d-models/cc36ed347db340d59bd2ec7b06ae0d63",
-  "title": "Medieval Crossbow"
- },
- {
-  "paths": [
-   "assets/_imported/dagger"
-  ],
-  "licence": "CC-BY-4.0",
-  "author": "Whatevvs",
-  "url": "https://sketchfab.com/3d-models/519b1fc1390747038cfc9f4ea158f660",
-  "title": "Medieval Dagger"
  },
  {
   "paths": [

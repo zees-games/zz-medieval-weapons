@@ -196,6 +196,60 @@ func _crossbow_anim() -> void:
 	_end()
 
 
+func _inspect_holster() -> void:
+	_begin("inspect and holster")
+	var all_ok := true
+	var cues: Array[StringName] = []
+	for id: StringName in ZzMedievalArtTable.rows():
+		var a := ZzWeaponAnim.new()
+		a.configure(id)
+		a.cue.connect(func(c: StringName) -> void: cues.append(c))
+		var base: Dictionary = a.pose()
+		if not a.inspect():
+			all_ok = false
+		var peak := 0.0
+		for f in int(a.inspect_s * 60.0) + 2:
+			a.advance(1.0 / 60.0)
+			peak = maxf(peak, ((a.pose()["pos"] as Vector3) - (base["pos"] as Vector3)).length())
+		if a.inspecting or peak < 0.05 or ((a.pose()["pos"] as Vector3) - (base["pos"] as Vector3)).length() > 0.01:
+			all_ok = false
+			print("  inspect failed for %s (peak %.3f)" % [id, peak])
+		a.holster(true)
+		for f in int(a.holster_s * 60.0) + 2:
+			a.advance(1.0 / 60.0)
+		if a.holstered < 0.99 or ((a.pose()["pos"] as Vector3) - (base["pos"] as Vector3)).length() < 0.2 or a.start_use() != ZzWeaponPose.Style.NONE or a.inspect():
+			all_ok = false
+			print("  holster failed for %s" % id)
+		a.holster(false)
+		for f in int(a.holster_s * 60.0) + 2:
+			a.advance(1.0 / 60.0)
+		if a.holstered > 0.0 or ((a.pose()["pos"] as Vector3) - (base["pos"] as Vector3)).length() > 0.01:
+			all_ok = false
+			print("  unholster failed for %s" % id)
+	_check(all_ok, "every weapon can be inspected (raised, then back at rest) and holstered (stowed, refuses swings, returns)")
+	_check(&"inspect" in cues and &"holster" in cues and &"unholster" in cues, "inspect and holster announce themselves as cues")
+	var b := ZzWeaponAnim.new()
+	b.configure(&"longsword")
+	b.inspect()
+	b.start_use()
+	_check(not b.inspecting, "a swing cancels the look-over")
+	b.inspect()
+	b.set_blocking(true)
+	_check(not b.inspecting and not b.inspect(), "guarding cancels the look-over and refuses a new one")
+	var c := ZzWeaponAnim.new()
+	c.configure(&"crossbow")
+	var laid := []
+	c.cue.connect(func(n: StringName) -> void: if n == &"bolt_laid": laid.append(n))
+	c.start_use()
+	c.set_reloading(true)
+	var tilt_max := 0.0
+	while c.reloading:
+		c.advance(1.0 / 60.0)
+		tilt_max = maxf(tilt_max, (c.pose()["rot"] as Vector3).x)
+	_check(laid.size() == 1 and tilt_max > 25.0, "the crossbow reload tips the stock up and lays the bolt once (tilt %.0f)" % tilt_max)
+	_end()
+
+
 func _held() -> void:
 	_begin("view and world models")
 	var root := Node3D.new()

@@ -17,8 +17,6 @@ static func rows() -> Dictionary:
 			"surface": "steel",
 		},
 		&"dagger": {
-			# The glb's blade leans about 29 degrees off +Y and its guard is rolled; align stands it up, grip is its handle.
-			"align": Vector3(26.9, -53.2, 11.5), "grip": Vector3(-0.043, -0.052, 0.003),
 			"hold": Vector3(-40, 0, 0), "rest": Vector3(0.26, -0.30, -0.44), "side": 1,
 			"styles": [S.THRUST, S.SLASH_R, S.SLASH_L], "heft": 0.7, "scale": 1.0, "weight": "light",
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},

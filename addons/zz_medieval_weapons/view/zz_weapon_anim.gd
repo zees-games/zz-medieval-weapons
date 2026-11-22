@@ -26,6 +26,11 @@ var loaded: bool = true      ## a crossbow has a bolt in the groove
 var reloading: bool = false
 var swings: int = 0          ## uses so far; picks the next style in the cycle
 
+var inspecting: bool = false ## the owner is looking the weapon over (a look pose, no net state)
+var holstered: float = 0.0   ## 0 = in hand, 1 = stowed (eased toward [member _holster_to])
+var inspect_s: float = 2.4
+var holster_s: float = 0.45
+
 var swing_s: float = 0.6
 var draw_s: float = 0.9
 var load_s: float = 1.5
@@ -39,6 +44,9 @@ var _load_t: float = 0.0
 var _kick: float = 0.0
 var _draw_full_sent: bool = false
 var _net_draw: float = -1.0   ## a watcher's target; negative = this copy is the owner's
+var _inspect_t: float = 0.0
+var _holster_to: float = 0.0
+var _bolt_laid: bool = false
 
 
 func configure(weapon_id: StringName, cfg: Dictionary = {}) -> void:
@@ -69,6 +77,10 @@ func reset() -> void:
 	_nock_wait = 0.0
 	_kick = 0.0
 	_net_draw = -1.0
+	inspecting = false
+	_inspect_t = 0.0
+	holstered = 0.0
+	_holster_to = 0.0
 	if ZzMedievalArtTable.has_string(id) and _row.get("projectile", "") == "bolt":
 		draw = 1.0   # a crossbow starts cocked and loaded
 
@@ -90,6 +102,9 @@ func start_use(which: int = -1, duration_s: float = 0.0) -> int:
 		if list.is_empty():
 			return ZzWeaponPose.Style.NONE
 		which = int(list[swings % list.size()])
+	if _holster_to > 0.0:
+		return ZzWeaponPose.Style.NONE   # a stowed weapon is not swung
+	inspecting = false
 	swings += 1
 	if which == ZzWeaponPose.Style.LOOSE or which == ZzWeaponPose.Style.FIRE:
 		loose()
@@ -103,9 +118,39 @@ func start_use(which: int = -1, duration_s: float = 0.0) -> int:
 	return style
 
 
+## Starts the look-over: the weapon is raised and turned in the hand. Refused while swinging, guarding, drawing, reloading or stowed;
+## returns whether it started. Any use, guard or holster cancels it.
+func inspect() -> bool:
+	if inspecting or is_swinging() or blocking or drawing or reloading or _holster_to > 0.0:
+		return false
+	inspecting = true
+	_inspect_t = 0.0
+	cue.emit(ZzMedievalArtTable.cue(id, &"inspect"))
+	return true
+
+
+## Fraction through the look-over, 0..1 (0 when not inspecting).
+func inspect_phase() -> float:
+	return clampf(_inspect_t / maxf(inspect_s, 0.01), 0.0, 1.0) if inspecting else 0.0
+
+
+## Puts the weapon away (true) or brings it out (false). Stowing cancels a look-over and a draw.
+func holster(on: bool) -> void:
+	if on == (_holster_to > 0.0):
+		return
+	_holster_to = 1.0 if on else 0.0
+	if on:
+		inspecting = false
+		_inspect_t = 0.0
+		drawing = false
+		blocking = false
+	cue.emit(ZzMedievalArtTable.cue(id, &"holster" if on else &"unholster"))
+
+
 func set_blocking(on: bool) -> void:
 	if on and not blocking:
 		cue.emit(&"guard_up")
+		inspecting = false
 	blocking = on
 
 
@@ -134,6 +179,8 @@ func set_reloading(on: bool, duration_s: float = 0.0) -> void:
 		reloading = true
 		loaded = false
 		_load_t = 0.0
+		_bolt_laid = false
+		inspecting = false
 		if duration_s > 0.0:
 			load_s = duration_s
 		cue.emit(&"reload_start")
@@ -211,6 +258,12 @@ func advance(dt: float) -> void:
 			style_t = 0.0
 
 	_kick = move_toward(_kick, 0.0, dt * 4.0)
+	holstered = move_toward(holstered, _holster_to, dt / maxf(holster_s, 0.01))
+	if inspecting:
+		_inspect_t += dt
+		if _inspect_t >= inspect_s:
+			inspecting = false
+			_inspect_t = 0.0
 
 	var is_bow: bool = _row.get("projectile", "") == "arrow"
 	if is_bow:
@@ -241,6 +294,9 @@ func advance(dt: float) -> void:
 	elif ZzMedievalArtTable.has_string(id):
 		if reloading:
 			_load_t += dt
+			if not _bolt_laid and _load_t >= load_s * 0.82:
+				_bolt_laid = true
+				cue.emit(&"bolt_laid")
 			draw = clampf(_load_t / maxf(load_s * 0.8, 0.01), 0.0, 1.0)
 			if _load_t >= load_s:
 				_finish_load()
@@ -275,24 +331,38 @@ func pose() -> Dictionary:
 		off_string = _off
 	elif ZzMedievalArtTable.has_string(id):
 		if reloading:
+			# Foot in the stirrup (the stock tips up and toward the body), the string worked back in the middle with a small rock
+			# for each pull of the hand, then the stock levels while the bolt is laid in the groove.
 			var p := clampf(_load_t / maxf(load_s, 0.01), 0.0, 1.0)
-			var lift := minf(p * 6.0, (1.0 - p) * 6.0)
-			lift = clampf(lift, 0.0, 1.0)
-			pos += Vector3(0.0, 0.07, 0.12) * lift
-			rot += Vector3(28, 0, 0) * lift
+			var up := smoothstep(0.0, 0.14, p) * (1.0 - smoothstep(0.84, 1.0, p))
+			var crank := sin(p * TAU * 3.0) * smoothstep(0.14, 0.3, p) * (1.0 - smoothstep(0.62, 0.8, p))
+			pos += Vector3(0.0, 0.07, 0.12) * up + Vector3(0.0, 0.0, 0.025) * crank
+			rot += Vector3(34, 0, 0) * up + Vector3(0, 0, 5) * crank
+			if p > 0.62:
+				rot += Vector3(-16, 0, 8) * smoothstep(0.62, 0.8, p) * (1.0 - smoothstep(0.84, 1.0, p))   # tilt to lay the bolt
 			off_string = clampf(minf(p, 1.0 - p) * 8.0, 0.0, 1.0)
 	if block > 0.0:
 		var g: Dictionary = _row.get("block", {"pos": ZzWeaponPose.GUARD_POS, "rot": ZzWeaponPose.GUARD_ROT})
 		var w := smoothstep(0.0, 1.0, block)
 		pos = pos.lerp((g["pos"] as Vector3) + pos * 0.25, w)
 		rot = rot.lerp((g["rot"] as Vector3) + rot * 0.25, w)
+	if inspecting:
+		# Raised toward the eye, turned over one way and back (both faces seen), and tipped to show the head, then lowered.
+		var ph := inspect_phase()
+		var env := smoothstep(0.0, 0.18, ph) * (1.0 - smoothstep(0.82, 1.0, ph))
+		pos += Vector3(-0.10, 0.12, 0.10) * env
+		rot += Vector3(-24.0 * env + 10.0 * sin(ph * TAU * 2.0) * env, 150.0 * sin(ph * TAU) * env, 14.0 * sin(ph * TAU * 2.0) * env)
+	if holstered > 0.0:
+		var h := smoothstep(0.0, 1.0, holstered)
+		pos += Vector3(0.12, -0.42, 0.10) * h
+		rot += Vector3(-55.0, 0.0, 25.0) * h
 	if _kick > 0.0:
 		# A hit or a loose: back and up, decaying.
 		pos += Vector3(0.0, 0.02, 0.08) * _kick
 		rot += Vector3(6.0, 0.0, 0.0) * _kick
 	return {
 		"pos": pos, "rot": rot, "string_pull": draw, "nock": nocked if is_bow else loaded,
-		"off_string": off_string, "block": block,
+		"off_string": off_string, "block": block, "inspect": inspect_phase(), "holstered": holstered,
 	}
 
 
@@ -301,5 +371,5 @@ func describe() -> Dictionary:
 		"id": String(id), "style": String(ZzWeaponPose.style_name(style)),
 		"t": snappedf(style_t / maxf(style_dur, 0.001), 0.01), "blocking": blocking,
 		"draw": snappedf(draw, 0.01), "nocked": nocked, "loaded": loaded,
-		"reloading": reloading,
+		"reloading": reloading, "inspecting": inspecting, "holstered": snappedf(holstered, 0.01),
 	}

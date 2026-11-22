@@ -4,7 +4,7 @@ extends "res://examples/selftest/zz_motion_checks.gd"
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 464
+const CHECKS := 470
 
 
 func _ready() -> void:
@@ -29,6 +29,7 @@ func _ready() -> void:
 	_anim()
 	_bow_anim()
 	_crossbow_anim()
+	_inspect_holster()
 	_net()
 	_held()
 	_flight()

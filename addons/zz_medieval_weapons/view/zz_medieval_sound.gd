@@ -11,11 +11,12 @@ const CUES := {
 	&"hit_flesh": &"melee_flesh", &"draw": &"draw_blade", &"draw_full": &"bow_draw",
 	&"bow_loose": &"bow_fire", &"bolt_fire": &"crossbow_fire",
 	&"reload_start": &"crossbow_load", &"reload_done": &"crossbow_load",
+	&"holster": &"draw_blade", &"unholster": &"draw_blade", &"bolt_laid": &"crossbow_load",
 }
 
 
 ## Cues that are deliberately silent (a stance change, a string settling); every other cue ZzWeaponAnim emits has a CUES entry.
-const SILENT: Array[StringName] = [&"guard_up", &"draw_relax", &"nock"]
+const SILENT: Array[StringName] = [&"guard_up", &"draw_relax", &"nock", &"inspect"]
 
 
 static func stream_for(cue: StringName, weapon_id: StringName = &"") -> AudioStream:

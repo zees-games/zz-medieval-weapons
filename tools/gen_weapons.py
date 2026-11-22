@@ -122,18 +122,6 @@ def box(mesh, c, h, uv_scale=1 / 0.2):
     loft(mesh, [r0, r1], uv_scale, hard=True)
 
 
-def catmull(pts, per=8):
-    P = np.asarray(pts, float)
-    P = np.vstack([2 * P[0] - P[1], P, 2 * P[-1] - P[-2]])
-    out = []
-    for i in range(1, len(P) - 2):
-        for t in np.linspace(0, 1, per, endpoint=False):
-            out.append(0.5 * ((2 * P[i]) + (-P[i - 1] + P[i + 1]) * t + (2 * P[i - 1] - 5 * P[i] + 4 * P[i + 1] - P[i + 2]) * t * t
-                              + (-P[i - 1] + 3 * P[i] - 3 * P[i + 1] + P[i + 2]) * t ** 3))
-    out.append(P[-2])
-    return np.array(out)
-
-
 def blade_section(w, t, fuller=0.55):
     """A flat blade's 10-point lens with a central ridge/fuller: points (x across, z thickness)."""
     return np.array([(w, 0), (0.5 * w, t), (0.13 * w, t * fuller), (-0.13 * w, t * fuller), (-0.5 * w, t),
@@ -149,6 +137,89 @@ def blade_rings(y0, y1, wfn, tfn, steps, fuller=0.55):
 
 
 # ---------------------------------------------------------------- the weapons
+def to_z(m):
+    """Rotate a mesh built about the y axis so that axis becomes +Z (y -> z, z -> -y)."""
+    for lst in (m.p, m.n):
+        for i, a in enumerate(lst):
+            lst[i] = np.stack([a[:, 0], -a[:, 2], a[:, 1]], 1)
+
+
+def longsword():
+    steel, iron, leather = Mesh(), Mesh(), Mesh()
+    revolve(iron, [(-0.1575, 0.004), (-0.152, 0.015), (-0.140, 0.0235), (-0.126, 0.0245), (-0.114, 0.019), (-0.108, 0.013)], 24, 1 / 0.2, caps=(True, False))
+    ys = np.linspace(-0.108, 0.092, 30)
+    revolve(leather, [(y, 0.0125 + 0.0018 * math.sin((y + 0.108) / 0.2 * math.pi) + 0.0008 * math.sin(y * 330)) for y in ys], 20, 1 / 0.1, caps=(False, False))
+    for y in (-0.106, 0.090):
+        revolve(iron, [(y - 0.004, 0.0128), (y, 0.0158), (y + 0.004, 0.0128)], 20, 1 / 0.1, caps=(False, False))
+    xs = np.linspace(-0.125, 0.125, 33)
+    rings = []
+    for x in xs:
+        u = abs(x) / 0.125
+        sec = super_ring(0.0085 * (1 - 0.45 * u * u) + 0.0016, 0.0105 * (1 - 0.5 * u ** 3) + 0.0013, 10, 2.3)
+        cy = 0.106 + 0.016 * u * u
+        rings.append(np.stack([np.full(10, x), cy + sec[:, 0], sec[:, 1]], 1))
+    loft(iron, rings, 1 / 0.2)
+    revolve(iron, [(0.092, 0.0125), (0.100, 0.0150), (0.114, 0.0150), (0.128, 0.0105)], 20, 1 / 0.1, caps=(False, False))
+    y0, y1 = 0.12, 0.9925
+    loft(steel, blade_rings(y0, y1, lambda s: 0.0245 * (1 - 0.3 * s) * (1 - smooth(0.80, 1.0, s) ** 1.6 * 0.97) + 0.0002,
+                            lambda s: 0.0046 * (1 - 0.5 * s) * (1 - 0.5 * smooth(0.9, 1, s)), 64, 0.35), 1 / 0.5, hard=True)
+    return {'Steel': steel, 'Iron': iron, 'Leather': leather}
+
+
+def round_shield():
+    steel, iron, wood, leather = Mesh(), Mesh(), Mesh(), Mesh()
+    # planked wooden dish: radius 0.4, boss toward +Z; built about y, then turned
+    prof = [(0.000, 0.004), (0.001, 0.12), (0.006, 0.22), (0.016, 0.32), (0.030, 0.385), (0.036, 0.40)]
+    revolve(wood, prof, 40, 1 / 0.8, caps=(False, False))
+    revolve(wood, [(d - 0.016, r * 0.99) for d, r in prof], 40, 1 / 0.8, caps=(False, False))
+    revolve(iron, [(0.036, 0.400), (0.030, 0.404), (0.018, 0.404), (0.010, 0.398), (0.006, 0.402), (-0.004, 0.402), (-0.014, 0.394), (-0.018, 0.388), (0.0, 0.394), (0.030, 0.396)], 40, 1 / 0.4, caps=(False, False))
+    revolve(steel, [(0.000, 0.002), (0.040, 0.055), (0.062, 0.082), (0.076, 0.095), (0.090, 0.092), (0.100, 0.062), (0.108, 0.030), (0.1125, 0.004)], 28, 1 / 0.3, caps=(True, True))
+    revolve(iron, [(0.003, 0.098), (0.0125, 0.108), (0.028, 0.108), (0.030, 0.098), (0.003, 0.098)], 28, 1 / 0.3, caps=(False, False))
+    for k in range(8):
+        a = k * math.pi / 4 + 0.39
+        revolve(steel, [(0.0, 0.0), (0.008, 0.014), (0.016, 0.012), (0.019, 0.004)], 10, 1 / 0.1, caps=(False, True), c=(math.cos(a) * 0.335, 0.022, math.sin(a) * 0.335))
+    # grip bar behind the boss
+    for sg in (-1, 1):
+        revolve(iron, [(-0.020, 0.012), (-0.060, 0.010), (-0.064, 0.003)], 8, 1 / 0.1, caps=(False, True), c=(0.0, 0.0, sg * 0.085))
+    gx = np.linspace(-0.09, 0.09, 14)
+    revolve(leather, [(x, 0.0135) for x in gx], 12, 1 / 0.2, caps=(True, True), axis='x', c=(0.0, -0.045, 0.0))
+    for m in (steel, iron, wood, leather):
+        to_z(m)
+    return {'Steel': steel, 'Iron': iron, 'Wood': wood, 'Leather': leather}
+
+
+def mace():
+    steel, iron, wood, leather = Mesh(), Mesh(), Mesh(), Mesh()
+    ys = np.linspace(-0.30, 0.34, 24)
+    revolve(wood, [(y, 0.0165 - 0.0020 * (y + 0.30) / 0.64 + 0.0004 * math.sin(y * 21)) for y in ys], 14, 1 / 0.4, caps=(False, False))
+    revolve(iron, [(-0.325, 0.003), (-0.318, 0.014), (-0.30, 0.0225), (-0.285, 0.0235), (-0.272, 0.0185), (-0.262, 0.0170)], 14, 1 / 0.2, caps=(True, False))
+    for y in (-0.255, 0.255):
+        revolve(iron, [(y - 0.004, 0.0165), (y, 0.0200), (y + 0.004, 0.0165)], 14, 1 / 0.1, caps=(False, False))
+    ly = np.linspace(-0.22, 0.12, 30)
+    revolve(leather, [(y, 0.0182 + 0.0014 * abs(math.sin((y + 0.22) * 150))) for y in ly], 14, 1 / 0.08, caps=(False, False))
+    # socket collar and flanged head
+    revolve(iron, [(0.255, 0.0215), (0.270, 0.027), (0.300, 0.030), (0.310, 0.040)], 16, 1 / 0.2, caps=(False, False))
+    head = [(0.305, 0.030), (0.318, 0.048), (0.345, 0.056), (0.372, 0.052), (0.395, 0.040), (0.410, 0.026), (0.418, 0.010), (0.4215, 0.003)]
+    revolve(steel, head, 20, 1 / 0.2, caps=(False, True))
+    # six radial flanges
+    for k in range(6):
+        a = k * math.pi / 3
+        dx, dz = math.cos(a), math.sin(a)
+        fl = []
+        for t in np.linspace(0, 1, 9):
+            y = 0.312 + 0.100 * t
+            r0 = 0.048
+            w = 0.0055 * (1 - 0.35 * t) + 0.0006
+            ext = 0.0185 * math.sin(math.pi * min(1, t * 0.95 + 0.02)) ** 0.7 + 0.002
+            sec = super_ring(ext * 0.5, w, 8, 2.2)
+            cen = r0 + ext * 0.5 - 0.004 * t
+            ring = np.stack([dx * (cen + sec[:, 0]) - dz * sec[:, 1], np.full(8, y), dz * (cen + sec[:, 0]) + dx * sec[:, 1]], 1)
+            fl.append(ring)
+        loft(steel, fl, 1 / 0.1, hard=True)
+    revolve(iron, [(0.420, 0.012), (0.434, 0.010), (0.448, 0.0045), (0.4525, 0.001)], 10, 1 / 0.1, caps=(False, True))
+    return {'Steel': steel, 'Iron': iron, 'Wood': wood, 'Leather': leather}
+
+
 def dagger():
     steel, iron, leather = Mesh(), Mesh(), Mesh()
     revolve(iron, [(-0.082, 0.002), (-0.078, 0.009), (-0.070, 0.0155), (-0.062, 0.0165), (-0.054, 0.013), (-0.050, 0.0105)], 14, 1 / 0.2, caps=(True, False))
@@ -191,7 +262,7 @@ def spear():
 
 def battle_axe():
     wood, iron, steel, leather = Mesh(), Mesh(), Mesh(), Mesh()
-    ys = np.linspace(-0.26, 0.66, 26)
+    ys = np.linspace(-0.26, 0.66, 36)
     rings = []
     for y in ys:
         r = 0.0158 * (1 + 0.13 * math.exp(-((y + 0.19) / 0.05) ** 2) - 0.05 * smooth(0, 0.6, y))
@@ -207,12 +278,20 @@ def battle_axe():
     revolve(iron, [(-0.295, 0.004), (-0.285, 0.0150), (-0.268, 0.0210), (-0.232, 0.0225), (-0.215, 0.0190)], 14, 1 / 0.2, caps=(True, False))
     for sg in (-1, 1):
         box(iron, (0, 0.46, sg * 0.0222), (0.0075, 0.13, 0.0036), 1 / 0.15)
-    s_, y0, y1 = np.linspace(0, 1, 22), 0.45, 0.78
+    # the head: a thin bearded plate, hollow-ground from the eye to a sharp edge; the edge curve runs from a narrow heel down into the beard,
+    # across a slight waist to the toe, and the eye (the thick back) only spans the middle of the plate
+    s_, y0, y1 = np.linspace(0, 1, 36), 0.37, 0.80
+    fs = np.array([0, 0.05, 0.15, 0.32, 0.55, 0.80, 1.0])
+    zk = [0.040, 0.118, 0.128, 0.114, 0.118, 0.126, 0.092, 0.040]
+    sk = [0.0, 0.10, 0.20, 0.42, 0.62, 0.84, 0.95, 1.0]
     rings = []
     for s in s_:
-        zf = 0.050 + 0.105 * math.sin(math.pi * s) ** 0.8 * (1.1 - 0.35 * s) + 0.015 * (1 - s) ** 2
-        zb = 0.026 + 0.005 * math.sin(math.pi * s)
-        pts = [(0, -zf), (0.0022, -zf * 0.86), (0.0048, -zf * 0.5), (0.0165, -0.020), (0.0165, zb), (-0.0165, zb), (-0.0165, -0.020), (-0.0048, -zf * 0.5), (-0.0022, -zf * 0.86)]
+        zf = float(np.interp(s, sk, zk))
+        win = smooth(0.10, 0.30, s) * (1 - smooth(0.74, 0.92, s))
+        he, zb = 0.0045 + 0.0120 * win, -0.016 + 0.040 * win
+        xs = 0.0016 + (he - 0.0016) * fs ** 2.1; xs[0] = 0.0
+        side = [(xs[i], -zf + fs[i] * (zf - 0.020)) for i in range(len(fs))]            # edge to the eye, x > 0
+        pts = side[:-1] + [(he, -0.020), (he, zb), (-he, zb), (-he, -0.020)] + [(-x, z) for x, z in reversed(side[1:-1])]
         rings.append(np.array([(x, y0 + (y1 - y0) * s, z) for x, z in pts]))
     loft(steel, rings, 1 / 0.4, hard=True)
     rings = []
@@ -272,18 +351,18 @@ def crossbow():
     return {'Wood': wood, 'Steel': steel, 'Iron': iron, 'Leather': leather, 'Bone': bone}
 
 
-# the bow's centreline at full draw (x toward the archer), through the rig's joints (0.039,0.09) (0.1174,0.29) (0.2154,0.49)
-BOW_PATH = [(0.0204, 0), (0.039, 0.09), (0.0775, 0.19), (0.1174, 0.29), (0.165, 0.39), (0.2154, 0.49), (0.36, 0.60), (0.503, 0.655), (0.562, 0.695)]
+# the bow's centreline at full draw (x toward the archer): x = 0.0204 + a y^2 + b y^3 + c y^4, a least-squares fit through the rig's joints
+# (0.039,0.09) (0.1174,0.29) (0.2154,0.49) and the nock (0.562,0.695)
+BOW_FIT = (2.796144, -7.970219, 8.000465)
 JOINT_Y = [0.09, 0.29, 0.49]
 BOW_Z = -0.02
 
 
 def bow():
     """Returns {name: (Mesh, joints (n,4), weights (n,4))} per material; rig joint order is grip, top 0..2, bottom 0..2."""
-    pts = catmull(BOW_PATH, 6)
-    k = np.exp(-0.5 * (np.arange(-6, 7) / 2.5) ** 2); k /= k.sum()        # the rig's joints are not on a fair curve: fair it, ends fixed
-    pad = np.vstack([2 * pts[0] - pts[6:0:-1], pts, 2 * pts[-1] - pts[-2:-8:-1]])
-    pts = np.stack([np.convolve(pad[:, i], k, 'valid') for i in range(2)], 1)
+    # one fair quartic through the grip and the nock, within 1.2 mm of the rig's joints (a spline through them waves: the joints are not on a fair curve)
+    ys = np.linspace(0, 0.695, 49)
+    pts = np.stack([0.0204 + BOW_FIT[0] * ys ** 2 + BOW_FIT[1] * ys ** 3 + BOW_FIT[2] * ys ** 4, ys], 1)
     y = pts[:, 1]
     # limb section: D-shaped, wide in Z, deep in X, thinning to the tips
     u = np.clip(y / 0.7, 0, 1)
@@ -296,7 +375,7 @@ def bow():
         uu = u[sel]
         a = 0.0165 * (1 - 0.55 * uu ** 1.5) + 0.0030
         b = 0.0245 * (1 - 0.60 * uu ** 1.2) + 0.0050
-        sweep(wood, pa if sg == 1 else pa[::-1], a if sg == 1 else a[::-1], b if sg == 1 else b[::-1], 12, 2.6, 1 / 0.35, caps=(False, sg == 1 or True))
+        sweep(wood, pa if sg == 1 else pa[::-1], a if sg == 1 else a[::-1], b if sg == 1 else b[::-1], 14, 2.6, 1 / 0.35, caps=(False, sg == 1 or True))
     horn = Mesh()
     sel = u >= 0.88
     for sg in (1, -1):
@@ -467,10 +546,10 @@ def write_glb(path, name, parts, sets, rig=None, skins=None):
 
 if __name__ == '__main__':
     root, out = sys.argv[1], sys.argv[2]
-    want = sys.argv[3:] or ['dagger', 'spear', 'battle_axe', 'crossbow', 'bow']
+    want = sys.argv[3:] or ['dagger', 'spear', 'battle_axe', 'crossbow', 'bow', 'longsword', 'round_shield', 'mace']
     sets = material_sets(root)
     sets['Wood'] = ambient(root, 'Wood049')
-    plans = {'dagger': dagger, 'spear': spear, 'battle_axe': battle_axe, 'crossbow': crossbow}
+    plans = {'dagger': dagger, 'spear': spear, 'battle_axe': battle_axe, 'crossbow': crossbow, 'longsword': longsword, 'round_shield': round_shield, 'mace': mace}
     texmap = {'Steel': 'Steel', 'Iron': 'Iron', 'Wood': 'Wood', 'Leather': 'Leather', 'Bone': 'Bone', 'Horn': 'Horn'}
     for n in want:
         if n == 'bow':

@@ -251,17 +251,18 @@ The models, textures, animations, sounds and maps in this pack are improved auto
 
 ## Credits
 
-Every model was decimated, re-textured and given a worn look. Author, URL and change notes are in [CREDITS.md](CREDITS.md). The code is MIT, see [LICENSE](LICENSE).
+Two axes are decimated Sketchfab models; every other model is built by `tools/gen_weapons.py`. Author, URL and change notes are in [CREDITS.md](CREDITS.md). The code is MIT, see [LICENSE](LICENSE).
 
 | Weapon | Model | Author | Licence | Source |
 | --- | --- | --- | --- | --- |
 | `double_axe` | Decorative Double-Bladed Battle Axe | Arms Museum | CC0 1.0 | [link](https://sketchfab.com/3d-models/decorative-double-bladed-battle-axe-f0bfbca7a2804efd9cf77fd0f5a806aa) |
 | `war_axe` | Decorative Battle Axe | Arms Museum | CC0 1.0 | [link](https://sketchfab.com/3d-models/decorative-battle-axe-97575b982f5944baa0c9062d8107a983) |
-| `longsword` | Medieval Longsword Type XVIa | leeeck | CC BY 4.0 | [link](https://sketchfab.com/3d-models/359b73c3e8c449d7aa5fd96e7d831abd) |
-| `bow` | Medieval Bow and Arrow | ana.stakflett | CC BY 4.0 | [link](https://sketchfab.com/3d-models/d5680d6d851d4411941f8f40f7feab94) |
-| `round_shield` | Worn Round Shield | iedalton | CC BY 4.0 | [link](https://sketchfab.com/3d-models/d848db788bc041ddab8a51c7836979d2) |
-| `battle_axe` | Medieval Battle Axe | CaptainHC | CC BY 4.0 | [link](https://sketchfab.com/3d-models/79115d20afec46928ca10dd948b4ced6) |
-| `mace` | Medieval Mace | Kama Modeling | CC BY 4.0 | [link](https://sketchfab.com/3d-models/83217215a0c541b2956a8e87a4ae62fe) |
-| `spear` | Medieval Spear | iedalton | CC BY 4.0 | [link](https://sketchfab.com/3d-models/f61070945153418fa11c4abae286b292) |
-| `crossbow` | Medieval Crossbow | iedalton | CC BY 4.0 | [link](https://sketchfab.com/3d-models/cc36ed347db340d59bd2ec7b06ae0d63) |
-| `dagger` | Medieval Dagger | Whatevvs | CC BY 4.0 | [link](https://sketchfab.com/3d-models/519b1fc1390747038cfc9f4ea158f660) |
+| `longsword` | Longsword | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `bow` | Bow | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `round_shield` | Round shield | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `battle_axe` | Battle axe | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `mace` | Flanged mace | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `spear` | Spear | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `crossbow` | Crossbow | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `arrow`, `bolt` | Arrow and crossbow bolt | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+| `dagger` | Dagger | own work (zz-medieval-weapons) | CC0 1.0 | this repo |

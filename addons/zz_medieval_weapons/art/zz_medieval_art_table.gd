@@ -26,10 +26,8 @@ static func rows() -> Dictionary:
 		&"war_axe": _axe(1.1),
 		&"double_axe": _axe(1.2),
 		&"mace": {
-			# The glb's haft leans 53.6 degrees off +Y (head to the right) and is 1.07 m; align stands it up, scale makes it 0.77 m.
-			"align": Vector3(0, 0, 53.6), "grip": Vector3(-0.156, -0.274, 0),
 			"hold": Vector3(-30, 0, 0), "rest": Vector3(0.30, -0.34, -0.52), "side": 1,
-			"styles": [S.OVERHEAD, S.SLASH_L, S.SLASH_R], "heft": 1.0, "scale": 0.72, "weight": "heavy",
+			"styles": [S.OVERHEAD, S.SLASH_L, S.SLASH_R], "heft": 1.0, "weight": "heavy",
 			"block": {"pos": Vector3(-0.20, 0.20, -0.04), "rot": Vector3(40, 0, 50)},
 			"surface": "iron",
 		},

@@ -170,11 +170,11 @@ def round_shield():
     steel, iron, wood, leather = Mesh(), Mesh(), Mesh(), Mesh()
     # planked wooden dish: radius 0.4, boss toward +Z; built about y, then turned
     prof = [(0.000, 0.004), (0.001, 0.12), (0.006, 0.22), (0.016, 0.32), (0.030, 0.385), (0.036, 0.40)]
-    revolve(wood, prof, 40, 1 / 0.8, caps=(False, False))
-    revolve(wood, [(d - 0.016, r * 0.99) for d, r in prof], 40, 1 / 0.8, caps=(False, False))
+    revolve(wood, prof, 40, 3 / (2 * math.pi * 0.4), caps=(False, False))
+    revolve(wood, [(d - 0.016, r * 0.99) for d, r in prof], 40, 3 / (2 * math.pi * 0.4), caps=(False, False))
     revolve(iron, [(0.036, 0.400), (0.030, 0.404), (0.018, 0.404), (0.010, 0.398), (0.006, 0.402), (-0.004, 0.402), (-0.014, 0.394), (-0.018, 0.388), (0.0, 0.394), (0.030, 0.396)], 40, 1 / 0.4, caps=(False, False))
-    revolve(steel, [(0.000, 0.002), (0.040, 0.055), (0.062, 0.082), (0.076, 0.095), (0.090, 0.092), (0.100, 0.062), (0.108, 0.030), (0.1125, 0.004)], 28, 1 / 0.3, caps=(True, True))
-    revolve(iron, [(0.003, 0.098), (0.0125, 0.108), (0.028, 0.108), (0.030, 0.098), (0.003, 0.098)], 28, 1 / 0.3, caps=(False, False))
+    revolve(steel, [(-0.002, 0.108), (0.004, 0.106), (0.016, 0.092), (0.030, 0.062), (0.040, 0.055), (0.062, 0.082), (0.076, 0.095), (0.090, 0.092), (0.100, 0.062), (0.108, 0.030), (0.1125, 0.004)], 28, 1 / 0.3, caps=(True, True))
+    revolve(iron, [(-0.004, 0.100), (-0.004, 0.114), (0.004, 0.116), (0.010, 0.108), (0.004, 0.100)], 28, 1 / 0.3, caps=(False, False))
     for k in range(8):
         a = k * math.pi / 4 + 0.39
         revolve(steel, [(0.0, 0.0), (0.008, 0.014), (0.016, 0.012), (0.019, 0.004)], 10, 1 / 0.1, caps=(False, True), c=(math.cos(a) * 0.335, 0.022, math.sin(a) * 0.335))
@@ -243,17 +243,22 @@ def dagger():
 
 def spear():
     wood, iron, steel, leather = Mesh(), Mesh(), Mesh(), Mesh()
-    ys = np.linspace(-0.70, 0.82, 22)
-    revolve(wood, [(y, 0.0132 - 0.0016 * (y + 0.7) / 1.52 + 0.0004 * math.sin(y * 17)) for y in ys], 14, 1 / 0.45, caps=(False, False))
-    revolve(iron, [(-0.80, 0.0012), (-0.785, 0.007), (-0.755, 0.0125), (-0.72, 0.0155), (-0.69, 0.0160), (-0.66, 0.0150), (-0.64, 0.0132)], 14, 1 / 0.2, caps=(True, False))
+    ys = np.linspace(-0.70, 0.82, 34)
+    revolve(wood, [(y, 0.0132 - 0.0016 * (y + 0.7) / 1.52 + 0.0004 * math.sin(y * 17)) for y in ys], 18, 1 / 0.45, caps=(False, False))
+    revolve(iron, [(-0.80, 0.0012), (-0.785, 0.007), (-0.755, 0.0125), (-0.72, 0.0155), (-0.69, 0.0160), (-0.66, 0.0150), (-0.64, 0.0132)], 18, 1 / 0.2, caps=(True, False))
     for y in (-0.655, -0.700):
-        revolve(iron, [(y - 0.004, 0.0152), (y, 0.0172), (y + 0.004, 0.0152)], 14, 1 / 0.2, caps=(False, False))
-    revolve(steel, [(0.60, 0.0140), (0.62, 0.0166), (0.66, 0.0170), (0.72, 0.0160), (0.80, 0.0152), (0.84, 0.0195), (0.865, 0.0200), (0.885, 0.0120), (0.905, 0.0085)], 14, 1 / 0.2, caps=(False, False))
+        revolve(iron, [(y - 0.004, 0.0152), (y, 0.0172), (y + 0.004, 0.0152)], 18, 1 / 0.2, caps=(False, False))
+    revolve(steel, [(0.60, 0.0140), (0.62, 0.0166), (0.66, 0.0170), (0.72, 0.0160), (0.80, 0.0152), (0.84, 0.0195), (0.865, 0.0200), (0.885, 0.0120), (0.905, 0.0085)], 20, 1 / 0.2, caps=(False, False))
+    # collar bands at the socket mouth and the domed rivets that pin the socket to the shaft
+    for y in (0.605, 0.640):
+        revolve(iron, [(y - 0.004, 0.0142), (y, 0.0176), (y + 0.004, 0.0142)], 18, 1 / 0.1, caps=(False, False))
+    for sg in (-1, 1):
+        revolve(iron, [(sg * 0.0158, 0.0044), (sg * 0.0178, 0.0038), (sg * 0.0190, 0.0020), (sg * 0.0194, 0.0004)], 10, 1 / 0.05, caps=(True, False), axis='x', c=(0, 0.676, 0))
     for sg in (-1, 1):
         box(steel, (sg * 0.0165, 0.545, 0), (0.0022, 0.075, 0.0065), 1 / 0.15)
         box(steel, (0, 0.545, sg * 0.0165), (0.0065, 0.075, 0.0022), 1 / 0.15)
-    leather_ys = np.linspace(0.42, 0.60, 19)
-    revolve(leather, [(y, 0.0146 + 0.0013 * abs(math.sin((y - 0.42) * 160))) for y in leather_ys], 14, 1 / 0.06, caps=(True, True))
+    leather_ys = np.linspace(0.42, 0.60, 37)
+    revolve(leather, [(y, 0.0146 + 0.0013 * abs(math.sin((y - 0.42) * 160))) for y in leather_ys], 18, 1 / 0.06, caps=(True, True))
     y0, y1 = 0.90, 1.265
     loft(steel, blade_rings(y0, y1, lambda s: 0.044 * math.sin(math.pi * s ** 0.62) ** 0.85 + 0.0085 * (1 - s),
                             lambda s: 0.0058 * (1 - 0.45 * s), 24, 1.0), 1 / 0.4, hard=True)
@@ -288,7 +293,7 @@ def battle_axe():
     for s in s_:
         zf = float(np.interp(s, sk, zk))
         win = smooth(0.10, 0.30, s) * (1 - smooth(0.74, 0.92, s))
-        he, zb = 0.0045 + 0.0120 * win, -0.016 + 0.040 * win
+        he, zb = 0.0030 + 0.0075 * win, -0.014 + 0.032 * win
         xs = 0.0016 + (he - 0.0016) * fs ** 2.1; xs[0] = 0.0
         side = [(xs[i], -zf + fs[i] * (zf - 0.020)) for i in range(len(fs))]            # edge to the eye, x > 0
         pts = side[:-1] + [(he, -0.020), (he, zb), (-he, zb), (-he, -0.020)] + [(-x, z) for x, z in reversed(side[1:-1])]
@@ -311,15 +316,15 @@ def crossbow():
     zt = [0.05, 0.04, 0.025, 0.017, 0.017, 0.017, 0.017, 0.017]
     zb = [-0.07, -0.075, -0.085, -0.06, -0.045, -0.04, -0.035, -0.03]
     rings = []
-    for y in np.linspace(-0.19, 0.40, 26):
+    for y in np.linspace(-0.19, 0.40, 36):
         h, t, b = np.interp(y, ky, hw), np.interp(y, ky, zt), np.interp(y, ky, zb)
-        sec = super_ring(h, (t - b) / 2, 14, 3.0)
-        rings.append(np.stack([sec[:, 0], np.full(14, y), (t + b) / 2 + sec[:, 1]], 1))
+        sec = super_ring(h, (t - b) / 2, 18, 3.0)
+        rings.append(np.stack([sec[:, 0], np.full(18, y), (t + b) / 2 + sec[:, 1]], 1))
     loft(wood, rings, 1 / 0.4)
     xs = np.linspace(-0.437, 0.437, 25)
     u = np.abs(xs) / 0.437
     path = np.stack([xs, 0.285 - 0.035 * (np.abs(xs) / 0.43) ** 2, np.full(len(xs), -0.032)], 1)
-    sweep(steel, path, 0.0075 * (1 - 0.5 * u ** 2) + 0.0015, 0.017 * (1 - 0.55 * u ** 1.5) + 0.002, 10, 2.8, 1 / 0.4, caps=(False, False))
+    sweep(steel, path, 0.0075 * (1 - 0.5 * u ** 2) + 0.0015, 0.017 * (1 - 0.55 * u ** 1.5) + 0.002, 14, 2.8, 1 / 0.4, caps=(False, False))
     for sg in (-1, 1):
         rings = []
         for d, rr in ((0.392, 0.0090), (0.404, 0.0108), (0.426, 0.0108), (0.440, 0.0075), (0.447, 0.0020)):
@@ -419,7 +424,7 @@ def bow_skin(m, kind):
         if kind == 'Horn':
             J[i, 0], W[i, 0] = base + 2, 1.0
             continue
-        s = [smooth(j - 0.1, j + 0.1, ay) for j in JOINT_Y]      # how far past each joint
+        s = [smooth(j - 0.2, j + 0.2, ay) for j in JOINT_Y]      # how far past each joint
         w = [1 - s[0], s[0] - s[1], s[1] - s[2], s[2]]               # grip, bone0, bone1, bone2
         J[i] = [0, base, base + 1, base + 2]
         W[i] = w

@@ -102,7 +102,7 @@ static func _axe(heft: float) -> Dictionary:
 		"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
 		"offhand": Vector3(0, 0.38, 0),
 		"styles": [S.OVERHEAD, S.SLASH_R], "heft": heft, "weight": "heavy",
-		"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},
+		"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(80, 0, 70)},
 		"surface": "steel",
 	}
 

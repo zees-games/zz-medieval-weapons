@@ -183,6 +183,8 @@ def round_shield():
         revolve(iron, [(-0.020, 0.012), (-0.060, 0.010), (-0.064, 0.003)], 8, 1 / 0.1, caps=(False, True), c=(0.0, 0.0, sg * 0.085))
     gx = np.linspace(-0.09, 0.09, 14)
     revolve(leather, [(x, 0.0135) for x in gx], 12, 1 / 0.2, caps=(True, True), axis='x', c=(0.0, -0.045, 0.0))
+    # planks: the grain runs straight across the disc (planar uv in the disc plane), not round the revolve
+    wood.uv = [np.stack([q[:, 0], q[:, 2]], 1).astype(np.float32) * 1.2 for q in wood.p]
     for m in (steel, iron, wood, leather):
         to_z(m)
     return {'Steel': steel, 'Iron': iron, 'Wood': wood, 'Leather': leather}
@@ -529,7 +531,7 @@ def write_glb(path, name, parts, sets, rig=None, skins=None):
             attrs['JOINTS_0'] = len(acc); acc.append({'bufferView': view(J.astype(np.uint8).tobytes(), 34962), 'componentType': 5121, 'count': len(pos), 'type': 'VEC4'})
             attrs['WEIGHTS_0'] = len(acc); acc.append({'bufferView': view(W.astype('<f4').tobytes(), 34962), 'componentType': 5126, 'count': len(pos), 'type': 'VEC4'})
         materials.append({'name': mname, 'doubleSided': True, 'normalTexture': {'index': tex(sname, 1), 'scale': 1.0},
-                          'pbrMetallicRoughness': {'baseColorTexture': {'index': tex(sname, 0)}, 'metallicFactor': 1.0, 'roughnessFactor': 1.0,
+                          'pbrMetallicRoughness': {'baseColorTexture': {'index': tex(sname, 0)}, 'metallicFactor': 0.6, 'roughnessFactor': 1.0,
                                                    'metallicRoughnessTexture': {'index': tex(sname, 2)}}})
         prims.append({'attributes': attrs, 'indices': a0 + 3, 'material': len(materials) - 1})
     if rig:

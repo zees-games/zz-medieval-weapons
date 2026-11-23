@@ -19,6 +19,8 @@ const WRIST := 0.075
 var shoulder: Vector3 = Vector3(0.22, -0.28, 0.14)
 var bone: float = 0.40
 var show_arms: bool = true
+## Arm thickness against the first-person sleeve: a watcher sees a person's arm from several metres, so the third person is stouter.
+var arm_scale: float = 1.0
 ## Draw a flying copy of a loosed arrow (see [ZzProjectileFlight]).
 var spawn_flight: bool = true
 var flight_parent: Node = null
@@ -60,8 +62,9 @@ func _make_parts() -> void:
 	_skin_mat.roughness = 0.62
 	for i in 2:
 		# Arm 0 is the main hand; its handedness is set per weapon in [method _place_arms].
-		var a := {"upper": _limb(0.036, 0.031, _arm_mat), "fore": _limb(0.031, 0.026, _arm_mat), "elbow": _ball(0.031, _arm_mat),
-			"cuff": _limb(0.030, 0.034, _skin_mat), "hand": _hand(), "left": false}
+		var k := arm_scale
+		var a := {"upper": _limb(0.036 * k, 0.031 * k, _arm_mat), "fore": _limb(0.031 * k, 0.026 * k, _arm_mat), "elbow": _ball(0.031 * k, _arm_mat),
+			"cuff": _limb(0.030 * k, 0.034 * k, _skin_mat), "hand": _hand(), "left": false, "shoulder": _ball(0.04 * k, _arm_mat)}
 		_arms.append(a)
 
 
@@ -274,12 +277,13 @@ func _place_arms(gx: Transform3D, p: Dictionary) -> void:
 	var off_up := weapon_up if _row.has("offhand") else Vector3(0, 0, -1)
 	var w := float(p["off_string"])
 	if w > 0.0 and _row.has("string"):
-		off_hand = off_hand.lerp(gx * ZzMedievalArtTable.string_point(weapon_id, float(p["string_pull"])), w)
+		var hp := float(p.get("hand_pull", p["string_pull"]))
+		off_hand = off_hand.lerp(gx * ZzMedievalArtTable.string_point(weapon_id, hp), w)
 		off_up = off_up.slerp(weapon_up, w) if off_up.dot(weapon_up) > -0.99 else weapon_up
 	_arm(_arms[0], main_s, main_hand, side, weapon_up)
-	_arm(_arms[1], off_s, off_hand, -side, off_up, w * smoothstep(0.25, 0.85, float(p["string_pull"])) if _row.has("string") and not _row.has("offhand") else 0.0)
+	_arm(_arms[1], off_s, off_hand, -side, off_up, w * smoothstep(0.25, 0.85, float(p.get("hand_pull", p["string_pull"]))) if _row.has("string") and not _row.has("offhand") else 0.0)
 	for a in _arms:
-		for k in ["upper", "fore", "elbow", "cuff", "hand"]:
+		for k in ["upper", "fore", "elbow", "shoulder", "cuff", "hand"]:
 			(a[k] as Node3D).visible = show_arms
 
 
@@ -308,6 +312,7 @@ func _arm(a: Dictionary, s: Vector3, h: Vector3, side: float, grip_up: Vector3 =
 	_span(a["upper"], s, elbow, true)
 	_span(a["fore"], elbow, wrist, true)
 	(a["elbow"] as Node3D).position = elbow
+	(a["shoulder"] as Node3D).position = s
 	_span(a["cuff"], wrist + back * 0.07, wrist - back * 0.005, true)
 	var left := side < 0.0
 	if a["left"] != left:

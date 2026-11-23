@@ -69,6 +69,7 @@ func reset() -> void:
 	blocking = false
 	block = 0.0
 	draw = 0.0
+	_hand = 0.0
 	drawing = false
 	nocked = true
 	reloading = false
@@ -229,7 +230,11 @@ func force(which: int, t: float) -> void:
 	_struck_sent = true
 
 
+## Guard blend per second: the raise or lower takes about a quarter of a second, long enough to read its wind-up and settle.
+const GUARD_RATE := 4.0
+
 var _prev_draw: float = 0.0
+var _hand: float = 0.0       ## where the draw hand is on its way back to the grip after a loose, 0..1
 var _aim: float = 0.0        ## how far the bow is raised to the eye, eased so a loose follows through
 var _off: float = 0.0        ## the draw hand's pull toward the string, eased so it leaves the string, not teleports
 var _follow: float = 0.0     ## seconds the bow stays up after a loose
@@ -245,7 +250,7 @@ func _last_draw() -> float:
 
 func advance(dt: float) -> void:
 	# Guard blend. A guard is a stance, so it eases rather than snaps.
-	block = move_toward(block, 1.0 if blocking else 0.0, dt * 7.0)
+	block = move_toward(block, 1.0 if blocking else 0.0, dt * GUARD_RATE)
 
 	if is_swinging():
 		style_t += dt
@@ -284,7 +289,9 @@ func advance(dt: float) -> void:
 			_aim = aim_to
 		elif _follow <= 0.0:
 			_aim = move_toward(_aim, aim_to, dt * 2.2)
-		var off_to := smoothstep(0.0, 0.12, draw) if nocked else 0.0
+		# The draw hand follows the string out, then, on a loose, carries on back and falls away over a fifth of a second.
+		_hand = draw if draw >= _hand else move_toward(_hand, draw, dt * 5.0)
+		var off_to := smoothstep(0.0, 0.12, maxf(draw, _hand)) if nocked or _hand > 0.0 else 0.0
 		_off = off_to if off_to >= _off else move_toward(_off, off_to, dt * 3.0)
 		if not nocked:
 			_nock_wait -= dt
@@ -343,7 +350,7 @@ func pose() -> Dictionary:
 			off_string = clampf(minf(p, 1.0 - p) * 8.0, 0.0, 1.0)
 	if block > 0.0:
 		var g: Dictionary = _row.get("block", {"pos": ZzWeaponPose.GUARD_POS, "rot": ZzWeaponPose.GUARD_ROT})
-		var w := smoothstep(0.0, 1.0, block)
+		var w := guard_curve(block)
 		pos = pos.lerp((g["pos"] as Vector3) + pos * 0.25, w)
 		rot = rot.lerp((g["rot"] as Vector3) + rot * 0.25, w)
 	if inspecting:
@@ -361,9 +368,20 @@ func pose() -> Dictionary:
 		pos += Vector3(0.0, 0.02, 0.08) * _kick
 		rot += Vector3(6.0, 0.0, 0.0) * _kick
 	return {
-		"pos": pos, "rot": rot, "string_pull": draw, "nock": nocked if is_bow else loaded,
+		"pos": pos, "rot": rot, "string_pull": draw, "hand_pull": maxf(draw, _hand), "nock": nocked if is_bow else loaded,
 		"off_string": off_string, "block": block, "inspect": inspect_phase(), "holstered": holstered,
 	}
+
+
+## The guard's weight for a blend [param b] (0..1): a small pull back first (anticipation), then past the guard
+## and back onto it (overshoot), so raise and lower both have a wind-up and a settle rather than a straight slide.
+static func guard_curve(b: float) -> float:
+	var x := clampf(b, 0.0, 1.0)
+	var back := -0.14 * sin(clampf(x / 0.35, 0.0, 1.0) * PI)
+	var c1 := 1.70158
+	var c3 := c1 + 1.0
+	var e := 1.0 + c3 * pow(x - 1.0, 3.0) + c1 * pow(x - 1.0, 2.0)
+	return e + back * (1.0 - x)
 
 
 func describe() -> Dictionary:

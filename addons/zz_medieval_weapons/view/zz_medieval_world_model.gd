@@ -16,9 +16,12 @@ func _init() -> void:
 	name = "WorldModel"
 	shoulder = Vector3(0.20, 0.0, 0.0)
 	bone = 0.36
+	arm_scale = 1.6
 
 
 func grip_transform() -> Transform3D:
 	var t := super.grip_transform()
-	t.origin += hip_offset.lerp(aim_offset, anim.aim_weight())
+	# A row may carry its own hip (the shield hangs further out than a sword so it clears the body).
+	var hip: Vector3 = _row.get("hip", hip_offset)
+	t.origin += hip.lerp(aim_offset, anim.aim_weight())
 	return t

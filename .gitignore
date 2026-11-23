@@ -12,3 +12,5 @@ __pycache__/
 art-src/reference/
 /addons/gs_audio
 /addons/gs_game
+/addons/gs_player_char
+/addons/gs_animation

@@ -19,6 +19,8 @@ const WRIST := 0.075
 var shoulder: Vector3 = Vector3(0.22, -0.28, 0.14)
 var bone: float = 0.40
 var show_arms: bool = true
+## Draw the real five-finger hand (first person, where it fills the frame) rather than the procedural fist.
+var real_hand: bool = false
 ## Arm thickness against the first-person sleeve: a watcher sees a person's arm from several metres, so the third person is stouter.
 var arm_scale: float = 1.0
 ## Draw a flying copy of a loosed arrow (see [ZzProjectileFlight]).
@@ -41,6 +43,7 @@ var _string_b: MeshInstance3D
 var _missile: Node3D
 var _skel: Skeleton3D
 var _arms: Array = []     # [{upper, fore, hand}] main then off
+var _hand_local: Array[Transform3D] = [Transform3D.IDENTITY, Transform3D.IDENTITY]
 var _arm_mat: StandardMaterial3D
 var _skin_mat: StandardMaterial3D
 
@@ -54,12 +57,8 @@ func _make_parts() -> void:
 	_grip = Node3D.new()
 	_grip.name = "Grip"
 	add_child(_grip)
-	_arm_mat = StandardMaterial3D.new()
-	_arm_mat.albedo_color = SLEEVE
-	_arm_mat.roughness = 0.9
-	_skin_mat = StandardMaterial3D.new()
-	_skin_mat.albedo_color = GLOVE
-	_skin_mat.roughness = 0.62
+	_arm_mat = ZzSleeveMaterial.cloth(SLEEVE)
+	_skin_mat = ZzSleeveMaterial.leather(GLOVE)
 	for i in 2:
 		# Arm 0 is the main hand; its handedness is set per weapon in [method _place_arms].
 		var k := arm_scale
@@ -98,12 +97,36 @@ func _ball(r: float, mat: Material) -> MeshInstance3D:
 	return mi
 
 
-func _hand() -> MeshInstance3D:
+func _hand() -> Node3D:
+	if real_hand:
+		var script: Script = load(HAND_SCRIPT) if ResourceLoader.exists(HAND_SCRIPT) else null
+		if script != null:
+			var hand: Node3D = script.new()
+			hand.set("material", _skin_mat)
+			add_child(hand)
+			hand.call("pose", _fist_curls())
+			return hand
 	var mi := MeshInstance3D.new()
 	mi.mesh = glove_mesh(false)
 	mi.material_override = _skin_mat
 	add_child(mi)
 	return mi
+
+
+## gs-player-char's five-finger hand, when that addon is linked (GSViewHand); the procedural fist otherwise.
+const HAND_SCRIPT := "res://addons/gs_player_char/nodes/gs_view_hand.gd"
+const HAND_POSES_SCRIPT := "res://addons/gs_player_char/core/gs_view_hand_poses.gd"
+
+
+## A fist's joint curls from gs-player-char's grip table (its FISTS kind), degrees per finger.
+func _fist_curls() -> Dictionary:
+	var poses: Script = load(HAND_POSES_SCRIPT)
+	var fists: Dictionary = poses.call("table")[&"fists"][&"firing"]
+	var out := {}
+	for k in fists:
+		if k is StringName and (k == &"spread" or poses.get("FINGERS").has(k)):
+			out[k] = fists[k]
+	return out
 
 
 ## A gloved fist closed round a grip along local +Y (see [ZzGloveMesh]).
@@ -287,6 +310,17 @@ func _place_arms(gx: Transform3D, p: Dictionary) -> void:
 			(a[k] as Node3D).visible = show_arms
 
 
+## +1 when the weapon is held in the right hand, -1 in the left.
+func arm_side() -> int:
+	return int(_row.get("side", 1))
+
+
+## Where hand [param i] (0 main, 1 off) closes this frame, in world space: the target a drawn person's arm (see
+## [ZzMedievalFigureArms]) reaches for. Its +Y is the grip axis, +Z points back toward the elbow.
+func hand_world(i: int) -> Transform3D:
+	return global_transform * _hand_local[i]
+
+
 ## Two-bone solve: the elbow falls below and outside the line from shoulder to hand.
 ## [param draw] 0..1 lifts the elbow from below the arm to level and behind it, as a drawing arm's is.
 func _arm(a: Dictionary, s: Vector3, h: Vector3, side: float, grip_up: Vector3 = Vector3.UP, draw: float = 0.0) -> void:
@@ -317,8 +351,22 @@ func _arm(a: Dictionary, s: Vector3, h: Vector3, side: float, grip_up: Vector3 =
 	var left := side < 0.0
 	if a["left"] != left:
 		a["left"] = left
-		(a["hand"] as MeshInstance3D).mesh = glove_mesh(left)
-	(a["hand"] as Node3D).transform = Transform3D(Basis(up.cross(back), up, back), hand)
+		if a["hand"] is MeshInstance3D:
+			(a["hand"] as MeshInstance3D).mesh = glove_mesh(left)
+		else:
+			(a["hand"] as Node3D).set("right", not left)
+			(a["hand"] as Node3D).call("build")
+			(a["hand"] as Node3D).call("pose", _fist_curls())
+	if a["hand"] is MeshInstance3D:
+		(a["hand"] as Node3D).transform = Transform3D(Basis(up.cross(back), up, back), hand)
+	else:
+		# Fingers along the forearm, the grip axis across the palm (thumb toward the blade), the palm facing the way it closes.
+		var y := -back
+		var gx_ := (up - y * up.dot(y)).normalized() * (-1.0 if left else 1.0)
+		var z := gx_.cross(y)
+		var hb := Basis(gx_, y, z)
+		(a["hand"] as Node3D).transform = Transform3D(hb, hand - hb * Vector3(0.0, 0.07, 0.02))
+	_hand_local[0 if side == float(_row.get("side", 1)) else 1] = (a["hand"] as Node3D).transform
 
 
 func _on_cue(cue: StringName) -> void:

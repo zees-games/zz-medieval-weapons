@@ -17,4 +17,5 @@ func _ready() -> void:
 
 func _init() -> void:
 	name = "ViewModel"
+	real_hand = true
 	shoulder = Vector3(0.22, -0.30, 0.16)

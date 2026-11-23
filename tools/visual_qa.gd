@@ -14,6 +14,8 @@ const STEP_SWING := 1.0
 var _view: ZzMedievalViewModel = null
 var _world: ZzMedievalWorldModel = null
 var _person: Node3D = null
+var _figure: GSHumanoidFigure = null
+var _arms: ZzMedievalFigureArms = null
 var _holder: Node3D = null
 var _id: StringName = &""
 var _done: Dictionary = {}
@@ -52,26 +54,14 @@ func _build() -> void:
 	_person = Node3D.new()
 	_person.name = "Person"
 	stage.add_child(_person)
-	var skin := StandardMaterial3D.new()
-	skin.albedo_color = Color(0.25, 0.3, 0.45)
-	var body := MeshInstance3D.new()
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.2
-	cap.height = 1.5
-	cap.material = skin
-	body.mesh = cap
-	body.position = Vector3(0.0, 0.85, 0.0)
-	_person.add_child(body)
-	var head := MeshInstance3D.new()
-	var ball := SphereMesh.new()
-	ball.radius = 0.12
-	ball.height = 0.24
-	var face := StandardMaterial3D.new()
-	face.albedo_color = ZzMedievalHeld.SKIN
-	ball.material = face
-	head.mesh = ball
-	head.position = Vector3(0.0, 1.72, 0.0)
-	_person.add_child(head)
+	# A real person (gs-player-char's figure), not a capsule; its arms reach the weapon's hands (ZzMedievalFigureArms).
+	_figure = GSHumanoidFigure.new()
+	_figure.name = "Figure"
+	_figure.auto_animate = false
+	_person.add_child(_figure)
+	_figure.build(GSHumanoidLook.stock(0), 1.8)
+	_arms = ZzMedievalFigureArms.new()
+	_person.add_child(_arms)
 	_holder = Node3D.new()
 	_holder.position = Vector3(0.0, 1.45, 0.0)
 	_person.add_child(_holder)
@@ -116,6 +106,7 @@ func _stage(item: String, _clip: String) -> GSResult:
 	_world.set_process(false)
 	_view.play_builtin_sounds = false
 	_world.bind(_id)
+	_arms.bind(_figure, _world)
 	_view.bind(_id)
 	_view.step(0.0)
 	_world.step(0.0)

@@ -182,7 +182,7 @@ func _drop(n: Node) -> Node:
 func _line() -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var m := BoxMesh.new()
-	m.size = Vector3(0.0045, 0.0045, 1.0)
+	m.size = Vector3(0.008, 0.008, 1.0)
 	mi.mesh = m
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = ZzMedievalModels.STRING

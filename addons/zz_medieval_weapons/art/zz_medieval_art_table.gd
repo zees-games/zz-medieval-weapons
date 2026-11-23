@@ -2,7 +2,7 @@ class_name ZzMedievalArtTable
 extends RefCounted
 
 ## How a weapon is HELD and MOVES, apart from the server's numbers: the one place that knows a model's grip, string and swings, so swapping in a .glb is a row edit. Aim-frame positions (-z forward); offhand and string
-## are model space. Keys: align, grip, world_turn, hip (a third-person hand offset instead of the default hip), hold, rest, side, offhand, styles, scale, heft, weight, block, string, projectile, nock_axis, surface. `align` (Euler degrees) and `grip` are for a vendored glb that was not modelled upright:
+## are model space. Keys: align, grip, world_turn, third_turn (Euler degrees about the weapon, third person only), hip (a third-person hand offset instead of the default hip), hold, rest, side, offhand, styles, scale, world_scale (third person only, about the grip), heft, weight, block, string, projectile, nock_axis, surface. `align` (Euler degrees) and `grip` are for a vendored glb that was not modelled upright:
 ## `align` turns it so the weapon stands along +Y (head or blade up), `grip` is then the point in that aligned space that goes to the hand (the origin). Both default to none.
 
 const S := ZzWeaponPose.Style
@@ -22,7 +22,7 @@ static func rows() -> Dictionary:
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},
 			"surface": "steel",
 		},
-		&"battle_axe": _axe(1.15),
+		&"battle_axe": _axe(1.15).merged({"world_scale": 1.7, "third_turn": Vector3(0, 90, 0)}),
 		&"war_axe": _axe(1.1),
 		&"double_axe": _axe(1.2),
 		&"mace": {
@@ -44,7 +44,7 @@ static func rows() -> Dictionary:
 			# Third person, carried like any melee weapon (+Y forward): a quarter turn about its long axis stands the disc up facing out.
 			"world_turn": Vector3(0, 90, 0),
 			"hip": Vector3(-0.12, -0.20, 0.10),
-			"styles": [S.BASH], "heft": 1.0, "scale": 0.62, "weight": "heavy",
+			"styles": [S.BASH], "heft": 1.0, "scale": 0.62, "world_scale": 1.3, "weight": "heavy",
 			"block": {"pos": Vector3(0.30, 0.34, -0.12), "rot": Vector3(-6, 0, 0)},
 			"surface": "wood",
 		},
@@ -62,7 +62,7 @@ static func _bow() -> Dictionary:
 		# anchored low at the jaw (0.04, -0.15, -0.12), so the drawing hand stays out of frame and the arrow
 		# climbs from the bottom of the view to the rest; the stave is canted a little.
 		"aim": {"pos": Vector3(0.23, 0.06, -0.30), "rot": Vector3(7, 8, -6)},
-		"styles": [S.LOOSE], "heft": 1.0, "scale": 0.8, "weight": "light",
+		"styles": [S.LOOSE], "heft": 1.0, "scale": 0.8, "world_scale": 1.5, "weight": "light",
 		# The glb is modelled at full draw; its rig (a root and three bones up each limb) bends it back:
 		# `flex` turns limb joint i by angle * share[i] about +Z, `braced` degrees at pull 0, `drawn` at 1.
 		# The tips are the glb's nocks as modelled; the string keeps its braced length, so the nock is
@@ -84,9 +84,9 @@ static func _bow() -> Dictionary:
 ## The crossbow: shouldered, cocked by a reload, the bolt in the groove.
 static func _crossbow() -> Dictionary:
 	return {
-		"hold": Vector3(-90, 0, 0), "rest": Vector3(0.20, -0.26, -0.50), "side": 1,
+		"hold": Vector3(-90, 0, 0), "rest": Vector3(0.20, -0.34, -0.50), "side": 1,
 		"offhand": Vector3(0, 0.16, -0.012),   # under the fore-stock, behind the prod
-		"styles": [S.FIRE], "heft": 1.0, "scale": 0.9, "weight": "heavy",
+		"styles": [S.FIRE], "heft": 1.0, "scale": 0.9, "world_scale": 1.6, "weight": "heavy",
 		"string": {
 			"tips": [Vector3(-0.426, 0.25, -0.032), Vector3(0.426, 0.25, -0.032)],   # in the prod's tip hooks
 			# Cocked is pull 1: the string drawn back and up over the stock into the nut (y 0.12, top of the stock z 0.017).

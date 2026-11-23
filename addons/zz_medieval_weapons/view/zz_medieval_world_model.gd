@@ -24,4 +24,10 @@ func grip_transform() -> Transform3D:
 	# A row may carry its own hip (the shield hangs further out than a sword so it clears the body).
 	var hip: Vector3 = _row.get("hip", hip_offset)
 	t.origin += hip.lerp(aim_offset, anim.aim_weight())
+	# A watcher sees the weapon from metres away against a person whose arms are drawn stout: the row's `world_scale` grows it about the grip.
+	t.basis = t.basis.scaled_local(Vector3.ONE * float(_row.get("world_scale", 1.0)))
+	# `third_turn` rolls it about its own axes for the watcher (an axe's blade shown flat, not edge-on).
+	var turn: Vector3 = _row.get("third_turn", Vector3.ZERO)
+	if turn != Vector3.ZERO:
+		t.basis = t.basis * Basis.from_euler(Vector3(deg_to_rad(turn.x), deg_to_rad(turn.y), deg_to_rad(turn.z)))
 	return t

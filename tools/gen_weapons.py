@@ -419,7 +419,7 @@ def bow_skin(m, kind):
         if kind == 'Horn':
             J[i, 0], W[i, 0] = base + 2, 1.0
             continue
-        s = [smooth(j - 0.045, j + 0.045, ay) for j in JOINT_Y]      # how far past each joint
+        s = [smooth(j - 0.1, j + 0.1, ay) for j in JOINT_Y]      # how far past each joint
         w = [1 - s[0], s[0] - s[1], s[1] - s[2], s[2]]               # grip, bone0, bone1, bone2
         J[i] = [0, base, base + 1, base + 2]
         W[i] = w

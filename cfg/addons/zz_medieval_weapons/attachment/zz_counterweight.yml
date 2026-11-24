@@ -1,0 +1,9 @@
+# Medieval attachment: zz_counterweight. Scales multiply the weapon's own numbers.
+name: "Counterweight"
+description: "A pommel weight: a quicker recovery between swings."
+mount: "magazine"
+model: "res://addons/zz_medieval_weapons/assets/attachments/zz_counterweight.tscn"
+fits_tags: "melee"
+excludes_tags: "shield"
+scale:
+  use_interval_ticks: 0.9

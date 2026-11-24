@@ -32,10 +32,12 @@ params = {
 &"stamina_cost": 12.0
 }
 tuning = SubResource("Resource_qb7ax")
+mounts = Array[StringName]([&"underbarrel", &"magazine"])
 authored_tick_rate = 64
 deploy_ticks = 26
 holster_ticks = 14
 use_interval_ticks = 42
+fire_modes = PackedStringArray()
 cost_per_use = 0
 reload_ticks = 0
 auto_reload = false

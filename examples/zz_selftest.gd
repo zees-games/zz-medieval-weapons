@@ -4,7 +4,7 @@ extends "res://examples/selftest/zz_motion_checks.gd"
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 470
+const CHECKS := 482
 
 
 func _ready() -> void:
@@ -34,6 +34,7 @@ func _ready() -> void:
 	_held()
 	_flight()
 	_sound()
+	_attachments()
 	print("%d sections entered, %d finished, %d checks (expected %d), %d failed" % [_entered, _finished, _checks, CHECKS, _failures])
 	if _entered != _finished or _checks != CHECKS:
 		_failures += 1
@@ -552,3 +553,69 @@ func _net() -> void:
 	_end()
 
 
+
+
+func _attachments() -> void:
+	_begin("attachments")
+	var cat := ZzMedievalAttachmentPack.catalogue(PackedStringArray(["res://cfg"]))
+	_check(cat.ids().size() == 5, "the catalogue holds the five attachments")
+	var drift: PackedStringArray = []
+	var bad_model: PackedStringArray = []
+	for id: StringName in ZzMedievalAttachmentPack.IDS:
+		if FileAccess.get_file_as_string(ZzMedievalAttachmentPack.profile_path(id)) != ZzMedievalAttachmentPack.to_yaml(id):
+			drift.append(str(id))
+		var att := cat.get_attachment(id)
+		if att == null or not (load(att.model) is PackedScene):
+			bad_model.append(str(id))
+	_check(drift.is_empty(), "every shipped yml equals its built-in row %s" % [drift])
+	_check(bad_model.is_empty(), "every attachment model loads %s" % [bad_model])
+	var defs: Dictionary = {}
+	for d in ZzMedievalPack.weapons():
+		defs[d.id] = d
+	_check((defs[&"bow"] as GSWeaponDef).mounts.is_empty(), "the bow takes no mount")
+	_check(Array((defs[&"crossbow"] as GSWeaponDef).mounts) == [&"optic", &"muzzle"], "the crossbow takes optic and muzzle")
+	var empty: PackedStringArray = []
+	var failed: PackedStringArray = []
+	for id: StringName in defs:
+		var def: GSWeaponDef = defs[id]
+		var choices := cat.choices_for(def)
+		for m: StringName in choices:
+			if (choices[m] as Array).is_empty():
+				empty.append("%s/%s" % [id, m])
+			for att_id: StringName in choices[m]:
+				var f := GSWeaponFitting.make(id)
+				f.fit(m, att_id)
+				var res := cat.apply(def, f)
+				if not res.ok:
+					failed.append("%s+%s" % [id, att_id])
+	_check(empty.is_empty(), "every mount of every weapon has something to fit %s" % [empty])
+	_check(failed.is_empty(), "every attachment applies to the weapons it fits %s" % [failed])
+	var xb: GSWeaponDef = defs[&"crossbow"]
+	var f1 := GSWeaponFitting.make(&"crossbow")
+	f1.fit(GSWeaponAttachment.MOUNT_OPTIC, &"zz_aperture_sight")
+	f1.fit(GSWeaponAttachment.MOUNT_MUZZLE, &"zz_barbed_heads")
+	var xf: GSWeaponDef = cat.apply(xb, f1).value
+	var xt := xf.tuning as GSWeaponBallistics
+	var xbt := xb.tuning as GSWeaponBallistics
+	_check(xt.gravity_scale < xbt.gravity_scale and xt.damage > xbt.damage and xt.speed < xbt.speed, "the sight flattens the flight; barbed heads hit harder and slower")
+	var sw: GSWeaponDef = defs[&"longsword"]
+	var f2 := GSWeaponFitting.make(&"longsword")
+	f2.fit(GSWeaponAttachment.MOUNT_UNDERBARREL, &"zz_leather_wrap")
+	f2.fit(GSWeaponAttachment.MOUNT_MAGAZINE, &"zz_counterweight")
+	var sf: GSWeaponDef = cat.apply(sw, f2).value
+	_check(float(sf.params["stamina_cost"]) < float(sw.params["stamina_cost"]) and sf.use_interval_ticks < sw.use_interval_ticks, "the wrap saves stamina; the counterweight quickens the swing")
+	var rs: GSWeaponDef = defs[&"round_shield"]
+	var f3 := GSWeaponFitting.make(&"round_shield")
+	f3.fit(GSWeaponAttachment.MOUNT_SIDE, &"zz_spiked_boss")
+	var rf: GSWeaponDef = cat.apply(rs, f3).value
+	_check(float(rf.params["knockback"]) > float(rs.params["knockback"]), "the spiked boss lengthens the shove")
+	_check(not cat.choices_for(rs).has(GSWeaponAttachment.MOUNT_UNDERBARREL), "a shield takes no wrap")
+	var held := ZzMedievalHeld.new()
+	add_child(held)
+	held.bind(&"crossbow")
+	held.show_fitting(cat, f1)
+	var placed: Array = held.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n.has_meta(&"gs_attachment_model"))
+	_check(placed.size() == 2, "a fitted crossbow shows its two models (%d)" % placed.size())
+	held.show_fitting(cat, null)
+	held.free()
+	_end()

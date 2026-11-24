@@ -37,12 +37,14 @@ params = {
 &"stamina_cost": 6.0
 }
 tuning = SubResource("Resource_rjbhr")
+mounts = Array[StringName]([&"optic", &"muzzle"])
 weight = 2.0
 authored_tick_rate = 64
 slot = 3
 deploy_ticks = 30
 holster_ticks = 16
 use_interval_ticks = 16
+fire_modes = PackedStringArray()
 ammo_type = &"bolts"
 magazine = 1
 reserve = 20

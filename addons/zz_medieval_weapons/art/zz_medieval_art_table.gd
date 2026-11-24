@@ -119,6 +119,19 @@ static func model_transform(id: StringName) -> Transform3D:
 	return Transform3D(basis, -(r.get("grip", Vector3.ZERO) as Vector3))
 
 
+## Where each mount's attachment model sits, in the aligned grip-at-origin space the weapon stands in (+Y along it).
+## Melee: the wrap just above the hand, the pommel weight at the butt. Crossbow: the sight over the nut, the head at the bolt's tip.
+static func socket_points(id: StringName) -> Dictionary:
+	match id:
+		&"crossbow":
+			return {"optic": Vector3(0, 0.10, 0.02), "muzzle": Vector3(0, 0.34, 0.0)}
+		&"round_shield":
+			return {"side": Vector3(0, 0, 0.03)}
+		&"bow":
+			return {}
+	return {"underbarrel": Vector3(0, 0.08, 0), "magazine": Vector3(0, -0.18, 0)}
+
+
 static func has(id: StringName) -> bool:
 	return rows().has(id)
 

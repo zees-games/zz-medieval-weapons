@@ -1,0 +1,9 @@
+# Medieval attachment: zz_spiked_boss. Scales multiply the weapon's own numbers.
+name: "Spiked Boss"
+description: "An iron spike on the face: a harder bash, a longer shove."
+mount: "side"
+model: "res://addons/zz_medieval_weapons/assets/attachments/zz_spiked_boss.tscn"
+fits_weapons: "round_shield"
+scale:
+  damage: 1.5
+  params.knockback: 1.2

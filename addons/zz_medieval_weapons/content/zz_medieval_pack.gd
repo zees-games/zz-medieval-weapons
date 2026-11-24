@@ -10,6 +10,16 @@ const SHIELD := BEHAVIOUR_DIR + "zz_shield.gd"
 const PROJECTILE := BEHAVIOUR_DIR + "zz_projectile.gd"
 
 
+## Which mounts each weapon takes; the sockets are [method ZzMedievalArtTable.socket_points]. A bow takes none.
+const MOUNTS := {
+	&"longsword": [&"underbarrel", &"magazine"], &"dagger": [&"underbarrel", &"magazine"],
+	&"battle_axe": [&"underbarrel", &"magazine"], &"war_axe": [&"underbarrel", &"magazine"],
+	&"double_axe": [&"underbarrel", &"magazine"], &"mace": [&"underbarrel", &"magazine"],
+	&"spear": [&"underbarrel", &"magazine"], &"round_shield": [&"side"],
+	&"crossbow": [&"optic", &"muzzle"],
+}
+
+
 static func weapons(cfg: Dictionary = {}) -> Array[GSWeaponDef]:
 	if cfg.is_empty():
 		cfg = ZzMedievalConfig.load_all()
@@ -37,6 +47,7 @@ static func build(id: StringName, c: Dictionary, types: Dictionary) -> GSWeaponD
 	d.holster_ticks = 14
 	GSWeaponProfiles.apply_common(d, c)
 	d.authored_tick_rate = ZzMedievalConfig.TICK_RATE
+	d.mounts = Array(MOUNTS.get(id, []), TYPE_STRING_NAME, &"", null)
 	d.cost_per_use = 0
 	d.reload_ticks = 0
 	d.auto_reload = false

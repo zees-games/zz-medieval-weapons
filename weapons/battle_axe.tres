@@ -32,11 +32,13 @@ params = {
 &"stamina_cost": 22.0
 }
 tuning = SubResource("Resource_slenp")
+mounts = Array[StringName]([&"underbarrel", &"magazine"])
 weight = 2.0
 authored_tick_rate = 64
 deploy_ticks = 34
 holster_ticks = 18
 use_interval_ticks = 70
+fire_modes = PackedStringArray()
 cost_per_use = 0
 reload_ticks = 0
 auto_reload = false

@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="iron"]
+cull_mode = 2
+albedo_color = Color(0.25, 0.25, 0.28, 1)
+metallic = 0.8
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="brass"]
+cull_mode = 2
+albedo_color = Color(0.72, 0.56, 0.22, 1)
+metallic = 0.85
+roughness = 0.4
+
+[sub_resource type="SphereMesh" id="ball"]
+radius = 0.032
+height = 0.064
+radial_segments = 16
+rings = 8
+
+[sub_resource type="CylinderMesh" id="collar"]
+top_radius = 0.022
+bottom_radius = 0.026
+height = 0.012
+radial_segments = 16
+rings = 1
+
+[node name="ZzCounterweight" type="Node3D"]
+
+[node name="Collar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0, 0)
+mesh = SubResource("collar")
+surface_material_override/0 = SubResource("brass")
+
+[node name="Ball" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.03, 0)
+mesh = SubResource("ball")
+surface_material_override/0 = SubResource("iron")

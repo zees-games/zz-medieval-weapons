@@ -266,3 +266,7 @@ Two axes are decimated Sketchfab models; every other model is built by `tools/ge
 | `crossbow` | Crossbow | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
 | `arrow`, `bolt` | Arrow and crossbow bolt | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
 | `dagger` | Dagger | own work (zz-medieval-weapons) | CC0 1.0 | this repo |
+
+### Attachments
+
+Five attachments fit the weapons through gs-weapon's attachment API, as in zz-modern-weapons: an aperture sight and barbed heads for the crossbow, a leather wrap and a counterweight for the melee weapons, and a spiked boss for the round shield. The bow takes none. Each is a yml under `cfg/addons/zz_medieval_weapons/attachment/` (generated from `ZzMedievalAttachmentPack`, so edit the code table and re-run `tools/export-defs.sh`) with a primitive mesh under `addons/zz_medieval_weapons/assets/attachments/`. `ZzMedievalHeld.show_fitting(catalogue, fitting)` dresses the view model.

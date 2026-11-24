@@ -1,0 +1,9 @@
+# Medieval attachment: zz_barbed_heads. Scales multiply the weapon's own numbers.
+name: "Barbed Heads"
+description: "Barbed bolt heads: harder hitting, a little slower."
+mount: "muzzle"
+model: "res://addons/zz_medieval_weapons/assets/attachments/zz_barbed_heads.tscn"
+fits_tags: "crossbow"
+scale:
+  damage: 1.15
+  speed: 0.92

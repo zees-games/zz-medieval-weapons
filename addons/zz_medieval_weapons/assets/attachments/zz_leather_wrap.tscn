@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="leather"]
+cull_mode = 2
+albedo_color = Color(0.28, 0.16, 0.09, 1)
+metallic = 0.0
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="brass"]
+cull_mode = 2
+albedo_color = Color(0.72, 0.56, 0.22, 1)
+metallic = 0.85
+roughness = 0.4
+
+[sub_resource type="CylinderMesh" id="band"]
+top_radius = 0.026
+bottom_radius = 0.026
+height = 0.02
+radial_segments = 16
+rings = 1
+
+[sub_resource type="CylinderMesh" id="cap"]
+top_radius = 0.027
+bottom_radius = 0.027
+height = 0.006
+radial_segments = 16
+rings = 1
+
+[node name="ZzLeatherWrap" type="Node3D"]
+
+[node name="Band0" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0, 0)
+mesh = SubResource("band")
+surface_material_override/0 = SubResource("leather")
+
+[node name="Band1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.024, 0)
+mesh = SubResource("band")
+surface_material_override/0 = SubResource("leather")
+
+[node name="Band2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.048, 0)
+mesh = SubResource("band")
+surface_material_override/0 = SubResource("leather")
+
+[node name="Cap" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.064, 0)
+mesh = SubResource("cap")
+surface_material_override/0 = SubResource("brass")

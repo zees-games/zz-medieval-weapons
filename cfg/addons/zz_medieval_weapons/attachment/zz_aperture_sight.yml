@@ -1,0 +1,8 @@
+# Medieval attachment: zz_aperture_sight. Scales multiply the weapon's own numbers.
+name: "Aperture Sight"
+description: "A peep sight on the stock: a flatter, truer flight."
+mount: "optic"
+model: "res://addons/zz_medieval_weapons/assets/attachments/zz_aperture_sight.tscn"
+fits_tags: "crossbow"
+scale:
+  gravity_scale: 0.8

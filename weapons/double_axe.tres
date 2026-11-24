@@ -32,11 +32,13 @@ params = {
 &"stamina_cost": 26.0
 }
 tuning = SubResource("Resource_2osab")
+mounts = Array[StringName]([&"underbarrel", &"magazine"])
 weight = 2.0
 authored_tick_rate = 64
 deploy_ticks = 38
 holster_ticks = 20
 use_interval_ticks = 78
+fire_modes = PackedStringArray()
 cost_per_use = 0
 reload_ticks = 0
 auto_reload = false

@@ -38,6 +38,8 @@ var _string_a: MeshInstance3D
 var _string_b: MeshInstance3D
 var _missile: Node3D
 var _skel: Skeleton3D
+var _catalogue: GSWeaponAttachments
+var _fitting: GSWeaponFitting
 var _arms: Array = []     # [{upper, fore, hand}] main then off
 var _arm_mat: StandardMaterial3D
 var _skin_mat: StandardMaterial3D
@@ -140,11 +142,20 @@ func bind(id: StringName, cfg: Dictionary = {}) -> void:
 	if _row.has("projectile"):
 		_missile = ZzMedievalModels.projectile(StringName(_row["projectile"]))
 		_grip.add_child(_missile)
+	ZzMedievalAttachmentDress.dress(_grip, id, _catalogue, _fitting)
 	if not anim.loosed.is_connected(_on_loosed):
 		anim.loosed.connect(_on_loosed)
 	if not anim.cue.is_connected(_on_cue):
 		anim.cue.connect(_on_cue)
 	apply()
+
+
+## Shows [param with]'s attachment models on the weapon now in hand and on each one bound after; null clears them.
+func show_fitting(catalogue: GSWeaponAttachments, with: GSWeaponFitting) -> void:
+	_catalogue = catalogue
+	_fitting = with
+	if _grip != null:
+		ZzMedievalAttachmentDress.dress(_grip, weapon_id, _catalogue, _fitting)
 
 
 func _drop(n: Node) -> Node:

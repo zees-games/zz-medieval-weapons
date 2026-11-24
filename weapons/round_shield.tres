@@ -36,11 +36,13 @@ params = {
 &"stamina_cost": 10.0
 }
 tuning = SubResource("Resource_g7tvd")
+mounts = Array[StringName]([&"side"])
 weight = 2.0
 authored_tick_rate = 64
 slot = 2
 holster_ticks = 12
 use_interval_ticks = 56
+fire_modes = PackedStringArray()
 cost_per_use = 0
 reload_ticks = 0
 auto_reload = false

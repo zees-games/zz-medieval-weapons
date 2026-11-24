@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="iron"]
+cull_mode = 2
+albedo_color = Color(0.25, 0.25, 0.28, 1)
+metallic = 0.8
+roughness = 0.5
+
+[sub_resource type="StandardMaterial3D" id="steel"]
+cull_mode = 2
+albedo_color = Color(0.62, 0.64, 0.68, 1)
+metallic = 0.9
+roughness = 0.35
+
+[sub_resource type="CylinderMesh" id="ring"]
+top_radius = 0.11
+bottom_radius = 0.11
+height = 0.012
+radial_segments = 24
+rings = 1
+
+[sub_resource type="SphereMesh" id="dome"]
+radius = 0.07
+height = 0.07
+is_hemisphere = true
+radial_segments = 20
+rings = 8
+
+[sub_resource type="CylinderMesh" id="spike"]
+top_radius = 0.0
+bottom_radius = 0.018
+height = 0.14
+radial_segments = 12
+rings = 1
+
+[node name="ZzSpikedBoss" type="Node3D"]
+
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0.006)
+mesh = SubResource("ring")
+surface_material_override/0 = SubResource("iron")
+
+[node name="Dome" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0.012)
+mesh = SubResource("dome")
+surface_material_override/0 = SubResource("iron")
+
+[node name="Spike" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0.11)
+mesh = SubResource("spike")
+surface_material_override/0 = SubResource("steel")

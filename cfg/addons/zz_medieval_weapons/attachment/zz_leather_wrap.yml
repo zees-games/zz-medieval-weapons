@@ -1,0 +1,9 @@
+# Medieval attachment: zz_leather_wrap. Scales multiply the weapon's own numbers.
+name: "Leather Wrap"
+description: "A bound grip: less stamina spent on each swing."
+mount: "underbarrel"
+model: "res://addons/zz_medieval_weapons/assets/attachments/zz_leather_wrap.tscn"
+fits_tags: "melee"
+excludes_tags: "shield"
+scale:
+  params.stamina_cost: 0.85

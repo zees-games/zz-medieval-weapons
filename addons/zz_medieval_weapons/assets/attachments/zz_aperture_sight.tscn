@@ -1,47 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=2 format=3]
 
-[sub_resource type="StandardMaterial3D" id="iron"]
-cull_mode = 2
-albedo_color = Color(0.25, 0.25, 0.28, 1)
-metallic = 0.8
-roughness = 0.5
-
-[sub_resource type="StandardMaterial3D" id="brass"]
-cull_mode = 2
-albedo_color = Color(0.72, 0.56, 0.22, 1)
-metallic = 0.85
-roughness = 0.4
-
-[sub_resource type="BoxMesh" id="base"]
-size = Vector3(0.05, 0.05, 0.01)
-
-[sub_resource type="BoxMesh" id="post"]
-size = Vector3(0.008, 0.01, 0.045)
-
-[sub_resource type="TorusMesh" id="ring"]
-inner_radius = 0.009
-outer_radius = 0.016
-rings = 16
-ring_segments = 8
+[ext_resource type="Script" path="res://addons/zz_medieval_weapons/view/zz_attachment_piece.gd" id="1_piece"]
 
 [node name="ZzApertureSight" type="Node3D"]
-
-[node name="Base" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.005)
-mesh = SubResource("base")
-surface_material_override/0 = SubResource("iron")
-
-[node name="PostL" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.018, 0, 0.03)
-mesh = SubResource("post")
-surface_material_override/0 = SubResource("iron")
-
-[node name="PostR" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.018, 0, 0.03)
-mesh = SubResource("post")
-surface_material_override/0 = SubResource("iron")
-
-[node name="Ring" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0.062)
-mesh = SubResource("ring")
-surface_material_override/0 = SubResource("brass")
+script = ExtResource("1_piece")
+kind = "sight"

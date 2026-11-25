@@ -1,49 +1,39 @@
 class_name ZzMedievalAttachmentDress
 extends RefCounted
 
-## Puts a fitting's attachment models on a medieval weapon's grip node: adds the `socket_<mount>` nodes at
-## [method ZzMedievalArtTable.socket_points], then hands over to [GSWeaponAttachmentModels].
+## Puts a fitting's attachment models on a medieval weapon: adds a `socket_<mount>` node for each of the weapon's
+## mounts ([constant ZzMedievalPack.MOUNTS]), hands over to [GSWeaponAttachmentModels], then fits each placed piece
+## ([ZzAttachmentPiece]) to what [ZzAttachmentFit] measures on this weapon's model. The sockets sit at the grip's origin
+## (pieces are built in the grip frame, so they ride every swing with the weapon), except the crossbow's muzzle, which
+## goes on the bolt itself (its frame turned so +Y runs to the tip) and so is shown, nocked and hidden with it.
+
+## The bolt's frame for a muzzle piece: the missile's -Z (its flight) turned onto +Y.
+const MISSILE_FRAME := Transform3D(Basis(Vector3(1, 0, 0), PI / 2), Vector3.ZERO)
 
 
-## Dresses [param grip] (the aligned grip-at-origin node holding [param id]'s model) with [param fitting]; returns how many models it placed.
-static func dress(grip: Node3D, id: StringName, catalogue: GSWeaponAttachments, fitting: GSWeaponFitting) -> int:
+## Dresses [param grip] (the aligned grip-at-origin node holding [param model], weapon [param id]) with
+## [param fitting]; [param missile] is the nocked bolt, if any. Returns how many models it placed.
+static func dress(grip: Node3D, model: Node3D, id: StringName, catalogue: GSWeaponAttachments, fitting: GSWeaponFitting, missile: Node3D = null) -> int:
 	if grip == null:
 		return 0
-	var points := ZzMedievalArtTable.socket_points(id)
+	for old in grip.find_children(GSWeaponAttachmentModels.SOCKET_PREFIX + "*", "Node3D", true, false):
+		old.get_parent().remove_child(old)
+		old.queue_free()
 	for mount: StringName in ZzMedievalPack.MOUNTS.get(id, []):
-		var key := String(mount)
-		if not points.has(key) or grip.has_node(NodePath(GSWeaponAttachmentModels.SOCKET_PREFIX + key)):
-			continue
 		var socket := Node3D.new()
-		socket.name = GSWeaponAttachmentModels.SOCKET_PREFIX + key
-		socket.position = points[key] as Vector3
-		if key == "magazine":
-			socket.position = _butt(grip, socket.position)
-		grip.add_child(socket)
-	return GSWeaponAttachmentModels.dress(grip, catalogue, fitting)
-
-
-## The weapon's butt end along its own axis (the lowest point of its meshes in grip space), so the counterweight sits on
-## each model's real pommel rather than at a table guess; [param fallback] when the grip has no meshes yet.
-static func _butt(grip: Node3D, fallback: Vector3) -> Vector3:
-	var lo := INF
-	var cx := 0.0
-	var cz := 0.0
-	for m: Node in grip.find_children("*", "MeshInstance3D", true, false):
-		var mi := m as MeshInstance3D
-		if mi.mesh == null:
-			continue
-		var xf := Transform3D.IDENTITY
-		var n: Node = mi
-		while n != null and n != grip:
-			if n is Node3D:
-				xf = (n as Node3D).transform * xf
-			n = n.get_parent()
-		var b: AABB = xf * mi.get_aabb()
-		if b.position.y < lo:
-			lo = b.position.y
-			cx = b.get_center().x
-			cz = b.get_center().z
-	if lo == INF:
-		return fallback
-	return Vector3(cx, lo + 0.012, cz)
+		socket.name = GSWeaponAttachmentModels.SOCKET_PREFIX + String(mount)
+		if mount == &"muzzle" and missile != null:
+			socket.transform = MISSILE_FRAME.affine_inverse()
+			missile.add_child(socket)
+		else:
+			grip.add_child(socket)
+	var placed := GSWeaponAttachmentModels.dress(grip, catalogue, fitting)
+	if placed == 0 or model == null:
+		return placed
+	var info := ZzAttachmentFit.of(id, model).duplicate()
+	if missile != null:
+		info["head"] = ZzAttachmentFit.head(missile, MISSILE_FRAME)
+	for n in grip.find_children("*", "", true, false):
+		if n.has_meta(&"gs_attachment_model") and n.has_method(&"fit"):
+			n.call(&"fit", info)
+	return placed

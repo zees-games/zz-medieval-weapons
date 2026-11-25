@@ -4,7 +4,7 @@ extends "res://examples/selftest/zz_motion_checks.gd"
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 482
+const CHECKS := 485
 
 
 func _ready() -> void:
@@ -616,6 +616,43 @@ func _attachments() -> void:
 	held.show_fitting(cat, f1)
 	var placed: Array = held.find_children("*", "", true, false).filter(func(n: Node) -> bool: return n.has_meta(&"gs_attachment_model"))
 	_check(placed.size() == 2, "a fitted crossbow shows its two models (%d)" % placed.size())
+	for p: Node in placed:
+		if p is ZzAttachmentPiece and (p as ZzAttachmentPiece).kind == "heads":
+			var hb := _local_box(p as Node3D)
+			var tip := float(ZzAttachmentFit.head(held._missile, ZzMedievalAttachmentDress.MISSILE_FRAME)["tip"])
+			_check(held._missile.is_ancestor_of(p) and absf(hb.end.y - tip) < 0.015, "the barbed heads ride the bolt and cap its tip (%.3f vs %.3f)" % [hb.end.y, tip])
+	held.bind(&"longsword")
+	held.show_fitting(cat, f2)
+	var fit := ZzAttachmentFit.of(&"longsword", held._model)
+	var grip_r := 0.0
+	for r: Dictionary in fit["wrap"]["rings"]:
+		grip_r = maxf(grip_r, (r["h"] as Vector2).x)
+	for p: Node in held.find_children("*", "", true, false):
+		if not p is ZzAttachmentPiece:
+			continue
+		var b := _local_box(p as Node3D)
+		match (p as ZzAttachmentPiece).kind:
+			"wrap":
+				var over := b.size.x * 0.5 - grip_r
+				_check(over > 0.001 and over < 0.007, "the wrap hugs the grip (%.1f mm proud)" % (over * 1000.0))
+			"counterweight":
+				var butt: Dictionary = fit["butt"]
+				var widest := 0.0
+				for r: Dictionary in butt["rings"]:
+					widest = maxf(widest, (r["h"] as Vector2).x)
+				_check(b.size.x * 0.5 - widest < 0.012 and absf(b.position.y - float(butt["y"])) < 0.035, "the counterweight caps the pommel (%.1f mm wider)" % ((b.size.x * 0.5 - widest) * 1000.0))
 	held.show_fitting(cat, null)
 	held.free()
 	_end()
+
+
+## [param n]'s meshes' bounds in [param n]'s own space (its children are direct).
+func _local_box(n: Node3D) -> AABB:
+	var box := AABB()
+	var first := true
+	for c in n.get_children():
+		if c is MeshInstance3D and (c as MeshInstance3D).mesh != null:
+			var b := (c as MeshInstance3D).transform * (c as MeshInstance3D).get_aabb()
+			box = b if first else box.merge(b)
+			first = false
+	return box

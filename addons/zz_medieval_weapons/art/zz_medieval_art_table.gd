@@ -22,8 +22,10 @@ static func rows() -> Dictionary:
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},
 			"surface": "steel",
 		},
-		&"battle_axe": _axe(1.15),
-		&"war_axe": _axe(1.1),
+		# The battle axe's haft leans 17 degrees back and passes 13 cm behind the glb's origin, the war axe's leans 5
+		# degrees and passes 5 cm beside it; align and grip stand each haft on +Y through the hand.
+		&"battle_axe": _axe(1.15, Vector3(-17.09, 0, 0), Vector3(0, -0.039, -0.126)),
+		&"war_axe": _axe(1.1, Vector3(0, 0, -5.32), Vector3(0.0526, -0.0049, 0)),
 		&"double_axe": _axe(1.2),
 		&"mace": {
 			"hold": Vector3(-30, 0, 0), "rest": Vector3(0.30, -0.34, -0.52), "side": 1,
@@ -32,6 +34,8 @@ static func rows() -> Dictionary:
 			"surface": "iron",
 		},
 		&"spear": {
+			# The glb's haft leans 11 degrees off +Y and passes 4 cm from its origin at the hand.
+			"align": Vector3(-10.93, 0, 0), "grip": Vector3(0, -0.0076, -0.0393),
 			"hold": Vector3(-78, 0, 6), "rest": Vector3(0.32, -0.30, -0.42), "side": 1,
 			"offhand": Vector3(0, 0.55, 0),
 			"styles": [S.THRUST], "heft": 1.0, "weight": "light",
@@ -83,7 +87,8 @@ static func _bow() -> Dictionary:
 ## The crossbow: shouldered, cocked by a reload, the bolt in the groove.
 static func _crossbow() -> Dictionary:
 	return {
-		"hold": Vector3(-90, 0, 0), "rest": Vector3(0.20, -0.26, -0.50), "side": 1,
+		# The groove falls 10 degrees from the nut to the prod; the hold levels it, so the bolt points where the eye looks.
+		"hold": Vector3(-79.8, 0, 0), "rest": Vector3(0.20, -0.26, -0.50), "side": 1,
 		"offhand": Vector3(0, 0.16, -0.012),   # under the fore-stock, behind the prod
 		"styles": [S.FIRE], "heft": 1.0, "scale": 0.9, "weight": "heavy",
 		"string": {
@@ -91,14 +96,15 @@ static func _crossbow() -> Dictionary:
 			# Cocked is pull 1: the string drawn back and up over the stock into the nut (y 0.12, top of the stock z 0.017).
 			"axis": Vector3(0, -0.944, 0.33), "rest": Vector3(0, 0.235, -0.02), "travel": 0.122,
 		},
-		"projectile": "bolt", "nock_axis": Vector3(0, 1, 0), "nock_lift": Vector3(0, 0, 0.008),
+		"projectile": "bolt", "nock_axis": Vector3(0, 0.9840, -0.1780), "nock_lift": Vector3(0, 0, 0.008),
 		"surface": "iron",
 	}
 
 
-## The three axes share one grip, rest and block and differ only in heft.
-static func _axe(heft: float) -> Dictionary:
+## The three axes share one hold, rest and block and differ in heft and in how their glb stands.
+static func _axe(heft: float, align := Vector3.ZERO, grip := Vector3.ZERO) -> Dictionary:
 	return {
+		"align": align, "grip": grip,
 		"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
 		"offhand": Vector3(0, 0.38, 0),
 		"styles": [S.OVERHEAD, S.SLASH_R], "heft": heft, "weight": "heavy",
@@ -117,19 +123,6 @@ static func model_transform(id: StringName) -> Transform3D:
 	var a: Vector3 = r.get("align", Vector3.ZERO)
 	var basis := Basis.from_euler(Vector3(deg_to_rad(a.x), deg_to_rad(a.y), deg_to_rad(a.z)))
 	return Transform3D(basis, -(r.get("grip", Vector3.ZERO) as Vector3))
-
-
-## Where each mount's attachment model sits, in the aligned grip-at-origin space the weapon stands in (+Y along it).
-## Melee: the wrap just above the hand, the pommel weight at the butt. Crossbow: the sight over the nut, the head at the bolt's tip.
-static func socket_points(id: StringName) -> Dictionary:
-	match id:
-		&"crossbow":
-			return {"optic": Vector3(0, 0.10, 0.02), "muzzle": Vector3(0, 0.34, 0.0)}
-		&"round_shield":
-			return {"side": Vector3(0, 0, 0.03)}
-		&"bow":
-			return {}
-	return {"underbarrel": Vector3(0, 0.08, 0), "magazine": Vector3(0, -0.18, 0)}
 
 
 static func has(id: StringName) -> bool:

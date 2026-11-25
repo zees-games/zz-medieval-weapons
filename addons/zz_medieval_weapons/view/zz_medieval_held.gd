@@ -142,7 +142,7 @@ func bind(id: StringName, cfg: Dictionary = {}) -> void:
 	if _row.has("projectile"):
 		_missile = ZzMedievalModels.projectile(StringName(_row["projectile"]))
 		_grip.add_child(_missile)
-	ZzMedievalAttachmentDress.dress(_grip, id, _catalogue, _fitting)
+	ZzMedievalAttachmentDress.dress(_grip, _model, id, _catalogue, _fitting, _missile)
 	if not anim.loosed.is_connected(_on_loosed):
 		anim.loosed.connect(_on_loosed)
 	if not anim.cue.is_connected(_on_cue):
@@ -155,7 +155,7 @@ func show_fitting(catalogue: GSWeaponAttachments, with: GSWeaponFitting) -> void
 	_catalogue = catalogue
 	_fitting = with
 	if _grip != null:
-		ZzMedievalAttachmentDress.dress(_grip, weapon_id, _catalogue, _fitting)
+		ZzMedievalAttachmentDress.dress(_grip, _model, weapon_id, _catalogue, _fitting, _missile)
 
 
 func _drop(n: Node) -> Node:

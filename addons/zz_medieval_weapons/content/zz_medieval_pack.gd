@@ -10,7 +10,7 @@ const SHIELD := BEHAVIOUR_DIR + "zz_shield.gd"
 const PROJECTILE := BEHAVIOUR_DIR + "zz_projectile.gd"
 
 
-## Which mounts each weapon takes; the sockets are [method ZzMedievalArtTable.socket_points]. A bow takes none.
+## Which mounts each weapon takes; each piece is fitted to the weapon by [ZzMedievalAttachmentDress]. A bow takes none.
 const MOUNTS := {
 	&"longsword": [&"underbarrel", &"magazine"], &"dagger": [&"underbarrel", &"magazine"],
 	&"battle_axe": [&"underbarrel", &"magazine"], &"war_axe": [&"underbarrel", &"magazine"],

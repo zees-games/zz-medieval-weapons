@@ -1,52 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=2 format=3]
 
-[sub_resource type="StandardMaterial3D" id="iron"]
-cull_mode = 2
-albedo_color = Color(0.25, 0.25, 0.28, 1)
-metallic = 0.8
-roughness = 0.5
-
-[sub_resource type="StandardMaterial3D" id="steel"]
-cull_mode = 2
-albedo_color = Color(0.62, 0.64, 0.68, 1)
-metallic = 0.9
-roughness = 0.35
-
-[sub_resource type="CylinderMesh" id="cone"]
-top_radius = 0.0
-bottom_radius = 0.022
-height = 0.07
-radial_segments = 4
-rings = 1
-
-[sub_resource type="CylinderMesh" id="collar"]
-top_radius = 0.012
-bottom_radius = 0.012
-height = 0.03
-radial_segments = 12
-rings = 1
-
-[sub_resource type="PrismMesh" id="barb"]
-size = Vector3(0.012, 0.03, 0.006)
+[ext_resource type="Script" path="res://addons/zz_medieval_weapons/view/zz_attachment_piece.gd" id="1_piece"]
 
 [node name="ZzBarbedHeads" type="Node3D"]
-
-[node name="Head" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.035, 0)
-mesh = SubResource("cone")
-surface_material_override/0 = SubResource("steel")
-
-[node name="Collar" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.015, 0)
-mesh = SubResource("collar")
-surface_material_override/0 = SubResource("iron")
-
-[node name="BarbL" type="MeshInstance3D" parent="."]
-transform = Transform3D(-1, 0, 0, 0, -1, 0, 0, 0, 1, -0.02, 0.0, 0)
-mesh = SubResource("barb")
-surface_material_override/0 = SubResource("iron")
-
-[node name="BarbR" type="MeshInstance3D" parent="."]
-transform = Transform3D(-1, 0, 0, 0, -1, 0, 0, 0, 1, 0.02, 0.0, 0)
-mesh = SubResource("barb")
-surface_material_override/0 = SubResource("iron")
+script = ExtResource("1_piece")
+kind = "heads"

@@ -200,9 +200,9 @@ func _boss(b: Dictionary) -> void:
 ## A peep sight on the stock's top just behind the nut: a forged foot hugging the stock, a leaf, and a ring to look
 ## through along the bolt's line (+Y).
 func _sight(top: Array) -> void:
-	# Back on the stock towards the eye (the nut is at y 0.12): behind the trigger hand round the origin, clear of the
-	# fore hand at y 0.16 and of the string, which never comes back past the nut.
-	var y := -0.1
+	# Back on the stock towards the eye (the nut is at y 0.12): a hand's width behind the trigger hand round the origin,
+	# so the ring stands clear of its index finger, and clear of the string, which never comes back past the nut.
+	var y := -0.13
 	var z := 0.017
 	var slope := 0.0
 	if top.size() >= 2:
@@ -227,23 +227,23 @@ func _sight(top: Array) -> void:
 	_mesh(ZzAttachmentArt.sweep(foot, 24, 1.0, 20.0), iron, at * Transform3D(up, Vector3.ZERO))
 	var leaf := [
 		{"y": 0.005, "c": Vector2.ZERO, "h": Vector2(0.0042, 0.0022)},
-		{"y": 0.022, "c": Vector2.ZERO, "h": Vector2(0.0028, 0.0016)},
-		{"y": 0.0275, "c": Vector2.ZERO, "h": Vector2(0.0028, 0.0016)},
+		{"y": 0.028, "c": Vector2.ZERO, "h": Vector2(0.0028, 0.0016)},
+		{"y": 0.0335, "c": Vector2.ZERO, "h": Vector2(0.0028, 0.0016)},
 	]
 	_mesh(ZzAttachmentArt.sweep(leaf, 16, 1.0, 20.0), iron, at * Transform3D(up, Vector3.ZERO))
 	# A forged collar where the leaf meets the ring, so the ring reads as welded on, not floating on a stalk.
 	var collar := [
-		{"y": 0.0245, "c": Vector2.ZERO, "h": Vector2(0.0034, 0.0022)},
-		{"y": 0.026, "c": Vector2.ZERO, "h": Vector2(0.0048, 0.003)},
-		{"y": 0.0275, "c": Vector2.ZERO, "h": Vector2(0.0048, 0.003)},
+		{"y": 0.0305, "c": Vector2.ZERO, "h": Vector2(0.0034, 0.0022)},
+		{"y": 0.032, "c": Vector2.ZERO, "h": Vector2(0.0048, 0.003)},
+		{"y": 0.0335, "c": Vector2.ZERO, "h": Vector2(0.0048, 0.003)},
 	]
 	_mesh(ZzAttachmentArt.sweep(collar, 16, 1.0, 20.0), iron, at * Transform3D(up, Vector3.ZERO))
 	var ring := TorusMesh.new()
-	ring.inner_radius = 0.0062
-	ring.outer_radius = 0.0105
+	ring.inner_radius = 0.0068
+	ring.outer_radius = 0.0115
 	ring.rings = 32
 	ring.ring_segments = 12
-	_mesh(ring, iron, at * Transform3D(Basis.IDENTITY, Vector3(0, 0, 0.0365)))
+	_mesh(ring, iron, at * Transform3D(Basis.IDENTITY, Vector3(0, 0, 0.0435)))
 
 
 ## Barbed broadheads over the bolt's own head: a socket sleeve on the shaft and two crossed forged blades, each with a

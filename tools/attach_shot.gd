@@ -4,7 +4,8 @@ extends Node3D
 ## close camera from its far (opponent's) side. The two close cameras ride the piece's socket frame, so the piece
 ## holds still in frame while the hands use the weapon, and anything that slips or floats on the weapon shows. There
 ## is no stand-in body: the subject is the attachment, not the person holding it. The weapon is used in real time (a
-## swing, or the crossbow's shot and full reload); the crossbow's shot runs slowed down while the close cameras
+## look-over, as the player's inspect raises it toward the eye, then a swing, or the crossbow's shot and full reload);
+## the crossbow's shot runs slowed down while the close cameras
 ## follow the bolt in flight, so the heads it carries show. One png per frame under <out>/<attachment>/<weapon>/
 ## (attach_capture.sh turns them into <attachment>/<weapon>.mp4). Run under Xvfb on a GPU box: `--out=<dir>
 ## [--variant=N] [--frames=N]`; the variant moves the sun and turns the close cameras.
@@ -18,14 +19,19 @@ const PAIRS := {
 	&"zz_counterweight": [&"longsword", &"war_axe", &"mace"],
 	&"zz_spiked_boss": [&"round_shield"],
 }
-## The crossbow's timeline in frames: it aims, shoots at SHOT, runs SLOW frames at an eighth of the speed (the close
-## cameras on the bolt in flight for the heads), reloads at RELOAD and shows the new bolt loaded to the end.
-const SHOT := 6
+## Every weapon is first looked over (the game's inspect, LOOK on for its 2.4 s): the first-person view sees the piece
+## raised toward the eye, not only at the hip. A melee weapon then swings at SWINGS and settles; the clip is MELEE_N.
+const LOOK := 1
+const SWINGS := [32, 50]
+const MELEE_N := 66
+## The crossbow's timeline in frames: it is looked over, shoots at SHOT, runs SLOW frames at an eighth of the speed
+## (the close cameras on the bolt in flight for the heads), reloads at RELOAD and shows the new bolt loaded to the end.
+const SHOT := 32
 const SLOW := 8
 const RELOAD := SHOT + SLOW + 2
 
 var _out := "res://screenshots/attach"
-var _n := 36
+var _n := MELEE_N
 var _n_set := false
 var _variant := 0
 var _fp: Camera3D
@@ -128,15 +134,17 @@ func _clip(cat: GSWeaponAttachments, att: StringName, w: StringName) -> void:
 			n.free()
 
 
-## The weapon in use for [param dt] of time: a swing (or the shield's bash) at the start and again halfway; the
-## crossbow aims a while (the heads ride the nocked bolt), shoots, then reloads.
+## The weapon in use for [param dt] of time: looked over, then two swings (or the shield's bashes); the crossbow is
+## looked over (the heads ride the loaded bolt), shoots, then reloads.
 func _act(vm: ZzMedievalHeld, w: StringName, i: int, dt: float) -> void:
-	if w == &"crossbow":
+	if i == LOOK:
+		vm.anim.inspect()
+	elif w == &"crossbow":
 		if i == SHOT:
 			vm.anim.start_use()
 		elif i == RELOAD:
 			vm.anim.set_reloading(true)
-	elif i == 2 or i == _n / 2 + 2:
+	elif i in SWINGS:
 		vm.anim.start_use()
 	var t := 0.0
 	var step := minf(STEP, dt)

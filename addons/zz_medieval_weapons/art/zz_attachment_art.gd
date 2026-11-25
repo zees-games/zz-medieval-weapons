@@ -254,8 +254,9 @@ static func rope() -> StandardMaterial3D:
 	var h := PackedFloat32Array()
 	h.resize(TEX * TEX)
 	var alb := Image.create(TEX, TEX, false, Image.FORMAT_RGBA8)
-	# Waxed cord, darkened by handling: it binds the leather's end without standing out of it.
-	var base := Color(0.40, 0.30, 0.19)
+	# Waxed cord, darkened by handling: it binds the leather's end without standing out of it, and with a low
+	# specular, so a backlit band never glints as thin white streaks between the fingers.
+	var base := Color(0.30, 0.21, 0.13)
 	for y in TEX:
 		for x in TEX:
 			var u := float(x) / TEX
@@ -267,7 +268,8 @@ static func rope() -> StandardMaterial3D:
 			alb.set_pixel(x, y, base.darkened(0.55 * (1.0 - bulge)).lerp(base.lightened(0.1), f * 0.3))
 			h[y * TEX + x] = height
 	var m := _material(alb, h, 2.5)
-	m.roughness = 0.92
+	m.roughness = 0.95
+	m.metallic_specular = 0.15
 	_mats[&"rope"] = m
 	return m
 

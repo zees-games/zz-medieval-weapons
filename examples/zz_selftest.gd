@@ -4,7 +4,7 @@ extends "res://examples/selftest/zz_motion_checks.gd"
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 485
+const CHECKS := 487
 
 
 func _ready() -> void:
@@ -532,6 +532,24 @@ func _net() -> void:
 		owner.start_use()
 	sender.pull(owner, wire)
 	_check(ZzMedievalNet.uses_between(seq, int(wire.net_use_seq)) == 1, "seventeen swings wrap to one (the counter is four bits)")
+	# A dagger's quick thrust ends on time, but its return to rest is spread over RECOVER_S on screen, not snapped.
+	var stab := ZzWeaponAnim.new()
+	stab.configure(&"dagger")
+	stab.start_use(ZzWeaponPose.Style.THRUST)
+	var steps := 0
+	while stab.is_swinging():
+		stab.advance(1.0 / 64.0)
+		steps += 1
+	var tail := (stab.pose()["pos"] as Vector3).length()
+	_check(steps <= ceili(stab.swing_s * 64.0) + 1 and tail > 0.05, "the dagger's swing ends on time and its return still shows (%.3f m out)" % tail)
+	var jump := 0.0
+	var last := tail
+	for f in 30:
+		stab.advance(1.0 / 64.0)
+		var now := (stab.pose()["pos"] as Vector3).length()
+		jump = maxf(jump, absf(now - last))
+		last = now
+	_check(last < 0.001 and jump < 0.05, "and it settles to rest with no step over 5 cm a tick (max %.3f)" % jump)
 	# A bow: draw travels as a level, the release as the counter.
 	var archer := ZzWeaponAnim.new()
 	archer.configure(&"bow")

@@ -48,6 +48,15 @@ var _inspect_t: float = 0.0
 var _holster_to: float = 0.0
 var _bolt_laid: bool = false
 
+## Every keyed style holds its strike to [constant RECOVER_FROM] and returns to rest by 1.0. A quick weapon's swing
+## (a dagger's is 0.31 s) would make that return a one-frame snap, so on screen it takes at least [constant RECOVER_S]:
+## the pose runs on after the swing itself has ended (the swing's timing, strike and next use are unchanged).
+const RECOVER_FROM := 0.70
+const RECOVER_S := 0.32
+var _settle_style: int = ZzWeaponPose.Style.NONE
+var _settle_t: float = 0.0
+var _settle_dur: float = 0.0
+
 
 func configure(weapon_id: StringName, cfg: Dictionary = {}) -> void:
 	id = weapon_id
@@ -66,6 +75,7 @@ func configure(weapon_id: StringName, cfg: Dictionary = {}) -> void:
 func reset() -> void:
 	style = ZzWeaponPose.Style.NONE
 	style_t = 0.0
+	_settle_style = ZzWeaponPose.Style.NONE
 	blocking = false
 	block = 0.0
 	draw = 0.0
@@ -111,6 +121,7 @@ func start_use(which: int = -1, duration_s: float = 0.0) -> int:
 		return which
 	style = which
 	style_t = 0.0
+	_settle_style = ZzWeaponPose.Style.NONE
 	style_dur = duration_s if duration_s > 0.0 else swing_s
 	_struck_sent = false
 	used.emit(style)
@@ -211,6 +222,7 @@ func loose() -> void:
 		_follow = 0.28
 	style = ZzWeaponPose.Style.NONE
 	style_t = 0.0
+	_settle_style = ZzWeaponPose.Style.NONE
 
 
 ## The swing found something: the weapon recoils off it and a hit is heard. [param surface]
@@ -224,6 +236,7 @@ func hit(surface: StringName = &"flesh") -> void:
 ## [method advance] carries on from there.
 func force(which: int, t: float) -> void:
 	style = which
+	_settle_style = ZzWeaponPose.Style.NONE
 	style_dur = swing_s
 	style_t = t * style_dur
 	_struck_sent = true
@@ -254,8 +267,15 @@ func advance(dt: float) -> void:
 			_struck_sent = true
 			struck.emit(style)
 		if t >= 1.0:
+			_settle_style = style
+			_settle_t = style_t
+			_settle_dur = style_dur
 			style = ZzWeaponPose.Style.NONE
 			style_t = 0.0
+	elif _settle_style != ZzWeaponPose.Style.NONE:
+		_settle_t += dt
+		if _visual_phase(_settle_t, _settle_dur) >= 1.0:
+			_settle_style = ZzWeaponPose.Style.NONE
 
 	_kick = move_toward(_kick, 0.0, dt * 4.0)
 	holstered = move_toward(holstered, _holster_to, dt / maxf(holster_s, 0.01))
@@ -304,6 +324,17 @@ func advance(dt: float) -> void:
 			draw = move_toward(draw, 1.0, dt * 3.0)
 
 
+## The pose's phase [param t] seconds into a swing of [param dur]: the swing's own phase up to [constant RECOVER_FROM],
+## then the return to rest spread over at least [constant RECOVER_S].
+func _visual_phase(t: float, dur: float) -> float:
+	dur = maxf(dur, 0.001)
+	var hold := RECOVER_FROM * dur
+	if t <= hold:
+		return t / dur
+	var back := maxf((1.0 - RECOVER_FROM) * dur, RECOVER_S)
+	return minf(RECOVER_FROM + (1.0 - RECOVER_FROM) * (t - hold) / back, 1.0)
+
+
 func _finish_load() -> void:
 	reloading = false
 	loaded = true
@@ -316,8 +347,10 @@ func _finish_load() -> void:
 func pose() -> Dictionary:
 	var pos := Vector3.ZERO
 	var rot := Vector3.ZERO
-	if is_swinging():
-		var s := ZzWeaponPose.sample(style, style_t / maxf(style_dur, 0.001), heft)
+	if is_swinging() or _settle_style != ZzWeaponPose.Style.NONE:
+		var swinging := is_swinging()
+		var s := ZzWeaponPose.sample(style if swinging else _settle_style,
+				_visual_phase(style_t if swinging else _settle_t, style_dur if swinging else _settle_dur), heft)
 		pos = s["pos"]
 		rot = s["rot"]
 	var is_bow: bool = _row.get("projectile", "") == "arrow"
@@ -361,7 +394,8 @@ func pose() -> Dictionary:
 		pos += Vector3(0.0, 0.02, 0.08) * _kick
 		rot += Vector3(6.0, 0.0, 0.0) * _kick
 	return {
-		"pos": pos, "rot": rot, "string_pull": draw, "nock": nocked if is_bow else loaded,
+		# A crossbow's bolt shows from the moment it is laid in the groove, before the reload finishes.
+		"pos": pos, "rot": rot, "string_pull": draw, "nock": nocked if is_bow else (loaded or (reloading and _bolt_laid)),
 		"off_string": off_string, "block": block, "inspect": inspect_phase(), "holstered": holstered,
 	}
 

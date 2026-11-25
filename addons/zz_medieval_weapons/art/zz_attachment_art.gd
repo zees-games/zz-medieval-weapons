@@ -168,8 +168,9 @@ static func grown(r: Dictionary, by: float, y_shift := 0.0) -> Dictionary:
 
 
 ## A forged blade in the XY plane, tip up: [param half] is its right half outline from the spine's foot to the tip
-## (x >= 0, mirrored for the left), [param spine] the thickness along x = 0, thinning to a sharp edge.
-static func blade(half: PackedVector2Array, spine: float) -> ArrayMesh:
+## (x >= 0, mirrored for the left), [param spine] the thickness along x = 0, thinning toward the edge to
+## [param edge] of it (a small forged blade keeps some body there, or its outline vanishes edge-on).
+static func blade(half: PackedVector2Array, spine: float, edge: float = 0.3) -> ArrayMesh:
 	var outline := PackedVector2Array(half)
 	var width := 0.0
 	for p in half:
@@ -183,7 +184,7 @@ static func blade(half: PackedVector2Array, spine: float) -> ArrayMesh:
 				var ps: Array = []
 				for k in 3:
 					var q := outline[tri[t + k]]
-					var z := face * spine * 0.5 * clampf(1.0 - q.x / maxf(width, 1e-4), 0.3, 1.0)
+					var z := face * spine * 0.5 * clampf(1.0 - q.x / maxf(width, 1e-4), edge, 1.0)
 					ps.append(Vector3(q.x * mirror, q.y, z))
 				var n: Vector3 = ((ps[1] as Vector3) - ps[0]).cross((ps[2] as Vector3) - ps[0]).normalized()
 				if n.z * face < 0.0:
@@ -195,8 +196,8 @@ static func blade(half: PackedVector2Array, spine: float) -> ArrayMesh:
 			var b := outline[(i + 1) % outline.size()]
 			if a.x < 1e-5 and b.x < 1e-5:
 				continue
-			var za := spine * 0.5 * clampf(1.0 - a.x / maxf(width, 1e-4), 0.3, 1.0)
-			var zb := spine * 0.5 * clampf(1.0 - b.x / maxf(width, 1e-4), 0.3, 1.0)
+			var za := spine * 0.5 * clampf(1.0 - a.x / maxf(width, 1e-4), edge, 1.0)
+			var zb := spine * 0.5 * clampf(1.0 - b.x / maxf(width, 1e-4), edge, 1.0)
 			var e := Vector3(b.x - a.x, b.y - a.y, 0.0)
 			var n := Vector3(e.y, -e.x, 0.0).normalized()
 			if n.dot(Vector3((a.x + b.x) * 0.5, 0, 0) - Vector3(0, 0, 0)) < 0.0 and absf(n.x) > 0.2:

@@ -52,7 +52,7 @@ var _bolt_laid: bool = false
 ## (a dagger's is 0.31 s) would make that return a one-frame snap, so on screen it takes at least [constant RECOVER_S]:
 ## the pose runs on after the swing itself has ended (the swing's timing, strike and next use are unchanged).
 const RECOVER_FROM := 0.70
-const RECOVER_S := 0.32
+const RECOVER_S := 0.45
 var _settle_style: int = ZzWeaponPose.Style.NONE
 var _settle_t: float = 0.0
 var _settle_dur: float = 0.0
@@ -384,7 +384,7 @@ func pose() -> Dictionary:
 		var ph := inspect_phase()
 		var env := smoothstep(0.0, 0.18, ph) * (1.0 - smoothstep(0.82, 1.0, ph))
 		pos += Vector3(-0.10, 0.12, 0.10) * env
-		rot += Vector3(-24.0 * env + 10.0 * sin(ph * TAU * 2.0) * env, 150.0 * sin(ph * TAU) * env, 14.0 * sin(ph * TAU * 2.0) * env)
+		rot += Vector3(-24.0 * env + 10.0 * sin(ph * TAU * 2.0) * env, 90.0 * sin(ph * TAU) * env, 14.0 * sin(ph * TAU * 2.0) * env)
 	if holstered > 0.0:
 		var h := smoothstep(0.0, 1.0, holstered)
 		pos += Vector3(0.12, -0.42, 0.10) * h

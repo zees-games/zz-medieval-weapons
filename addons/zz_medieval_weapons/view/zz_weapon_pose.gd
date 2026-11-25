@@ -12,7 +12,7 @@ const STYLE_BITS := 3
 
 const STRIKE_AT := 0.45
 
-## Keyframes: [t, pos, rot_degrees]. Linear in t, eased between keys.
+## Keyframes: [t, pos, rot_degrees], joined by a monotone cubic ([method _hermite]).
 const _SLASH_R := [
 	[0.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
 	[0.32, Vector3(0.20, 0.12, 0.10), Vector3(42, 0, -58)],
@@ -87,17 +87,43 @@ static func sample(style: int, t: float, heft: float = 1.0) -> Dictionary:
 	var i := 0
 	while i < k.size() - 2 and t > float(k[i + 1][0]):
 		i += 1
-	var a: Array = k[i]
-	var b: Array = k[i + 1]
-	var span := maxf(float(b[0]) - float(a[0]), 0.0001)
-	var f := smoothstep(0.0, 1.0, clampf((t - float(a[0])) / span, 0.0, 1.0))
-	var pos: Vector3 = (a[1] as Vector3).lerp(b[1], f) * heft
-	var rot: Vector3 = (a[2] as Vector3).lerp(b[2], f) * heft
+	var pos: Vector3 = _hermite(k, i, 1, t) * heft
+	var rot: Vector3 = _hermite(k, i, 2, t) * heft
 	if style == Style.SLASH_L:
 		pos.x = -pos.x
 		rot.z = -rot.z
 		rot.y = -rot.y
 	return {"pos": pos, "rot": rot}
+
+
+## Key column [param col] at [param t] in segment [param i]: a monotone cubic through the keys, so the hand flows
+## through each key at speed (no stop at every key, no overshoot past one) and is still at the first and last.
+static func _hermite(k: Array, i: int, col: int, t: float) -> Vector3:
+	var t0 := float(k[i][0])
+	var t1 := float(k[i + 1][0])
+	var h := maxf(t1 - t0, 0.0001)
+	var s := clampf((t - t0) / h, 0.0, 1.0)
+	var p0: Vector3 = k[i][col]
+	var p1: Vector3 = k[i + 1][col]
+	var m0 := _tangent(k, i, col) * h
+	var m1 := _tangent(k, i + 1, col) * h
+	var s2 := s * s
+	var s3 := s2 * s
+	return p0 * (2.0 * s3 - 3.0 * s2 + 1.0) + m0 * (s3 - 2.0 * s2 + s) + p1 * (-2.0 * s3 + 3.0 * s2) + m1 * (s3 - s2)
+
+
+## The slope at key [param j] per component: zero at the ends and where the motion turns, else the harmonic mean
+## of the two secants (Fritsch-Butland), which never overshoots.
+static func _tangent(k: Array, j: int, col: int) -> Vector3:
+	if j <= 0 or j >= k.size() - 1:
+		return Vector3.ZERO
+	var da := ((k[j][col] as Vector3) - (k[j - 1][col] as Vector3)) / maxf(float(k[j][0]) - float(k[j - 1][0]), 0.0001)
+	var db := ((k[j + 1][col] as Vector3) - (k[j][col] as Vector3)) / maxf(float(k[j + 1][0]) - float(k[j][0]), 0.0001)
+	var out := Vector3.ZERO
+	for c in 3:
+		if da[c] * db[c] > 0.0:
+			out[c] = 2.0 * da[c] * db[c] / (da[c] + db[c])
+	return out
 
 
 ## Where the blade is, as a signed number: 0 before the wind-up, 1 at the strike. For

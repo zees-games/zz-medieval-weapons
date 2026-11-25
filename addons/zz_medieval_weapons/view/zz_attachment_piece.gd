@@ -266,10 +266,10 @@ func _heads(h: Dictionary) -> void:
 	_mesh(ZzAttachmentArt.sweep(sleeve, 16, 1.0, 20.0), iron)
 	var w := hr + 0.004
 	var s := shaft + 0.002
-	# Each barb swept well back, a deep notch between it and the point's shoulder, so the barbed outline reads at a
-	# distance; the cross is turned 45 degrees off the stirrup's plane, which the nocked head sits in.
-	var half := PackedVector2Array([Vector2(0, yb), Vector2(s, yb), Vector2(w + 0.006, yb - 0.017), Vector2(s + 0.0015, yb + 0.002), Vector2(w + 0.002, yb + 0.011), Vector2(0, tip + 0.002)])
-	var blade := ZzAttachmentArt.blade(half, 0.007)
+	# Each barb swept well back with a thick root and bevelled edges (so it reads as forged iron, not a flat card), a deep
+	# notch between it and the point's shoulder; the cross is turned 45 degrees off the stirrup's plane, which the nocked head sits in.
+	var half := PackedVector2Array([Vector2(0, yb), Vector2(s, yb), Vector2(w + 0.006, yb - 0.017), Vector2(s + 0.004, yb + 0.005), Vector2(w + 0.002, yb + 0.011), Vector2(0, tip + 0.002)])
+	var blade := ZzAttachmentArt.blade(half, 0.010, 0.55)
 	for turn: float in [PI / 4, 3 * PI / 4]:
 		_mesh(blade, iron, Transform3D(Basis(Vector3(0, 1, 0), turn), Vector3.ZERO))
 

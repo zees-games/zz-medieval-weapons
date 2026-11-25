@@ -10,14 +10,14 @@ const S := ZzWeaponPose.Style
 static func rows() -> Dictionary:
 	return {
 		&"longsword": {
-			"hold": Vector3(-28, 0, 0), "rest": Vector3(0.30, -0.34, -0.55), "side": 1,
+			"hold": Vector3(-28, 0, 0), "rest": Vector3(0.25, -0.28, -0.55), "side": 1,
 			"offhand": Vector3(0, -0.06, 0),
 			"styles": [S.SLASH_R, S.SLASH_L, S.OVERHEAD], "heft": 1.0, "weight": "light",
 			"block": {"pos": Vector3(-0.22, 0.20, -0.02), "rot": Vector3(40, 0, 52)},
 			"surface": "steel",
 		},
 		&"dagger": {
-			"hold": Vector3(-40, 0, 0), "rest": Vector3(0.26, -0.30, -0.44), "side": 1,
+			"hold": Vector3(-40, 0, 0), "rest": Vector3(0.22, -0.25, -0.44), "side": 1,
 			"styles": [S.THRUST, S.SLASH_R, S.SLASH_L], "heft": 0.7, "scale": 1.0, "weight": "light",
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},
 			"surface": "steel",
@@ -28,7 +28,7 @@ static func rows() -> Dictionary:
 		&"war_axe": _axe(1.1, Vector3(0, 0, -5.32), Vector3(0.0526, -0.0049, 0)),
 		&"double_axe": _axe(1.2),
 		&"mace": {
-			"hold": Vector3(-30, 0, 0), "rest": Vector3(0.30, -0.34, -0.52), "side": 1,
+			"hold": Vector3(-30, 0, 0), "rest": Vector3(0.25, -0.28, -0.52), "side": 1,
 			"styles": [S.OVERHEAD, S.SLASH_L, S.SLASH_R], "heft": 1.0, "weight": "heavy",
 			"block": {"pos": Vector3(-0.20, 0.20, -0.04), "rot": Vector3(40, 0, 50)},
 			"surface": "iron",
@@ -36,7 +36,7 @@ static func rows() -> Dictionary:
 		&"spear": {
 			# The glb's haft leans 11 degrees off +Y and passes 4 cm from its origin at the hand.
 			"align": Vector3(-10.93, 0, 0), "grip": Vector3(0, -0.0076, -0.0393),
-			"hold": Vector3(-78, 0, 6), "rest": Vector3(0.32, -0.30, -0.42), "side": 1,
+			"hold": Vector3(-78, 0, 6), "rest": Vector3(0.27, -0.26, -0.42), "side": 1,
 			"offhand": Vector3(0, 0.55, 0),
 			"styles": [S.THRUST], "heft": 1.0, "weight": "light",
 			"block": {"pos": Vector3(-0.06, 0.16, -0.05), "rot": Vector3(20, 0, 62)},
@@ -105,7 +105,7 @@ static func _crossbow() -> Dictionary:
 static func _axe(heft: float, align := Vector3.ZERO, grip := Vector3.ZERO) -> Dictionary:
 	return {
 		"align": align, "grip": grip,
-		"hold": Vector3(-20, 0, 8), "rest": Vector3(0.30, -0.36, -0.55), "side": 1,
+		"hold": Vector3(-20, 0, 8), "rest": Vector3(0.25, -0.29, -0.55), "side": 1,
 		"offhand": Vector3(0, 0.38, 0),
 		"styles": [S.OVERHEAD, S.SLASH_R], "heft": heft, "weight": "heavy",
 		"block": {"pos": Vector3(-0.10, 0.20, -0.10), "rot": Vector3(5, 0, 70)},

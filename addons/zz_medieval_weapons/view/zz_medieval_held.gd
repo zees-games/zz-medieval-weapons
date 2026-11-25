@@ -9,9 +9,7 @@ extends Node3D
 signal projectile_loosed(xf: Transform3D, charge: float)
 
 const ARM_RADIUS := 0.045
-const SLEEVE := Color(0.34, 0.22, 0.14)
 const SKIN := Color(0.86, 0.66, 0.52)
-const GLOVE := Color(0.22, 0.14, 0.09)
 ## Grip centre to wrist, along the forearm.
 const WRIST := 0.075
 
@@ -54,30 +52,25 @@ func _make_parts() -> void:
 	_grip = Node3D.new()
 	_grip.name = "Grip"
 	add_child(_grip)
-	_arm_mat = StandardMaterial3D.new()
-	_arm_mat.albedo_color = SLEEVE
-	_arm_mat.roughness = 0.9
-	_skin_mat = StandardMaterial3D.new()
-	_skin_mat.albedo_color = GLOVE
-	_skin_mat.roughness = 0.62
+	_arm_mat = ZzArmArt.sleeve()
+	_skin_mat = ZzArmArt.glove()
 	for i in 2:
-		# Arm 0 is the main hand; its handedness is set per weapon in [method _place_arms].
-		var a := {"upper": _limb(0.036, 0.031, _arm_mat), "fore": _limb(0.031, 0.026, _arm_mat), "elbow": _ball(0.031, _arm_mat),
-			"cuff": _limb(0.030, 0.034, _skin_mat), "hand": _hand(), "left": false}
+		# Arm 0 is the main hand; its handedness is set per weapon in [method _place_arms]. The cuff is the glove's
+		# gauntlet, flaring from the wrist over the sleeve, closed at both ends.
+		var a := {"upper": _limb(0.036, 0.031, _arm_mat), "fore": _limb(0.031, 0.027, _arm_mat), "elbow": _ball(0.031, _arm_mat),
+			"cuff": _limb(0.025, 0.036, _skin_mat, 24), "hand": _hand(), "left": false}
 		_arms.append(a)
 
 
-## A tapered unit-height cylinder: [param r0] at the start of a span, [param r1] at its end.
-func _limb(r0: float, r1: float, mat: Material) -> MeshInstance3D:
+## A tapered unit-height cylinder, capped: [param r0] at the start of a span, [param r1] at its end.
+func _limb(r0: float, r1: float, mat: Material, segs: int = 20) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var m := CylinderMesh.new()
 	m.top_radius = r1
 	m.bottom_radius = r0
 	m.height = 1.0
-	m.radial_segments = 16
+	m.radial_segments = segs
 	m.rings = 1
-	m.cap_top = false
-	m.cap_bottom = false
 	mi.mesh = m
 	mi.material_override = mat
 	add_child(mi)
@@ -294,37 +287,44 @@ func _place_arms(gx: Transform3D, p: Dictionary) -> void:
 			(a[k] as Node3D).visible = show_arms
 
 
-## Two-bone solve: the elbow falls below and outside the line from shoulder to hand.
+## Places one arm so its fist closes on the grip at [param h]. The fist is set first, from the grip alone: its axis
+## is [param grip_up] exactly (so it wraps the haft whatever the arm does) and its wrist sits off the haft toward the
+## shoulder, a little from below. The arm then reaches the wrist with a two-bone solve whose elbow falls below,
+## outside, and away from the eye (so a hand brought close never drives the forearm through the camera).
 ## [param draw] 0..1 lifts the elbow from below the arm to level and behind it, as a drawing arm's is.
 func _arm(a: Dictionary, s: Vector3, h: Vector3, side: float, grip_up: Vector3 = Vector3.UP, draw: float = 0.0) -> void:
-	var d := h - s
+	var up := grip_up.normalized() if grip_up.length() > 0.001 else Vector3.UP
+	var toward := (s - h).normalized() + Vector3(0.0, -0.5, 0.0)
+	var back := toward - up * toward.dot(up)
+	if back.length() < 0.05:
+		back = Vector3(side, 0.0, 0.0).cross(up)
+	back = back.normalized()
+	var wrist := h + back * WRIST
+	var d := wrist - s
 	# Stretchy past full reach: a hand that cannot reach its grip leaves the weapon floating
 	# beside the arm, which reads far worse than a forearm a few centimetres long.
-	var reach := maxf(bone, d.length() * 0.5 + 0.01)
+	var reach := maxf(bone - WRIST * 0.5, d.length() * 0.5 + 0.01)
 	var dist := clampf(d.length(), 0.05, reach * 2.0 - 0.01)
 	var dn := d.normalized()
+	var mid := s + d * 0.5
 	var pole := Vector3(0.55 * side, -1.0, 0.25).normalized().lerp(Vector3(0.45 * side, -0.9, 1.0).normalized(), draw).normalized()
-	var perp := (pole - dn * pole.dot(dn)).normalized()
+	pole = (pole + mid.normalized() * 0.8).normalized()
+	var perp := pole - dn * pole.dot(dn)
+	perp = perp.normalized() if perp.length() > 0.01 else Vector3(side, -1.0, 0.0).normalized()
 	var x := dist * 0.5
 	var hgt := sqrt(maxf(reach * reach - x * x, 0.0))
 	var elbow := s + dn * x + perp * hgt
-	var hand := s + dn * dist
-	# The fist closes round the grip axis; the wrist sits back toward the elbow.
-	var back := (elbow - hand).normalized()
-	var up := grip_up - back * grip_up.dot(back)
-	if up.length() < 0.05:
-		up = Vector3.UP - back * back.y
-	up = up.normalized()
-	var wrist := hand + back * WRIST
+	var fore := (elbow - wrist).normalized()
 	_span(a["upper"], s, elbow, true)
-	_span(a["fore"], elbow, wrist, true)
+	_span(a["fore"], elbow, wrist + fore * 0.03, true)
 	(a["elbow"] as Node3D).position = elbow
-	_span(a["cuff"], wrist + back * 0.07, wrist - back * 0.005, true)
+	# Gauntlet: narrow at the wrist, flaring back over the sleeve.
+	_span(a["cuff"], wrist - fore * 0.006, wrist + fore * 0.075, true)
 	var left := side < 0.0
 	if a["left"] != left:
 		a["left"] = left
 		(a["hand"] as MeshInstance3D).mesh = glove_mesh(left)
-	(a["hand"] as Node3D).transform = Transform3D(Basis(up.cross(back), up, back), hand)
+	(a["hand"] as Node3D).transform = Transform3D(Basis(up.cross(back), up, back), h)
 
 
 func _on_cue(cue: StringName) -> void:

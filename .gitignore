@@ -43,3 +43,11 @@ art-src/reference/
 /assets/war_axe_bake.jpg
 /assets/war_axe_metal_roughness.jpg
 /.gs-pack
+
+# Local links to sibling checkouts (absolute, per machine): never tracked; CI resolves the gs_* ones
+/addons/godot-sqlite
+/addons/gs_bot
+/addons/gs_bot_record
+/addons/gs_net
+/addons/gs_sim
+/addons/gs_sql

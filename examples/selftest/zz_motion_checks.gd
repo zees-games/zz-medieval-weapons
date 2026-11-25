@@ -51,8 +51,10 @@ func _write(path: String, text: String) -> void:
 	f.close()
 
 
+## A scratch dir of this run's own. The process id is in the name: several runs of this suite (other worktrees of the
+## same project) share the host's temp dir and user://, and ticks alone repeat across processes started together.
 func _root(name: String) -> String:
-	return OS.get_temp_dir().path_join("zz_prof_%s_%d" % [name, Time.get_ticks_usec()])
+	return OS.get_temp_dir().path_join("zz_prof_%s_%d_%d" % [name, OS.get_process_id(), Time.get_ticks_usec()])
 
 
 func _event(out: GSWeaponOutcome, type: String) -> Variant:

@@ -50,7 +50,7 @@ func _config() -> void:
 	for id in ZzMedievalConfig.IDS:
 		_check(d.has(String(id)), "default row for %s" % id)
 	# Overrides: the fallback reader lays a yml over the defaults.
-	var tmp := OS.get_temp_dir().path_join("zz_cfg_%d" % Time.get_ticks_usec())
+	var tmp := _root("cfg")
 	DirAccess.make_dir_recursive_absolute(tmp)
 	var f := FileAccess.open(tmp.path_join("longsword.yml"), FileAccess.WRITE)
 	f.store_string("longsword:\n  damage: 99.5\n  rays: 7\n")
@@ -361,9 +361,10 @@ func _model_lookup() -> void:
 	var plain := ZzMedievalModels.asset_dirs("res://addons/zz_medieval_weapons/art/zz_medieval_models.gd", func(_d: String) -> String: return "")
 	_check(plain == ["res://assets/"], "an addon in the project itself: just res://assets/ (%s)" % [plain])
 
-	# A real symlink: user://<tmp>/addons/zz_medieval_weapons -> this project's addon dir; the link is followed, and a glb that is
-	# only reachable through it (an absolute path outside res://) is read at run time.
-	var tmp := ProjectSettings.globalize_path("user://link_check")
+	# A real symlink: <tmp>/addons/zz_medieval_weapons -> this project's addon dir; the link is followed, and a glb that is
+	# only reachable through it (an absolute path outside res://) is read at run time. The tmp dir is this run's own: in a
+	# shared one (user://) another worktree's run left its link, pointing at that checkout's assets.
+	var tmp := _root("link")
 	DirAccess.make_dir_recursive_absolute(tmp.path_join("addons"))
 	var link := tmp.path_join("addons/zz_medieval_weapons")
 	var target := ProjectSettings.globalize_path("res://addons/zz_medieval_weapons")
@@ -403,9 +404,12 @@ func _workshop() -> void:
 
 func _pack_cfg() -> void:
 	_begin("delivered pack cfg root")
-	var src := "user://pack_cfg_src"
+	# This run's own dirs, not user://: a concurrent run's cfg/server/.../dagger.yml (555) reached this run's defs.
+	var base := _root("pack")
+	var src := base.path_join("src")
+	var cfg := base.path_join("cfg")
 	var rel := "cfg/addons/zz_medieval_weapons/weapon"
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://cfg/server/addons/zz_medieval_weapons/weapon"))
+	DirAccess.make_dir_recursive_absolute(cfg.path_join("server/addons/zz_medieval_weapons/weapon"))
 	var exported := ZzDefExport.export_to(src)
 	_check(exported.ok, "export succeeds")
 	var yml := src.path_join(rel).path_join("dagger.yml")
@@ -416,7 +420,7 @@ func _pack_cfg() -> void:
 	f.store_string(re.sub(text, "  damage: 777.0"))
 	f.close()
 	var pck := PCKPacker.new()
-	var pck_path := ProjectSettings.globalize_path("user://pack_cfg_test.pck")
+	var pck_path := base.path_join("pack_cfg_test.pck")
 	pck.pck_start(pck_path)
 	var stack: Array[String] = [""]
 	while not stack.is_empty():
@@ -428,13 +432,13 @@ func _pack_cfg() -> void:
 	pck.flush()
 	_check(ProjectSettings.load_resource_pack(pck_path), "pack mounts")
 	ZzMedievalConfig.pack_cfg_root = "res://gs_cloud/zzcfg/1/cfg"
-	ZzMedievalConfig.base_roots = PackedStringArray(["user://cfg"])
+	ZzMedievalConfig.base_roots = PackedStringArray([cfg])
 	_check(is_equal_approx(_pack_damage(), 777.0), "a delivered pack's profile numbers reach weapon_defs()")
-	var srv := FileAccess.open("user://cfg/server/addons/zz_medieval_weapons/weapon/dagger.yml", FileAccess.WRITE)
+	var srv := FileAccess.open(cfg.path_join("server/addons/zz_medieval_weapons/weapon/dagger.yml"), FileAccess.WRITE)
 	srv.store_string("extra:\n  damage: 555.0\n")
 	srv.close()
 	_check(is_equal_approx(_pack_damage(), 555.0), "cfg/server still overrides the pack")
-	DirAccess.remove_absolute(ProjectSettings.globalize_path("user://cfg/server/addons/zz_medieval_weapons/weapon/dagger.yml"))
+	DirAccess.remove_absolute(cfg.path_join("server/addons/zz_medieval_weapons/weapon/dagger.yml"))
 	ZzMedievalConfig.pack_cfg_root = ""
 	ZzMedievalConfig.base_roots = PackedStringArray()
 	_end()

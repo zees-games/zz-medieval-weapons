@@ -610,6 +610,13 @@ func _attachments() -> void:
 	var rf: GSWeaponDef = cat.apply(rs, f3).value
 	_check(float(rf.params["knockback"]) > float(rs.params["knockback"]), "the spiked boss lengthens the shove")
 	_check(not cat.choices_for(rs).has(GSWeaponAttachment.MOUNT_UNDERBARREL), "a shield takes no wrap")
+	_attachments_held(cat, f1, f2)
+	_end()
+
+
+## The fitted crossbow ([param f1]) and longsword ([param f2]) in the first-person view: each piece sits on the part
+## it fits.
+func _attachments_held(cat: GSWeaponAttachments, f1: GSWeaponFitting, f2: GSWeaponFitting) -> void:
 	var held := ZzMedievalHeld.new()
 	add_child(held)
 	held.bind(&"crossbow")
@@ -643,7 +650,6 @@ func _attachments() -> void:
 				_check(b.size.x * 0.5 - widest < 0.012 and absf(b.position.y - float(butt["y"])) < 0.035, "the counterweight caps the pommel (%.1f mm wider)" % ((b.size.x * 0.5 - widest) * 1000.0))
 	held.show_fitting(cat, null)
 	held.free()
-	_end()
 
 
 ## [param n]'s meshes' bounds in [param n]'s own space (its children are direct).

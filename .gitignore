@@ -12,3 +12,8 @@ __pycache__/
 art-src/reference/
 /addons/gs_audio
 /addons/gs_game
+
+# The people (first-person arms, real hands, a body for outside views) and what they stand on.
+/addons/gs_player_char
+/addons/gs_player
+/addons/gs_animation

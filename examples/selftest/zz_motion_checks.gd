@@ -91,8 +91,8 @@ func _pose() -> void:
 	var r := ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_R, 0.55)
 	var l := ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_L, 0.55)
 	_check(is_equal_approx((r["pos"] as Vector3).x, -(l["pos"] as Vector3).x), "a left slash mirrors the right")
-	var o := ZzWeaponPose.sample(ZzWeaponPose.Style.OVERHEAD, 0.34)
-	_check((o["rot"] as Vector3).x > 90.0 and (o["pos"] as Vector3).y > 0.3, "an overhead raises the weapon over the shoulder")
+	var o := ZzWeaponPose.sample(ZzWeaponPose.Style.OVERHEAD, 0.27)
+	_check((o["rot"] as Vector3).x > 75.0 and (o["pos"] as Vector3).y > 0.3, "an overhead raises the weapon over the shoulder")
 	_check(ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_R, 0.55, 0.5)["pos"].length() < r["pos"].length(), "heft scales the swing")
 	_end()
 
@@ -267,7 +267,13 @@ func _held() -> void:
 			h.step(0.2)
 			var t := h.grip_transform()
 			_check(t.origin.is_finite() and t.basis.is_finite(), "%s (%s) poses finitely" % [id, "view" if kind == 0 else "world"])
-			_check(h.get_child_count() >= 7, "%s has grip and two arms" % id)
+			if kind == 0:
+				for f in 4:
+					h.step(1.0 / 60.0)
+				var err := h.view_arms.hand_error(h.held_grip) if h.view_arms != null else -1.0
+				_check(err >= 0.0 and err < 0.04, "%s: gs-player-char's arms hold the eye's model (hands %.3f m off)" % [id, err])
+			else:
+				_check(h.view_arms == null, "%s: the world model draws no arms of its own" % id)
 			# Every hand on the weapon stays within its arm's reach at the strike (a thrust or a pole arm moves the
 			# weapon back rather than stretching the arm into a pole).
 			h.step(0.12)

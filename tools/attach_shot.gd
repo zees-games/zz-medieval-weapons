@@ -56,11 +56,15 @@ func _ready() -> void:
 	sun.rotation_degrees = Vector3(-45 - 8 * (_variant % 3), 30 + 55.0 * _variant, 0)
 	sun.light_energy = 1.0
 	sun.shadow_enabled = true
+	# Lights the scene but is not drawn in the sky: the far camera looks back toward it, and the sky's sun disc bloomed
+	# across that panel.
+	sun.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
 	add_child(sun)
 	# A soft fill from the other side, so a piece's shaded face still reads in a close-up.
 	var fill := DirectionalLight3D.new()
 	fill.rotation_degrees = Vector3(-20, sun.rotation_degrees.y + 180.0, 0)
 	fill.light_energy = 0.35
+	fill.sky_mode = DirectionalLight3D.SKY_MODE_LIGHT_ONLY
 	add_child(fill)
 	var g := MeshInstance3D.new()
 	var pm := PlaneMesh.new()

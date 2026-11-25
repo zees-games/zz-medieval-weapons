@@ -131,9 +131,10 @@ func _counterweight(b: Dictionary) -> void:
 		if float(r["y"]) > y0 + 0.06:
 			break
 		r_max = maxf(r_max, _radius(r))
-	var r := r_max + 0.0035
+	var r := r_max + 0.0025
 	var top_y := y0 + 0.045
-	# The shoe flares from its collar to a bulb half again as wide as the haft, closed in a dome (no flat end face
+	# The shoe swells from its collar to a bulb a sixth wider than the haft (half again read as a bell as wide as a
+	# mace's head), closed in a dome (no flat end face
 	# to read as a pipe's open mouth from below), with the haft's peened button at its pole.
 	ferrule = [
 		ZzAttachmentArt.ring(y0 - 0.0225, 0.0, c0),
@@ -141,10 +142,10 @@ func _counterweight(b: Dictionary) -> void:
 		ZzAttachmentArt.ring(y0 - 0.0205, r * 0.5, c0),
 		ZzAttachmentArt.ring(y0 - 0.019, r * 0.62, c0),
 		ZzAttachmentArt.ring(y0 - 0.0175, r * 0.95, c0),
-		ZzAttachmentArt.ring(y0 - 0.0135, r * 1.28, c0),
-		ZzAttachmentArt.ring(y0 - 0.0075, r * 1.4, c0),
-		ZzAttachmentArt.ring(y0 - 0.001, r * 1.3, c0),
-		ZzAttachmentArt.ring(y0 + 0.008, r * 1.08, c0),
+		ZzAttachmentArt.ring(y0 - 0.0135, r * 1.12, c0),
+		ZzAttachmentArt.ring(y0 - 0.0075, r * 1.16, c0),
+		ZzAttachmentArt.ring(y0 - 0.001, r * 1.13, c0),
+		ZzAttachmentArt.ring(y0 + 0.008, r * 1.04, c0),
 		ZzAttachmentArt.ring(y0 + 0.018, r * 1.0, c0),
 		ZzAttachmentArt.ring(top_y - 0.008, r, c0),
 		ZzAttachmentArt.ring(top_y - 0.007, r + 0.0018, c0),
@@ -200,9 +201,9 @@ func _boss(b: Dictionary) -> void:
 ## A peep sight on the stock's top just behind the nut: a forged foot hugging the stock, a leaf, and a ring to look
 ## through along the bolt's line (+Y).
 func _sight(top: Array) -> void:
-	# Back on the stock towards the eye (the nut is at y 0.12): a hand's width behind the trigger hand round the origin,
-	# so the ring stands clear of its index finger, and clear of the string, which never comes back past the nut.
-	var y := -0.13
+	# Back on the stock towards the eye (the nut is at y 0.12): 10 cm behind the trigger hand round the origin, clear of
+	# its index finger and of the string (which never comes back past the nut); at 13 cm it sat under the first-person frame.
+	var y := -0.10
 	var z := 0.017
 	var slope := 0.0
 	if top.size() >= 2:
@@ -266,9 +267,9 @@ func _heads(h: Dictionary) -> void:
 	_mesh(ZzAttachmentArt.sweep(sleeve, 16, 1.0, 20.0), iron)
 	var w := hr + 0.004
 	var s := shaft + 0.002
-	# Each barb swept well back with a thick root and bevelled edges (so it reads as forged iron, not a flat card), a deep
+	# Each barb (no wider than the head's own shoulders, so the head clears the stirrup's loop) swept back with a thick root and bevelled edges (so it reads as forged iron, not a flat card), a deep
 	# notch between it and the point's shoulder; the cross is turned 45 degrees off the stirrup's plane, which the nocked head sits in.
-	var half := PackedVector2Array([Vector2(0, yb), Vector2(s, yb), Vector2(w + 0.006, yb - 0.017), Vector2(s + 0.004, yb + 0.005), Vector2(w + 0.002, yb + 0.011), Vector2(0, tip + 0.002)])
+	var half := PackedVector2Array([Vector2(0, yb), Vector2(s, yb), Vector2(w, yb - 0.014), Vector2(s + 0.003, yb + 0.005), Vector2(w - 0.001, yb + 0.011), Vector2(0, tip + 0.002)])
 	var blade := ZzAttachmentArt.blade(half, 0.010, 0.55)
 	for turn: float in [PI / 4, 3 * PI / 4]:
 		_mesh(blade, iron, Transform3D(Basis(Vector3(0, 1, 0), turn), Vector3.ZERO))

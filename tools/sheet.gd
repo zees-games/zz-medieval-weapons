@@ -9,6 +9,7 @@ var _world := false
 var _frames_out := false   ## --frames: also save every cell at full size to screenshots/frames/
 var _holder: Node3D
 var _held: ZzMedievalHeld
+var _carrier: ZzMedievalCarrier
 var _cam: Camera3D
 
 
@@ -75,30 +76,10 @@ func _stage() -> void:
 	add_child(_cam)
 	_cam.current = true
 	if _world:
-		# A person: legs, torso, head. The chest node is where a world model's shoulders sit.
-		var body := MeshInstance3D.new()
-		var cap := CapsuleMesh.new()
-		cap.radius = 0.2
-		cap.height = 1.5
-		var bmat := StandardMaterial3D.new()
-		bmat.albedo_color = Color(0.25, 0.3, 0.45)
-		cap.material = bmat
-		body.mesh = cap
-		body.position = Vector3(0, 0.85, 0)
-		add_child(body)
-		var head := MeshInstance3D.new()
-		var hs := SphereMesh.new()
-		hs.radius = 0.12
-		hs.height = 0.24
-		var hm := StandardMaterial3D.new()
-		hm.albedo_color = ZzMedievalHeld.SKIN
-		hs.material = hm
-		head.mesh = hs
-		head.position = Vector3(0, 1.72, 0)
-		add_child(head)
-		_holder = Node3D.new()
-		_holder.position = Vector3(0, 1.45, 0)
-		add_child(_holder)
+		# A whole person (gs-player-char's), the weapon at their shoulders and both hands on it.
+		_carrier = ZzMedievalCarrier.new()
+		add_child(_carrier)
+		_carrier.build()
 		_cam.position = Vector3(2.4, 1.7, -1.6)
 		_cam.look_at(Vector3(0, 1.1, -0.9))
 		_cam.fov = 40
@@ -137,10 +118,13 @@ func _frames(id: StringName) -> Array:
 
 
 func _sheet(id: StringName) -> void:
-	if _held != null:
+	if _held != null and not _world:
 		_held.queue_free()
-	_held = ZzMedievalWorldModel.new() if _world else ZzMedievalViewModel.new()
-	_holder.add_child(_held)
+	if _world:
+		_held = _carrier.held
+	else:
+		_held = ZzMedievalViewModel.new()
+		_holder.add_child(_held)
 	_held.set_process(false)
 	_held.flight_parent = self
 	var frames := _frames(id)
@@ -151,7 +135,7 @@ func _sheet(id: StringName) -> void:
 			if n is ZzProjectileFlight or n is CPUParticles3D:
 				n.free()
 		_held.bind(id)
-		_held.step(0.0)
+		_step(0.0)
 		for op in frames[i]:
 			_run(op)
 		labels.append(str(frames[i]))
@@ -174,7 +158,7 @@ func _run(op: Array) -> void:
 		"force":
 			var st: int = (a.styles() as Array)[int(op[1])]
 			a.force(st, float(op[2]))
-			_held.step(0.0)
+			_step(0.0)
 		"block":
 			a.set_blocking(true)
 			_wait(0.3)
@@ -192,14 +176,22 @@ func _run(op: Array) -> void:
 			_wait(float(op[1]))
 		"hit":
 			_held.anim.hit(&"wood")
-			_held.step(0.0)
+			_step(0.0)
 
 
 func _wait(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
-		_held.step(STEP)
+		_step(STEP)
 		for n in get_children():
 			if n is ZzProjectileFlight:
 				(n as ZzProjectileFlight).step(STEP)
 		t += STEP
+
+
+## The weapon (and in --world the person holding it) on by [param dt].
+func _step(dt: float) -> void:
+	if _world:
+		_carrier.step(dt)
+	else:
+		_held.step(dt)

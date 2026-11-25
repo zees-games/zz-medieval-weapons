@@ -14,10 +14,13 @@ const STRIKE_AT := 0.45
 
 ## Keyframes: [t, pos, rot_degrees], joined by a monotone cubic ([method _hermite]). The follow-through keeps moving
 ## (0.55 to 0.70 still travels) and stays in front of the eye: the blade lies across the view rather than pitching
-## end-on to the camera, so no frame of a swing shows only a pommel or an empty view.
+## end-on to the camera, so no frame of a swing shows only a pommel or an empty view. The wind-up tops out early
+## (0.25, an overhead's 0.27) so the fall onto the strike spans a fifth of the swing, not an eighth: at 24 frames a
+## second a 0.66 s longsword no longer sits still at the top and lands in one frame. The overhead tops out at 78
+## degrees, short of upright: past it a mace's head swung over the eye and read as flipped end over end at the turn.
 const _SLASH_R := [
 	[0.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
-	[0.32, Vector3(0.16, 0.10, 0.06), Vector3(40, 0, -54)],
+	[0.25, Vector3(0.16, 0.10, 0.06), Vector3(40, 0, -54)],
 	[0.45, Vector3(0.0, 0.0, -0.14), Vector3(-6, 0, 8)],
 	[0.55, Vector3(-0.20, -0.06, -0.16), Vector3(-12, 0, 52)],
 	[0.70, Vector3(-0.26, -0.10, -0.12), Vector3(-16, 0, 66)],
@@ -25,7 +28,7 @@ const _SLASH_R := [
 ]
 const _OVERHEAD := [
 	[0.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
-	[0.34, Vector3(0.02, 0.31, 0.12), Vector3(92, 0, -4)],
+	[0.27, Vector3(0.02, 0.31, 0.12), Vector3(78, 0, -4)],
 	[0.45, Vector3(0.0, 0.14, -0.10), Vector3(24, 0, 0)],
 	[0.55, Vector3(0, -0.10, -0.18), Vector3(-28, 0, 4)],
 	[0.70, Vector3(0, -0.15, -0.16), Vector3(-36, 0, 6)],

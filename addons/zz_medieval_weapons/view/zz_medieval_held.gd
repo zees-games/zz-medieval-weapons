@@ -8,12 +8,14 @@ extends Node3D
 ## The visual arrow left the string. [param xf] is its world transform, -Z the way it flies.
 signal projectile_loosed(xf: Transform3D, charge: float)
 
-const ARM_RADIUS := 0.045
+## The head stand-in's skin in the sheet tool.
 const SKIN := Color(0.86, 0.66, 0.52)
-## Grip centre to wrist, along the forearm.
-const WRIST := 0.075
+## The arms' look and height (gs-player-char's stock person 3).
+const ARMS_LOOK := 3
+const ARMS_HEIGHT := 1.8
 
-## Shoulders in the aim frame, [code]x[/code] mirrored for a left hand. Arm bone length.
+## Shoulders in the aim frame, [code]x[/code] mirrored for a left hand, and arm bone length: the reach a pose is kept
+## within ([method _within_reach]).
 var shoulder: Vector3 = Vector3(0.22, -0.28, 0.14)
 var bone: float = 0.40
 var show_arms: bool = true
@@ -38,9 +40,11 @@ var _missile: Node3D
 var _skel: Skeleton3D
 var _catalogue: GSWeaponAttachments
 var _fitting: GSWeaponFitting
-var _arms: Array = []     # [{upper, fore, hand}] main then off
-var _arm_mat: StandardMaterial3D
-var _skin_mat: StandardMaterial3D
+## The family's own first-person arms (gs-player-char), posed on [member held_grip] each [method step]; null on a
+## holder that draws no arms ([method _wants_arms]).
+var view_arms: GSPlayerViewArms
+## Where the hands close on the weapon now in hand, in the grip node's space (+Y along the haft, +Z its back).
+var held_grip: GSViewGrip
 
 
 func _ready() -> void:
@@ -52,55 +56,20 @@ func _make_parts() -> void:
 	_grip = Node3D.new()
 	_grip.name = "Grip"
 	add_child(_grip)
-	_arm_mat = ZzArmArt.sleeve()
-	_skin_mat = ZzArmArt.glove()
-	for i in 2:
-		# Arm 0 is the main hand; its handedness is set per weapon in [method _place_arms]. The cuff is the glove's
-		# gauntlet, flaring from the wrist over the sleeve, closed at both ends.
-		var a := {"upper": _limb(0.036, 0.031, _arm_mat), "fore": _limb(0.031, 0.027, _arm_mat), "elbow": _ball(0.031, _arm_mat),
-			"cuff": _limb(0.025, 0.036, _skin_mat, 24), "hand": _hand(), "left": false}
-		_arms.append(a)
+	held_grip = GSViewGrip.one_hand(_grip, Vector3.ZERO)
+	held_grip.forward = Vector3.UP
+	held_grip.up = Vector3.BACK
+	if _wants_arms():
+		# The arms' head sits at this node's origin: the view model hangs at the eye.
+		view_arms = GSPlayerViewArms.new()
+		view_arms.name = "Arms"
+		add_child(view_arms)
+		view_arms.build(GSHumanoidLook.stock(ARMS_LOOK), ARMS_HEIGHT)
 
 
-## A tapered unit-height cylinder, capped: [param r0] at the start of a span, [param r1] at its end.
-func _limb(r0: float, r1: float, mat: Material, segs: int = 20) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var m := CylinderMesh.new()
-	m.top_radius = r1
-	m.bottom_radius = r0
-	m.height = 1.0
-	m.radial_segments = segs
-	m.rings = 1
-	mi.mesh = m
-	mi.material_override = mat
-	add_child(mi)
-	return mi
-
-
-func _ball(r: float, mat: Material) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var m := SphereMesh.new()
-	m.radius = r
-	m.height = r * 2.0
-	m.radial_segments = 16
-	m.rings = 8
-	mi.mesh = m
-	mi.material_override = mat
-	add_child(mi)
-	return mi
-
-
-func _hand() -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	mi.mesh = glove_mesh(false)
-	mi.material_override = _skin_mat
-	add_child(mi)
-	return mi
-
-
-## A gloved fist closed round a grip along local +Y (see [ZzGloveMesh]).
-static func glove_mesh(left: bool) -> Mesh:
-	return ZzGloveMesh.fist(left)
+## True where this holder draws the player's own arms (the eye's); a world model is held by a whole body instead.
+func _wants_arms() -> bool:
+	return true
 
 
 ## Puts [param id] in the hands, from the art table and [param cfg] (default the shipped
@@ -179,6 +148,8 @@ func _process(delta: float) -> void:
 func step(dt: float) -> void:
 	anim.advance(dt)
 	apply()
+	if view_arms != null:
+		view_arms.tick(0.0, dt)
 
 
 func grip_transform() -> Transform3D:
@@ -292,67 +263,40 @@ static func _span(mi: Node3D, a: Vector3, b: Vector3, along_y: bool) -> void:
 		mi.transform = Transform3D(Basis.looking_at(dn, Vector3.UP if absf(dn.y) < 0.99 else Vector3.RIGHT).scaled_local(Vector3(1, 1, l)), (a + b) * 0.5)
 
 
+## Says which hand closes where this frame ([member held_grip], in the grip node's space). The right hand is the
+## firing hand and the left the support, as gs-player-char draws them: a left-hand weapon (a shield, a bow's stave) is
+## the support hand's, the right one loose beside it or drawing the string; a crossbow's left hand leaves the stock
+## for the string as it spans.
 func _place_arms(gx: Transform3D, p: Dictionary) -> void:
+	if held_grip == null:
+		return
+	var to_grip := gx.affine_inverse()
 	var side := float(_row.get("side", 1))
-	var main_s := Vector3(shoulder.x * side, shoulder.y, shoulder.z)
-	var off_s := Vector3(-shoulder.x * side, shoulder.y, shoulder.z)
-	var main_hand := gx.origin
-	var weapon_up := gx.basis.y.normalized()
-	# The other hand: the weapon's second grip, the string, or hanging loose.
-	var idle := Vector3(-0.30 * side, -0.46, -0.34)
-	var off_hand := idle
-	if _row.has("offhand"):
-		off_hand = gx * (_row["offhand"] as Vector3)
-	var off_up := weapon_up if _row.has("offhand") else Vector3(0, 0, -1)
-	var w := float(p["off_string"])
-	if w > 0.0 and _row.has("string"):
-		off_hand = off_hand.lerp(gx * ZzMedievalArtTable.string_point(weapon_id, float(p["string_pull"])), w)
-		off_up = off_up.slerp(weapon_up, w) if off_up.dot(weapon_up) > -0.99 else weapon_up
-	_arm(_arms[0], main_s, main_hand, side, weapon_up)
-	_arm(_arms[1], off_s, off_hand, -side, off_up, w * smoothstep(0.25, 0.85, float(p["string_pull"])) if _row.has("string") and not _row.has("offhand") else 0.0)
-	for a in _arms:
-		for k in ["upper", "fore", "elbow", "cuff", "hand"]:
-			(a[k] as Node3D).visible = show_arms
-
-
-## Places one arm so its fist closes on the grip at [param h]. The fist is set first, from the grip alone: its axis
-## is [param grip_up] exactly (so it wraps the haft whatever the arm does) and its wrist sits off the haft toward the
-## shoulder, a little from below. The arm then reaches the wrist with a two-bone solve whose elbow falls below,
-## outside, and away from the eye (so a hand brought close never drives the forearm through the camera).
-## [param draw] 0..1 lifts the elbow from below the arm to level and behind it, as a drawing arm's is.
-func _arm(a: Dictionary, s: Vector3, h: Vector3, side: float, grip_up: Vector3 = Vector3.UP, draw: float = 0.0) -> void:
-	var up := grip_up.normalized() if grip_up.length() > 0.001 else Vector3.UP
-	var toward := (s - h).normalized() + Vector3(0.0, -0.5, 0.0)
-	var back := toward - up * toward.dot(up)
-	if back.length() < 0.05:
-		back = Vector3(side, 0.0, 0.0).cross(up)
-	back = back.normalized()
-	var wrist := h + back * WRIST
-	var d := wrist - s
-	# Stretchy past full reach: a hand that cannot reach its grip leaves the weapon floating
-	# beside the arm, which reads far worse than a forearm a few centimetres long.
-	var reach := maxf(bone - WRIST * 0.5, d.length() * 0.5 + 0.01)
-	var dist := clampf(d.length(), 0.05, reach * 2.0 - 0.01)
-	var dn := d.normalized()
-	var mid := s + d * 0.5
-	var pole := Vector3(0.55 * side, -1.0, 0.25).normalized().lerp(Vector3(0.45 * side, -0.9, 1.0).normalized(), draw).normalized()
-	pole = (pole + mid.normalized() * 0.8).normalized()
-	var perp := pole - dn * pole.dot(dn)
-	perp = perp.normalized() if perp.length() > 0.01 else Vector3(side, -1.0, 0.0).normalized()
-	var x := dist * 0.5
-	var hgt := sqrt(maxf(reach * reach - x * x, 0.0))
-	var elbow := s + dn * x + perp * hgt
-	var fore := (elbow - wrist).normalized()
-	_span(a["upper"], s, elbow, true)
-	_span(a["fore"], elbow, wrist + fore * 0.03, true)
-	(a["elbow"] as Node3D).position = elbow
-	# Gauntlet: narrow at the wrist, flaring back over the sleeve.
-	_span(a["cuff"], wrist - fore * 0.006, wrist + fore * 0.075, true)
-	var left := side < 0.0
-	if a["left"] != left:
-		a["left"] = left
-		(a["hand"] as MeshInstance3D).mesh = glove_mesh(left)
-	(a["hand"] as Node3D).transform = Transform3D(Basis(up.cross(back), up, back), h)
+	var idle := to_grip * Vector3(-0.30 * side, -0.46, -0.34)
+	var w := float(p["off_string"]) if _row.has("string") else 0.0
+	var pull := float(p["string_pull"])
+	if _row.has("string") and not _row.has("offhand"):
+		held_grip.kind = GSViewHandPoses.BOW
+		held_grip.support = Vector3.ZERO
+		held_grip.grip = idle.lerp(ZzMedievalArtTable.string_point(weapon_id, pull), w)
+	elif _row.has("string"):
+		held_grip.kind = GSViewHandPoses.CROSSBOW
+		held_grip.grip = Vector3.ZERO
+		held_grip.support = (_row["offhand"] as Vector3).lerp(ZzMedievalArtTable.string_point(weapon_id, pull), w)
+	elif side < 0.0:
+		held_grip.kind = GSViewHandPoses.SHIELD
+		held_grip.support = Vector3.ZERO
+		held_grip.grip = idle
+	elif _row.has("offhand"):
+		held_grip.kind = GSViewHandPoses.HAFT
+		held_grip.grip = Vector3.ZERO
+		held_grip.support = _row["offhand"]
+	else:
+		held_grip.kind = GSViewHandPoses.SWORD
+		held_grip.grip = Vector3.ZERO
+		held_grip.support = Vector3.INF
+	if view_arms != null:
+		view_arms.set_held(held_grip if show_arms else null)
 
 
 func _on_cue(cue: StringName) -> void:

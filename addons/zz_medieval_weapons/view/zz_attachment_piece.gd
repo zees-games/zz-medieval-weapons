@@ -62,7 +62,7 @@ func _wrap(w: Dictionary) -> void:
 		var t := minf(i, rs.size() - 1 - i)
 		leather.append(ZzAttachmentArt.grown(rs[i], 0.0008 + 0.0017 * clampf(t / 2.0, 0.0, 1.0)))
 	# A 14 mm strap, each turn stepping 1.4 mm over the last: the spiral shows in the outline, past the fist.
-	_mesh(ZzAttachmentArt.wound(leather, 48, 0.014, 0.0014), ZzAttachmentArt.leather())
+	_mesh(ZzAttachmentArt.wound(leather, 48, 0.014, 0.0024), ZzAttachmentArt.leather())
 	for end: int in [0, rs.size() - 1]:
 		var step := 1 if end == 0 else -1
 		var r0: Dictionary = rs[end]
@@ -135,8 +135,8 @@ func _counterweight(b: Dictionary) -> void:
 		ZzAttachmentArt.ring(y0 - 0.028, 0.0, c0),
 		ZzAttachmentArt.ring(y0 - 0.026, r * 0.42, c0),
 		ZzAttachmentArt.ring(y0 - 0.02, r * 0.95, c0),
-		ZzAttachmentArt.ring(y0 - 0.012, r * 1.12, c0),
-		ZzAttachmentArt.ring(y0 - 0.006, r * 1.04, c0),
+		ZzAttachmentArt.ring(y0 - 0.012, r * 1.05, c0),
+		ZzAttachmentArt.ring(y0 - 0.006, r * 1.01, c0),
 		ZzAttachmentArt.ring(y0 - 0.002, r * 0.98, c0),
 		ZzAttachmentArt.ring(top_y - 0.008, r, c0),
 		ZzAttachmentArt.ring(top_y - 0.007, r + 0.0018, c0),
@@ -161,19 +161,19 @@ func _boss(b: Dictionary) -> void:
 	var apex := float(b.get("z", face + 0.04))
 	var base_r := float(b.get("r", 0.07)) + 0.008
 	var top := apex + 0.006
-	var pts: Array = [Vector2(base_r + 0.012, -0.001), Vector2(base_r + 0.013, 0.0015), Vector2(base_r + 0.011, 0.003), Vector2(base_r, 0.004)]
+	var pts: Array = [Vector2(base_r + 0.02, -0.001), Vector2(base_r + 0.021, 0.002), Vector2(base_r + 0.019, 0.005), Vector2(base_r + 0.004, 0.006), Vector2(base_r, 0.008)]
 	for i in range(1, 9):
 		var t := float(i) / 8.0 * PI / 2.0
-		var rr := maxf(base_r * cos(t), 0.026)
-		pts.append(Vector2(rr, 0.004 + (top - face - 0.004) * sin(t)))
-	# A stout forged spike: a collar where it is welded to the dome, then a 9 cm cone, thick at the root.
+		var rr := maxf(base_r * cos(t), 0.036)
+		pts.append(Vector2(rr, 0.008 + (top - face - 0.008) * sin(t)))
+	# A stout forged spike: a collar where it is welded to the dome, then a 9 cm cone, half the dome wide at the root.
 	var s0 := top - face
-	pts.append(Vector2(0.026, s0 + 0.004))
-	pts.append(Vector2(0.021, s0 + 0.012))
-	pts.append(Vector2(0.017, s0 + 0.03))
-	pts.append(Vector2(0.012, s0 + 0.05))
-	pts.append(Vector2(0.007, s0 + 0.07))
-	pts.append(Vector2(0.003, s0 + 0.085))
+	pts.append(Vector2(0.036, s0 + 0.004))
+	pts.append(Vector2(0.03, s0 + 0.014))
+	pts.append(Vector2(0.023, s0 + 0.032))
+	pts.append(Vector2(0.016, s0 + 0.052))
+	pts.append(Vector2(0.009, s0 + 0.07))
+	pts.append(Vector2(0.004, s0 + 0.085))
 	pts.append(Vector2(0.0, s0 + 0.092))
 	var lathe := _lathe_rings(pts, Vector2.ZERO, face, 1.0)
 	var to_front := Basis(Vector3(1, 0, 0), PI / 2)
@@ -181,11 +181,11 @@ func _boss(b: Dictionary) -> void:
 	for i in 6:
 		var a := TAU * float(i) / 6.0 + PI / 6.0
 		var rivet := SphereMesh.new()
-		rivet.radius = 0.0045
-		rivet.height = 0.0045
+		rivet.radius = 0.0065
+		rivet.height = 0.0065
 		rivet.radial_segments = 12
 		rivet.rings = 6
-		var at := Vector3(cos(a) * (base_r + 0.0065), sin(a) * (base_r + 0.0065), face + 0.003)
+		var at := Vector3(cos(a) * (base_r + 0.012), sin(a) * (base_r + 0.012), face + 0.005)
 		_mesh(rivet, ZzAttachmentArt.iron(), Transform3D(to_front, at))
 
 
@@ -250,8 +250,8 @@ func _heads(h: Dictionary) -> void:
 	_mesh(ZzAttachmentArt.sweep(sleeve, 16, 1.0, 20.0), iron)
 	var w := hr + 0.004
 	var s := shaft + 0.002
-	var half := PackedVector2Array([Vector2(0, yb), Vector2(s, yb), Vector2(w + 0.004, yb - 0.011), Vector2(w, yb + 0.012), Vector2(0, tip + 0.007)])
-	var blade := ZzAttachmentArt.blade(half, 0.0026)
+	var half := PackedVector2Array([Vector2(0, yb), Vector2(s, yb), Vector2(w + 0.004, yb - 0.011), Vector2(w, yb + 0.012), Vector2(0, tip + 0.002)])
+	var blade := ZzAttachmentArt.blade(half, 0.0045)
 	for turn: float in [0.0, PI / 2]:
 		_mesh(blade, iron, Transform3D(Basis(Vector3(0, 1, 0), turn), Vector3.ZERO))
 

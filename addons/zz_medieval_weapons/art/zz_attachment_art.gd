@@ -166,7 +166,7 @@ static func blade(half: PackedVector2Array, spine: float) -> ArrayMesh:
 				var ps: Array = []
 				for k in 3:
 					var q := outline[tri[t + k]]
-					var z := face * spine * 0.5 * clampf(1.0 - q.x / maxf(width, 1e-4), 0.08, 1.0)
+					var z := face * spine * 0.5 * clampf(1.0 - q.x / maxf(width, 1e-4), 0.3, 1.0)
 					ps.append(Vector3(q.x * mirror, q.y, z))
 				var n: Vector3 = ((ps[1] as Vector3) - ps[0]).cross((ps[2] as Vector3) - ps[0]).normalized()
 				if n.z * face < 0.0:
@@ -178,8 +178,8 @@ static func blade(half: PackedVector2Array, spine: float) -> ArrayMesh:
 			var b := outline[(i + 1) % outline.size()]
 			if a.x < 1e-5 and b.x < 1e-5:
 				continue
-			var za := spine * 0.5 * clampf(1.0 - a.x / maxf(width, 1e-4), 0.08, 1.0)
-			var zb := spine * 0.5 * clampf(1.0 - b.x / maxf(width, 1e-4), 0.08, 1.0)
+			var za := spine * 0.5 * clampf(1.0 - a.x / maxf(width, 1e-4), 0.3, 1.0)
+			var zb := spine * 0.5 * clampf(1.0 - b.x / maxf(width, 1e-4), 0.3, 1.0)
 			var e := Vector3(b.x - a.x, b.y - a.y, 0.0)
 			var n := Vector3(e.y, -e.x, 0.0).normalized()
 			if n.dot(Vector3((a.x + b.x) * 0.5, 0, 0) - Vector3(0, 0, 0)) < 0.0 and absf(n.x) > 0.2:
@@ -201,8 +201,8 @@ static func leather() -> StandardMaterial3D:
 	h.resize(TEX * TEX)
 	var alb := Image.create(TEX, TEX, false, Image.FORMAT_RGBA8)
 	# Oxblood-dyed leather: a red no wooden haft, horn grip or glove shares, so the wrap reads as its own part.
-	var base := Color(0.46, 0.09, 0.06)
-	var dark := Color(0.11, 0.02, 0.02)
+	var base := Color(0.33, 0.10, 0.06)
+	var dark := Color(0.07, 0.02, 0.015)
 	var thread := Color(0.90, 0.82, 0.62)
 	for y in TEX:
 		for x in TEX:
@@ -212,8 +212,9 @@ static func leather() -> StandardMaterial3D:
 			var along := fposmod((u - v) * 9.0, 1.0) # along it
 			var g := grain.get_pixel(x, y).r
 			var edge := smoothstep(0.0, 0.08, s) * smoothstep(1.0, 0.9, s)
-			var height := 0.55 * edge + 0.12 * g
-			var col := dark.lerp(base, edge).lerp(base.lightened(0.12), g * 0.35 * edge)
+			var height := 0.55 * edge + 0.3 * g
+			# Pebbled, worn grain: the high spots rubbed lighter and browner by the hand.
+			var col := dark.lerp(base, edge).lerp(Color(0.45, 0.2, 0.12), g * 0.55 * edge).darkened(0.25 * (1.0 - g))
 			if absf(s - 0.2) < 0.022 and along < 0.55:
 				col = thread.darkened(0.25 * (1.0 - g))
 				height += 0.25
@@ -222,8 +223,8 @@ static func leather() -> StandardMaterial3D:
 				height -= 0.15
 			alb.set_pixel(x, y, col)
 			h[y * TEX + x] = height
-	var m := _material(alb, h, 3.0)
-	m.roughness = 0.78
+	var m := _material(alb, h, 4.5)
+	m.roughness = 0.88
 	_mats[&"leather"] = m
 	return m
 
@@ -253,7 +254,7 @@ static func rope() -> StandardMaterial3D:
 	return m
 
 
-## Forged iron: dark satin metal with hammer facets, pitted with rust in the pits; triplanar, about 4 cm a tile.
+## Forged iron: satin metal with hammer facets, pitted with rust in the pits; triplanar, about 8 cm a tile.
 static func iron() -> StandardMaterial3D:
 	if _mats.has(&"iron"):
 		return _mats[&"iron"]
@@ -263,26 +264,26 @@ static func iron() -> StandardMaterial3D:
 	h.resize(TEX * TEX)
 	var alb := Image.create(TEX, TEX, false, Image.FORMAT_RGBA8)
 	var rough := Image.create(TEX, TEX, false, Image.FORMAT_L8)
-	var steel := Color(0.36, 0.37, 0.38)
+	var steel := Color(0.54, 0.55, 0.57)
 	var rust := Color(0.34, 0.19, 0.10)
 	for y in TEX:
 		for x in TEX:
 			var p := pits.get_pixel(x, y).r
 			var hm := ham.get_pixel(x, y).r
-			var pit := smoothstep(0.68, 0.8, p)
-			var col := steel.darkened(0.25 * hm).lerp(rust, pit * 0.8)
+			var pit := smoothstep(0.74, 0.86, p)
+			var col := steel.darkened(0.2 * hm).lerp(rust, pit * 0.6)
 			alb.set_pixel(x, y, col)
 			# Black-forged, not polished: a satin sheen on the hammer facets, dull in the pits.
-			rough.set_pixel(x, y, Color(0.58 + 0.17 * hm + 0.25 * pit, 0, 0))
+			rough.set_pixel(x, y, Color(0.3 + 0.16 * hm + 0.35 * pit, 0, 0))
 			h[y * TEX + x] = 0.35 * hm - 0.6 * pit
-	var m := _material(alb, h, 2.0)
-	m.metallic = 0.6
+	var m := _material(alb, h, 1.2)
+	m.metallic = 0.88
 	m.roughness = 1.0
 	rough.generate_mipmaps()
 	m.roughness_texture = ImageTexture.create_from_image(rough)
 	m.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
 	m.uv1_triplanar = true
-	m.uv1_scale = Vector3(25, 25, 25)
+	m.uv1_scale = Vector3(12, 12, 12)
 	_mats[&"iron"] = m
 	return m
 

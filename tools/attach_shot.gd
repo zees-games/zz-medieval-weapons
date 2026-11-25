@@ -3,7 +3,7 @@ extends Node3D
 ## three panels side by side per frame: the first-person view, a close camera behind and right of the piece, and a
 ## close camera from its far (opponent's) side. The two close cameras ride the piece's socket frame, so the piece
 ## holds still in frame while the hands use the weapon, and anything that slips or floats on the weapon shows. There
-## is no stand-in body: the subject is the attachment, not the person holding it. The weapon is used in real time (a
+## is no stand-in body, and the close cameras leave out the eye's sleeves (ARMS_LAYER): the subject is the attachment, not the person holding it. The weapon is used in real time (a
 ## look-over, as the player's inspect raises it toward the eye, then a swing, or the crossbow's shot and full reload);
 ## the crossbow's shot runs slowed down while the close cameras
 ## follow the bolt in flight, so the heads it carries show. One png per frame under <out>/<attachment>/<weapon>/
@@ -23,6 +23,10 @@ const PAIRS := {
 ## raised toward the eye, not only at the hip. A melee weapon then swings at SWINGS and settles; the clip is MELEE_N.
 ## Frames are 1/24 s, so a 0.6 s swing is sampled at 15 poses rather than 7; the times are as before.
 const LOOK := 2
+## The eye's arms (gs-player-char's sleeves and forearms) are drawn on this layer, seen by the first-person camera
+## only: the close cameras stand where an outside camera would see a whole body, and from inside the sleeves they saw
+## nothing but cloth. The hands stay on layer 1, so the close panels still show the grip on the weapon.
+const ARMS_LAYER := 2
 const SWINGS := [64, 100]
 const MELEE_N := 132
 ## The crossbow's timeline in frames: it is looked over, shoots at SHOT, runs SLOW frames at an eighth of the speed
@@ -92,6 +96,7 @@ func _close_camera() -> Camera3D:
 	var c := Camera3D.new()
 	c.fov = 30
 	c.near = 0.01
+	c.cull_mask = 1   # not ARMS_LAYER
 	add_child(c)
 	return c
 
@@ -107,6 +112,11 @@ func _clip(cat: GSWeaponAttachments, att: StringName, w: StringName) -> void:
 	vm.bind(w)
 	vm.show_fitting(cat, f)
 	vm.step(0.0)
+	if vm.view_arms != null:
+		for m: Node in vm.view_arms.find_children("*", "MeshInstance3D", true, false):
+			(m as MeshInstance3D).layers = ARMS_LAYER
+		for hand: GSViewHand in vm.view_arms.hands():
+			hand.mesh_instance().layers = 1
 	var frames := _n if _n_set or w != &"crossbow" else RELOAD + roundi(vm.anim.load_s / FRAME) + 16
 	var dir := ProjectSettings.globalize_path("%s/%s/%s" % [_out, att, w])
 	DirAccess.make_dir_recursive_absolute(dir)

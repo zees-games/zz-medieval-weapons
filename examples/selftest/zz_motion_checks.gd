@@ -86,7 +86,8 @@ func _pose() -> void:
 		_check((a["pos"] as Vector3).length() < 0.001 and (z["pos"] as Vector3).length() < 0.001, "%s starts and ends at rest" % ZzWeaponPose.style_name(st))
 	var hi := ZzWeaponPose.sample(ZzWeaponPose.Style.THRUST, 0.55)
 	var back := ZzWeaponPose.sample(ZzWeaponPose.Style.THRUST, 0.34)
-	_check((hi["pos"] as Vector3).z < -0.5 and (back["pos"] as Vector3).z > 0.2, "a thrust draws back then reaches forward")
+	# A thrust reaches as far as the arm does (the holder eases anything past it back), so its keys stay within it.
+	_check((hi["pos"] as Vector3).z < -0.2 and (back["pos"] as Vector3).z > 0.08, "a thrust draws back then reaches forward")
 	var r := ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_R, 0.55)
 	var l := ZzWeaponPose.sample(ZzWeaponPose.Style.SLASH_L, 0.55)
 	_check(is_equal_approx((r["pos"] as Vector3).x, -(l["pos"] as Vector3).x), "a left slash mirrors the right")
@@ -267,6 +268,16 @@ func _held() -> void:
 			var t := h.grip_transform()
 			_check(t.origin.is_finite() and t.basis.is_finite(), "%s (%s) poses finitely" % [id, "view" if kind == 0 else "world"])
 			_check(h.get_child_count() >= 7, "%s has grip and two arms" % id)
+			# Every hand on the weapon stays within its arm's reach at the strike (a thrust or a pole arm moves the
+			# weapon back rather than stretching the arm into a pole).
+			h.step(0.12)
+			var row := ZzMedievalArtTable.row(id)
+			var sd := float(row.get("side", 1))
+			var g := h.grip_transform()
+			var far := (g.origin - Vector3(h.shoulder.x * sd, h.shoulder.y, h.shoulder.z)).length()
+			if row.has("offhand"):
+				far = maxf(far, (g * (row["offhand"] as Vector3) - Vector3(-h.shoulder.x * sd, h.shoulder.y, h.shoulder.z)).length())
+			_check(far <= h.bone * 2.0 * ZzMedievalHeld.REACH_MAX + 0.001, "%s (%s) hands within reach at the strike (%.2f m)" % [id, "view" if kind == 0 else "world", far])
 	var bow := ZzMedievalViewModel.new()
 	root.add_child(bow)
 	bow.spawn_flight = false

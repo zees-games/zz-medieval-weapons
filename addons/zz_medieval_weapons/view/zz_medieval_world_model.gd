@@ -18,7 +18,5 @@ func _init() -> void:
 	bone = 0.36
 
 
-func grip_transform() -> Transform3D:
-	var t := super.grip_transform()
-	t.origin += hip_offset.lerp(aim_offset, anim.aim_weight())
-	return t
+func _hand_offset() -> Vector3:
+	return hip_offset.lerp(aim_offset, anim.aim_weight())

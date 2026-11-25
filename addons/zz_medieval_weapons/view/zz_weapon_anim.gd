@@ -383,8 +383,10 @@ func pose() -> Dictionary:
 		# Raised toward the eye, turned over one way and back (both faces seen), and tipped to show the head, then lowered.
 		var ph := inspect_phase()
 		var env := smoothstep(0.0, 0.18, ph) * (1.0 - smoothstep(0.82, 1.0, ph))
-		pos += Vector3(-0.10, 0.12, 0.10) * env
-		rot += Vector3(-24.0 * env + 10.0 * sin(ph * TAU * 2.0) * env, 90.0 * sin(ph * TAU) * env, 14.0 * sin(ph * TAU * 2.0) * env)
+		# Turned 55 degrees each way, not 90, and kept a hand's length from the eye: a full quarter turn laid a long
+		# weapon end-on to the camera, so the look-over read as a flail rather than a look.
+		pos += Vector3(-0.08, 0.10, 0.04) * env
+		rot += Vector3(-18.0 * env + 8.0 * sin(ph * TAU * 2.0) * env, 55.0 * sin(ph * TAU) * env, 12.0 * sin(ph * TAU * 2.0) * env)
 	if holstered > 0.0:
 		var h := smoothstep(0.0, 1.0, holstered)
 		pos += Vector3(0.12, -0.42, 0.10) * h

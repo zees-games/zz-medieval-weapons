@@ -14,7 +14,7 @@ for d in screenshots/attach/*/*/; do
   [[ -f $d/f000.png ]] || continue
   att=$(basename "$(dirname "$d")"); w=$(basename "$d")
   mkdir -p "$clips/$att"
-  ffmpeg -v error -y -framerate 12 -i "$d/f%03d.png" -c:v libx264 -pix_fmt yuv420p "$clips/$att/$w.mp4" && n=$((n + 1))
+  ffmpeg -v error -y -framerate 24 -i "$d/f%03d.png" -c:v libx264 -pix_fmt yuv420p "$clips/$att/$w.mp4" && n=$((n + 1))
 done
 echo "attach_capture: $n clips in $clips"
 ((n > 0))

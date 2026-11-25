@@ -186,7 +186,35 @@ func grip_transform() -> Transform3D:
 	var hold: Vector3 = _row.get("hold", Vector3.ZERO)
 	var rest: Vector3 = _row.get("rest", Vector3(0.3, -0.3, -0.5))
 	var b := (Basis.from_euler(_rad(p["rot"])) * Basis.from_euler(_rad(hold))).scaled(Vector3.ONE * float(_row.get("scale", 1.0)))
-	return Transform3D(b, rest + (p["pos"] as Vector3))
+	return _within_reach(Transform3D(b, rest + (p["pos"] as Vector3) + _hand_offset()))
+
+
+## Where this holder carries the hand beyond the pose (a world model's hip and aim offsets); none for the eye's.
+func _hand_offset() -> Vector3:
+	return Vector3.ZERO
+
+
+## Arms are [member bone] + [member bone] long: past [constant REACH_SOFT] of that a pose's reach is eased toward the
+## shoulder (never past [constant REACH_MAX]), for the main hand and the second grip alike, so a thrust or a pole arm
+## held far out moves the whole weapon back instead of stretching the arm into a pole.
+const REACH_SOFT := 0.86
+const REACH_MAX := 1.04
+
+
+func _within_reach(t: Transform3D) -> Transform3D:
+	var side := float(_row.get("side", 1))
+	var grips: Array = [[Vector3(shoulder.x * side, shoulder.y, shoulder.z), Vector3.ZERO]]
+	if _row.has("offhand"):
+		grips.append([Vector3(-shoulder.x * side, shoulder.y, shoulder.z), _row["offhand"]])
+	var full := bone * 2.0
+	var soft := full * REACH_SOFT
+	var knee := full * (REACH_MAX - REACH_SOFT)
+	for g in grips:
+		var d: Vector3 = t * (g[1] as Vector3) - (g[0] as Vector3)
+		var l := d.length()
+		if l > soft:
+			t.origin -= d / l * (l - (soft + knee * tanh((l - soft) / knee)))
+	return t
 
 
 static func _rad(v: Vector3) -> Vector3:

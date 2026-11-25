@@ -12,7 +12,7 @@ extends Node3D
 
 const CAM := Vector2i(400, 400)
 const STEP := 1.0 / 60.0
-const FRAME := 1.0 / 12.0
+const FRAME := 1.0 / 24.0
 const PAIRS := {
 	&"zz_aperture_sight": [&"crossbow"], &"zz_barbed_heads": [&"crossbow"],
 	&"zz_leather_wrap": [&"longsword", &"battle_axe", &"spear", &"dagger"],
@@ -21,13 +21,14 @@ const PAIRS := {
 }
 ## Every weapon is first looked over (the game's inspect, LOOK on for its 2.4 s): the first-person view sees the piece
 ## raised toward the eye, not only at the hip. A melee weapon then swings at SWINGS and settles; the clip is MELEE_N.
-const LOOK := 1
-const SWINGS := [32, 50]
-const MELEE_N := 66
+## Frames are 1/24 s, so a 0.6 s swing is sampled at 15 poses rather than 7; the times are as before.
+const LOOK := 2
+const SWINGS := [64, 100]
+const MELEE_N := 132
 ## The crossbow's timeline in frames: it is looked over, shoots at SHOT, runs SLOW frames at an eighth of the speed
 ## (the close cameras on the bolt in flight for the heads), reloads at RELOAD and shows the new bolt loaded to the end.
-const SHOT := 32
-const SLOW := 8
+const SHOT := 64
+const SLOW := 16
 const RELOAD := SHOT + SLOW + 2
 
 var _out := "res://screenshots/attach"
@@ -102,7 +103,7 @@ func _clip(cat: GSWeaponAttachments, att: StringName, w: StringName) -> void:
 	vm.bind(w)
 	vm.show_fitting(cat, f)
 	vm.step(0.0)
-	var frames := _n if _n_set or w != &"crossbow" else RELOAD + roundi(vm.anim.load_s / FRAME) + 8
+	var frames := _n if _n_set or w != &"crossbow" else RELOAD + roundi(vm.anim.load_s / FRAME) + 16
 	var dir := ProjectSettings.globalize_path("%s/%s/%s" % [_out, att, w])
 	DirAccess.make_dir_recursive_absolute(dir)
 	get_viewport().size = CAM

@@ -12,38 +12,40 @@ const STYLE_BITS := 3
 
 const STRIKE_AT := 0.45
 
-## Keyframes: [t, pos, rot_degrees], joined by a monotone cubic ([method _hermite]).
+## Keyframes: [t, pos, rot_degrees], joined by a monotone cubic ([method _hermite]). The follow-through keeps moving
+## (0.55 to 0.70 still travels) and stays in front of the eye: the blade lies across the view rather than pitching
+## end-on to the camera, so no frame of a swing shows only a pommel or an empty view.
 const _SLASH_R := [
 	[0.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
-	[0.32, Vector3(0.20, 0.12, 0.10), Vector3(42, 0, -58)],
-	[0.45, Vector3(-0.02, 0.02, -0.12), Vector3(5, 0, 0)],
-	[0.55, Vector3(-0.32, -0.14, -0.30), Vector3(-45, 0, 62)],
-	[0.70, Vector3(-0.36, -0.16, -0.30), Vector3(-50, 0, 68)],
+	[0.32, Vector3(0.16, 0.10, 0.06), Vector3(40, 0, -54)],
+	[0.45, Vector3(0.0, 0.0, -0.14), Vector3(-6, 0, 8)],
+	[0.55, Vector3(-0.20, -0.06, -0.16), Vector3(-12, 0, 52)],
+	[0.70, Vector3(-0.26, -0.10, -0.12), Vector3(-16, 0, 66)],
 	[1.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
 ]
 const _OVERHEAD := [
 	[0.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
-	[0.34, Vector3(0.02, 0.30, 0.14), Vector3(92, 0, -4)],
-	[0.45, Vector3(0.0, 0.20, -0.05), Vector3(30, 0, 0)],
-	[0.55, Vector3(0, -0.24, -0.38), Vector3(-72, 0, 0)],
-	[0.70, Vector3(0, -0.26, -0.38), Vector3(-76, 0, 0)],
+	[0.34, Vector3(0.02, 0.31, 0.12), Vector3(92, 0, -4)],
+	[0.45, Vector3(0.0, 0.14, -0.10), Vector3(24, 0, 0)],
+	[0.55, Vector3(0, -0.10, -0.18), Vector3(-28, 0, 4)],
+	[0.70, Vector3(0, -0.15, -0.16), Vector3(-36, 0, 6)],
 	[1.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
 ]
 const _THRUST := [
 	[0.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
-	[0.34, Vector3(0.04, -0.02, 0.28), Vector3(12, 0, -4)],
-	[0.45, Vector3(0.02, 0.0, -0.20), Vector3(-6, 0, 0)],
-	[0.55, Vector3(0, 0.03, -0.62), Vector3(-14, 0, 2)],
-	[0.70, Vector3(0, 0.03, -0.64), Vector3(-14, 0, 2)],
+	[0.34, Vector3(0.03, -0.02, 0.10), Vector3(8, 0, -4)],
+	[0.45, Vector3(0.01, 0.0, -0.14), Vector3(-4, 0, 0)],
+	[0.55, Vector3(0, 0.02, -0.26), Vector3(-8, 0, 2)],
+	[0.70, Vector3(0, 0.02, -0.22), Vector3(-6, 0, 2)],
 	[1.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
 ]
 ## A shield bash: the whole shield shoved at the target.
 const _BASH := [
 	[0.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
-	[0.32, Vector3(0.10, -0.04, 0.22), Vector3(8, 18, 0)],
-	[0.45, Vector3(0.0, 0.0, -0.18), Vector3(-4, 4, 0)],
-	[0.55, Vector3(-0.10, 0.08, -0.52), Vector3(-10, -16, 0)],
-	[0.70, Vector3(-0.10, 0.08, -0.54), Vector3(-10, -16, 0)],
+	[0.32, Vector3(0.06, -0.03, 0.10), Vector3(6, 12, 0)],
+	[0.45, Vector3(0.0, 0.0, -0.10), Vector3(-3, 3, 0)],
+	[0.55, Vector3(-0.05, 0.04, -0.22), Vector3(-6, -10, 0)],
+	[0.70, Vector3(-0.04, 0.03, -0.18), Vector3(-5, -8, 0)],
 	[1.00, Vector3(0, 0, 0), Vector3(0, 0, 0)],
 ]
 ## Loosing a bow and firing a crossbow are a kick, not a swing: the carrier already holds the

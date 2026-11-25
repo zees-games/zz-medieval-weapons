@@ -22,9 +22,9 @@ static func rows() -> Dictionary:
 			"block": {"pos": Vector3(-0.14, 0.18, -0.06), "rot": Vector3(30, 0, 40)},
 			"surface": "steel",
 		},
-		# The battle axe's haft leans 17 degrees back and passes 13 cm behind the glb's origin, the war axe's leans 5
-		# degrees and passes 5 cm beside it; align and grip stand each haft on +Y through the hand.
-		&"battle_axe": _axe(1.15, Vector3(-17.09, 0, 0), Vector3(0, -0.039, -0.126)),
+		# The war axe's haft leans 5 degrees and passes 5 cm beside the glb's origin; align and grip stand it on +Y
+		# through the hand. The rebuilt battle axe's haft already stands on +Y through the origin.
+		&"battle_axe": _axe(1.15),
 		&"war_axe": _axe(1.1, Vector3(0, 0, -5.32), Vector3(0.0526, -0.0049, 0)),
 		&"double_axe": _axe(1.2),
 		&"mace": {
@@ -34,8 +34,7 @@ static func rows() -> Dictionary:
 			"surface": "iron",
 		},
 		&"spear": {
-			# The glb's haft leans 11 degrees off +Y and passes 4 cm from its origin at the hand.
-			"align": Vector3(-10.93, 0, 0), "grip": Vector3(0, -0.0076, -0.0393),
+			# The rebuilt glb's haft stands on +Y through its origin, so it needs no align or grip.
 			"hold": Vector3(-78, 0, 6), "rest": Vector3(0.27, -0.26, -0.42), "side": 1,
 			"offhand": Vector3(0, 0.55, 0),
 			"styles": [S.THRUST], "heft": 1.0, "weight": "light",

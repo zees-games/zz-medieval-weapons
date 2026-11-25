@@ -37,3 +37,23 @@ static func dress(grip: Node3D, model: Node3D, id: StringName, catalogue: GSWeap
 		if n.has_meta(&"gs_attachment_model") and n.has_method(&"fit"):
 			n.call(&"fit", info)
 	return placed
+
+
+## Carries the nocked bolt's muzzle pieces onto [param flight_model], the bolt drawn in flight
+## ([ZzProjectileFlight]), so what was fitted to the bolt on the stock is still on it when it flies. Both are the
+## same projectile model, so each socket keeps its place on it. Returns how many pieces it carried.
+static func dress_flight(missile: Node3D, flight_model: Node3D) -> int:
+	if missile == null or flight_model == null:
+		return 0
+	var info := {"head": ZzAttachmentFit.head(flight_model, MISSILE_FRAME)}
+	var carried := 0
+	for socket in missile.get_children():
+		if not String(socket.name).begins_with(GSWeaponAttachmentModels.SOCKET_PREFIX):
+			continue
+		var copy := socket.duplicate() as Node3D
+		for n in copy.find_children("*", "", true, false):
+			if n.has_meta(&"gs_attachment_model") and n.has_method(&"fit"):
+				n.call(&"fit", info)
+				carried += 1
+		flight_model.add_child(copy)
+	return carried

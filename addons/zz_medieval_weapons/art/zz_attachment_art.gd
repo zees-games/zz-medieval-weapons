@@ -40,6 +40,69 @@ static func sweep(rings: Array, segs: int = 32, u_tiles: float = 1.0, v_per_m: f
 	return st.commit()
 
 
+## A strap wound in a spiral over [param rings]: the sleeve [method sweep] would make, with each turn of the strap
+## standing [param depth] proud of the one it overlaps, so the overlap is a real step in the outline, not only in the
+## texture. [param pitch] is the strap's width along the grip (one turn of the spiral advances it by that much). UV:
+## u once round, v one strap per unit, so [method leather]'s spiral lines up with the steps. The relief fades out over
+## the last 4 mm at each end, where the strap is skived flush.
+static func wound(rings: Array, segs: int, pitch: float, depth: float) -> ArrayMesh:
+	var rr: Array = []
+	for i in rings.size() - 1:
+		var r0: Dictionary = rings[i]
+		var r1: Dictionary = rings[i + 1]
+		var n := maxi(1, ceili(absf(float(r1["y"]) - float(r0["y"])) / 0.0008))
+		for k in n:
+			rr.append(_mix(r0, r1, float(k) / float(n)))
+	rr.append(rings[rings.size() - 1])
+	var y_lo := float(rr[0]["y"])
+	var y_hi := float(rr[rr.size() - 1]["y"])
+	var grid: Array = []
+	for r: Dictionary in rr:
+		var y := float(r["y"])
+		var fade := smoothstep(0.0, 0.004, y - y_lo) * smoothstep(0.0, 0.004, y_hi - y)
+		var row := PackedVector3Array()
+		for j in segs + 1:
+			var a := TAU * float(j) / float(segs)
+			var s := fposmod(float(j) / float(segs) + (y - y_lo) / pitch, 1.0)
+			# A sawtooth: the strap rises across its width to its edge, then steps down onto the turn below.
+			var lift := depth * fade * (0.3 + 0.7 * s) * smoothstep(1.0, 0.94, s)
+			var c: Vector2 = r["c"]
+			var h: Vector2 = r["h"]
+			row.append(Vector3(c.x + (h.x + lift) * cos(a), y, c.y + (h.y + lift) * sin(a)))
+		grid.append(row)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in grid.size() - 1:
+		var g0: PackedVector3Array = grid[i]
+		var g1: PackedVector3Array = grid[i + 1]
+		var v0 := (float(rr[i]["y"]) - y_lo) / pitch
+		var v1 := (float(rr[i + 1]["y"]) - y_lo) / pitch
+		for j in segs:
+			var u0 := float(j) / float(segs)
+			var u1 := float(j + 1) / float(segs)
+			var ns: Array = [_grid_normal(grid, i, j, segs), _grid_normal(grid, i, j + 1, segs), _grid_normal(grid, i + 1, j + 1, segs), _grid_normal(grid, i + 1, j, segs)]
+			_quad(st, [g0[j], g0[j + 1], g1[j + 1], g1[j]], ns, [Vector2(u0, v0), Vector2(u1, v0), Vector2(u1, v1), Vector2(u0, v1)])
+	st.generate_tangents()
+	return st.commit()
+
+
+static func _mix(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
+	return {"y": lerpf(float(a["y"]), float(b["y"]), t), "c": (a["c"] as Vector2).lerp(b["c"], t), "h": (a["h"] as Vector2).lerp(b["h"], t)}
+
+
+## The outward normal of [method wound]'s grid at row [param i], column [param j], from its neighbours.
+static func _grid_normal(grid: Array, i: int, j: int, segs: int) -> Vector3:
+	var row: PackedVector3Array = grid[i]
+	var round_d := row[(j + 1) % segs] - row[(j + segs - 1) % segs]
+	var along := (grid[mini(i + 1, grid.size() - 1)] as PackedVector3Array)[j] - (grid[maxi(i - 1, 0)] as PackedVector3Array)[j]
+	var n := along.cross(round_d)
+	var out := Vector3(cos(TAU * j / segs), 0.0, sin(TAU * j / segs))
+	if n.length() < 1e-12:
+		return out
+	n = n.normalized()
+	return n if n.dot(out) >= 0.0 else -n
+
+
 static func _at(r: Dictionary, a: float) -> Vector3:
 	var c: Vector2 = r["c"]
 	var h: Vector2 = r["h"]
@@ -137,9 +200,10 @@ static func leather() -> StandardMaterial3D:
 	var h := PackedFloat32Array()
 	h.resize(TEX * TEX)
 	var alb := Image.create(TEX, TEX, false, Image.FORMAT_RGBA8)
-	var base := Color(0.33, 0.19, 0.10)
-	var dark := Color(0.15, 0.08, 0.04)
-	var thread := Color(0.72, 0.62, 0.44)
+	# Oxblood-dyed leather: a red no wooden haft, horn grip or glove shares, so the wrap reads as its own part.
+	var base := Color(0.46, 0.09, 0.06)
+	var dark := Color(0.11, 0.02, 0.02)
+	var thread := Color(0.90, 0.82, 0.62)
 	for y in TEX:
 		for x in TEX:
 			var u := float(x) / TEX
@@ -189,7 +253,7 @@ static func rope() -> StandardMaterial3D:
 	return m
 
 
-## Forged iron: dark blued metal with hammer facets, pitted with rust in the pits; triplanar, about 4 cm a tile.
+## Forged iron: dark satin metal with hammer facets, pitted with rust in the pits; triplanar, about 4 cm a tile.
 static func iron() -> StandardMaterial3D:
 	if _mats.has(&"iron"):
 		return _mats[&"iron"]
@@ -208,10 +272,11 @@ static func iron() -> StandardMaterial3D:
 			var pit := smoothstep(0.68, 0.8, p)
 			var col := steel.darkened(0.25 * hm).lerp(rust, pit * 0.8)
 			alb.set_pixel(x, y, col)
-			rough.set_pixel(x, y, Color(0.38 + 0.15 * hm + 0.45 * pit, 0, 0))
+			# Black-forged, not polished: a satin sheen on the hammer facets, dull in the pits.
+			rough.set_pixel(x, y, Color(0.58 + 0.17 * hm + 0.25 * pit, 0, 0))
 			h[y * TEX + x] = 0.35 * hm - 0.6 * pit
 	var m := _material(alb, h, 2.0)
-	m.metallic = 0.82
+	m.metallic = 0.6
 	m.roughness = 1.0
 	rough.generate_mipmaps()
 	m.roughness_texture = ImageTexture.create_from_image(rough)

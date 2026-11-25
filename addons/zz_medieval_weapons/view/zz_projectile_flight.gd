@@ -19,6 +19,8 @@ var mask: int = 1
 var surface: StringName = &"wood"
 
 var _age: float = 0.0
+## The projectile's model (its -Z the flight), where [ZzMedievalAttachmentDress] puts the bolt's pieces.
+var model: Node3D
 
 
 ## Builds a flight of [param projectile_id] ("arrow" or "bolt") at [param xf], flying at
@@ -26,7 +28,8 @@ var _age: float = 0.0
 static func launch(parent: Node, projectile_id: StringName, xf: Transform3D, speed: float, gravity: float) -> ZzProjectileFlight:
 	var f := ZzProjectileFlight.new()
 	f.name = "Flight"
-	f.add_child(ZzMedievalModels.projectile(projectile_id))
+	f.model = ZzMedievalModels.projectile(projectile_id)
+	f.add_child(f.model)
 	parent.add_child(f)
 	f.global_transform = xf
 	f.velocity = -xf.basis.z.normalized() * speed

@@ -1,10 +1,13 @@
 extends Node3D
-## Attachment clips for the visual judge: each fitted weapon held and used, three panels side by side per frame:
-## the first-person view (camera, arms, gloves), a close camera on the fitted piece in those hands, and a person
-## holding it in third person. The weapon is used in real time (a swing, or the crossbow's shot and reload), so a
-## piece that lags or floats off the weapon shows. One png per frame under <out>/<attachment>/<weapon>/
+## Attachment clips for the visual judge: close-ups of each fitted piece on the pack's own first-person view model,
+## three panels side by side per frame: the first-person view, a close camera behind and right of the piece, and a
+## close camera from its far (opponent's) side. The two close cameras ride the piece's socket frame, so the piece
+## holds still in frame while the hands use the weapon, and anything that slips or floats on the weapon shows. There
+## is no stand-in body: the subject is the attachment, not the person holding it. The weapon is used in real time (a
+## swing, or the crossbow's shot and full reload); the crossbow's shot runs slowed down while the close cameras
+## follow the bolt in flight, so the heads it carries show. One png per frame under <out>/<attachment>/<weapon>/
 ## (attach_capture.sh turns them into <attachment>/<weapon>.mp4). Run under Xvfb on a GPU box: `--out=<dir>
-## [--variant=N] [--frames=N]`; the variant moves the sun and the close camera.
+## [--variant=N] [--frames=N]`; the variant moves the sun and turns the close cameras.
 
 const CAM := Vector2i(400, 400)
 const STEP := 1.0 / 60.0
@@ -15,16 +18,19 @@ const PAIRS := {
 	&"zz_counterweight": [&"longsword", &"war_axe", &"mace"],
 	&"zz_spiked_boss": [&"round_shield"],
 }
-## The third-person rig stands well away from the first-person one, so neither shows in the other's panels.
-const BODY_AT := Vector3(40, 0, 0)
+## The crossbow's timeline in frames: it aims, shoots at SHOT, runs SLOW frames at an eighth of the speed (the close
+## cameras on the bolt in flight for the heads), reloads at RELOAD and shows the new bolt loaded to the end.
+const SHOT := 6
+const SLOW := 8
+const RELOAD := SHOT + SLOW + 2
 
 var _out := "res://screenshots/attach"
 var _n := 36
+var _n_set := false
 var _variant := 0
 var _fp: Camera3D
-var _detail: Camera3D
-var _tp: Camera3D
-var _holder: Node3D
+var _near: Camera3D
+var _far: Camera3D
 
 
 func _ready() -> void:
@@ -35,6 +41,7 @@ func _ready() -> void:
 			_variant = int(a.substr(10))
 		elif a.begins_with("--frames="):
 			_n = int(a.substr(9))
+			_n_set = true
 	var env := WorldEnvironment.new()
 	env.environment = ZzMedievalReflectionSource.sky_environment()
 	add_child(env)
@@ -43,28 +50,11 @@ func _ready() -> void:
 	sun.light_energy = 1.0
 	sun.shadow_enabled = true
 	add_child(sun)
-	_ground(Vector3.ZERO)
-	_ground(BODY_AT)
-	_fp = Camera3D.new()
-	_fp.fov = 72
-	_fp.position = Vector3(0, 1.6, 0)
-	add_child(_fp)
-	_detail = Camera3D.new()
-	_detail.fov = 30
-	_detail.near = 0.01
-	add_child(_detail)
-	_tp = Camera3D.new()
-	_tp.fov = 40
-	add_child(_tp)
-	_body()
-	var cat := ZzMedievalAttachmentPack.catalogue(PackedStringArray(["res://cfg"]))
-	for att: StringName in PAIRS:
-		for w: StringName in PAIRS[att]:
-			await _clip(cat, att, w)
-	get_tree().quit()
-
-
-func _ground(at: Vector3) -> void:
+	# A soft fill from the other side, so a piece's shaded face still reads in a close-up.
+	var fill := DirectionalLight3D.new()
+	fill.rotation_degrees = Vector3(-20, sun.rotation_degrees.y + 180.0, 0)
+	fill.light_energy = 0.35
+	add_child(fill)
 	var g := MeshInstance3D.new()
 	var pm := PlaneMesh.new()
 	pm.size = Vector2(12, 12)
@@ -73,65 +63,54 @@ func _ground(at: Vector3) -> void:
 	m.roughness = 0.95
 	pm.material = m
 	g.mesh = pm
-	g.position = at
 	add_child(g)
+	_fp = Camera3D.new()
+	_fp.fov = 72
+	_fp.position = Vector3(0, 1.6, 0)
+	add_child(_fp)
+	_near = _close_camera()
+	_far = _close_camera()
+	var cat := ZzMedievalAttachmentPack.catalogue(PackedStringArray(["res://cfg"]))
+	for att: StringName in PAIRS:
+		for w: StringName in PAIRS[att]:
+			await _clip(cat, att, w)
+	get_tree().quit()
 
 
-## A person (legs and torso, head) like tools/sheet.gd's; the holder at the shoulders carries the world model.
-func _body() -> void:
-	var body := MeshInstance3D.new()
-	var cap := CapsuleMesh.new()
-	cap.radius = 0.2
-	cap.height = 1.5
-	var bmat := StandardMaterial3D.new()
-	bmat.albedo_color = Color(0.25, 0.3, 0.45)
-	cap.material = bmat
-	body.mesh = cap
-	body.position = BODY_AT + Vector3(0, 0.85, 0)
-	add_child(body)
-	var head := MeshInstance3D.new()
-	var hs := SphereMesh.new()
-	hs.radius = 0.12
-	hs.height = 0.24
-	var hm := StandardMaterial3D.new()
-	hm.albedo_color = ZzMedievalHeld.SKIN
-	hs.material = hm
-	head.mesh = hs
-	head.position = BODY_AT + Vector3(0, 1.72, 0)
-	add_child(head)
-	_holder = Node3D.new()
-	_holder.position = BODY_AT + Vector3(0, 1.45, 0)
-	add_child(_holder)
+func _close_camera() -> Camera3D:
+	var c := Camera3D.new()
+	c.fov = 30
+	c.near = 0.01
+	add_child(c)
+	return c
 
 
 func _clip(cat: GSWeaponAttachments, att: StringName, w: StringName) -> void:
 	var a := cat.get_attachment(att) as GSWeaponAttachment
 	var f := GSWeaponFitting.make(w)
 	f.fit(a.mount, att)
-	var fp := ZzMedievalViewModel.new()
-	_fp.add_child(fp)
-	var tp := ZzMedievalWorldModel.new()
-	_holder.add_child(tp)
-	var both: Array[ZzMedievalHeld] = [fp, tp]
-	for h in both:
-		h.set_process(false)
-		h.flight_parent = self
-		h.bind(w)
-		h.show_fitting(cat, f)
-		h.step(0.0)
+	var vm := ZzMedievalViewModel.new()
+	_fp.add_child(vm)
+	vm.set_process(false)
+	vm.flight_parent = self
+	vm.bind(w)
+	vm.show_fitting(cat, f)
+	vm.step(0.0)
+	var frames := _n if _n_set or w != &"crossbow" else RELOAD + roundi(vm.anim.load_s / FRAME) + 8
 	var dir := ProjectSettings.globalize_path("%s/%s/%s" % [_out, att, w])
 	DirAccess.make_dir_recursive_absolute(dir)
 	get_viewport().size = CAM
-	var piece := _piece(fp)
-	var reach := maxf(_bounds(piece).size.length(), 0.06)
-	var placed := 0
-	for i in _n:
-		_act(both, w, i)
+	var held := _piece(vm)
+	var reach := maxf(_bounds(held).size.length(), 0.06)
+	var cams: Array[Camera3D] = [_fp, _near, _far]
+	for i in frames:
+		var slow := w == &"crossbow" and i >= SHOT and i < SHOT + SLOW
+		_act(vm, w, i, FRAME / 8.0 if slow else FRAME)
+		var piece := held
+		if slow and att == &"zz_barbed_heads":
+			piece = _flight_piece(piece)
+		_aim(piece, att, w, reach)
 		var strip := Image.create(CAM.x * 3, CAM.y, false, Image.FORMAT_RGBA8)
-		var cams: Array[Camera3D] = [_fp, _detail, _tp]
-		_aim_detail(piece, att, reach)
-		_tp.position = BODY_AT + Vector3(1.9, 1.75, -1.5).rotated(Vector3.UP, deg_to_rad(25.0 * (_variant % 3)))
-		_tp.look_at(BODY_AT + Vector3(0, 1.2, -0.4))
 		for k in 3:
 			cams[k].current = true
 			await RenderingServer.frame_post_draw
@@ -140,66 +119,83 @@ func _clip(cat: GSWeaponAttachments, att: StringName, w: StringName) -> void:
 			img.convert(Image.FORMAT_RGBA8)
 			strip.blit_rect(img, Rect2i(Vector2i.ZERO, CAM), Vector2i(k * CAM.x, 0))
 		strip.save_png("%s/f%03d.png" % [dir, i])
-		placed += 1
-	print("clip ", att, "/", w, " frames ", placed, " piece ", _bounds(piece).size)
-	for h in both:
-		h.get_parent().remove_child(h)
-		h.free()
+	print("clip ", att, "/", w, " frames ", frames, " piece ", _bounds(held).size)
+	vm.get_parent().remove_child(vm)
+	vm.free()
 	for n in get_children():
 		if n is ZzProjectileFlight or n is CPUParticles3D:
 			n.free()
 
 
-## The weapon in use, a frame's worth of time: a swing (or the shield's bash) at the start and again halfway; the
+## The weapon in use for [param dt] of time: a swing (or the shield's bash) at the start and again halfway; the
 ## crossbow aims a while (the heads ride the nocked bolt), shoots, then reloads.
-func _act(both: Array[ZzMedievalHeld], w: StringName, i: int) -> void:
-	for h in both:
-		if w == &"crossbow":
-			if i == _n * 2 / 3:
-				h.anim.start_use()
-			elif i == _n * 2 / 3 + 4:
-				h.anim.set_reloading(true)
-		elif i == 2 or i == _n / 2 + 2:
-			h.anim.start_use()
+func _act(vm: ZzMedievalHeld, w: StringName, i: int, dt: float) -> void:
+	if w == &"crossbow":
+		if i == SHOT:
+			vm.anim.start_use()
+		elif i == RELOAD:
+			vm.anim.set_reloading(true)
+	elif i == 2 or i == _n / 2 + 2:
+		vm.anim.start_use()
 	var t := 0.0
-	while t < FRAME - 1e-6:
-		for h in both:
-			h.step(STEP)
+	var step := minf(STEP, dt)
+	while t < dt - 1e-6:
+		vm.step(step)
 		for n in get_children():
 			if n is ZzProjectileFlight:
-				(n as ZzProjectileFlight).step(STEP)
-		t += STEP
+				# Stepped here only: its own _process would fly it on between the cameras' renders.
+				n.set_process(false)
+				(n as ZzProjectileFlight).step(step)
+		t += step
 
 
-## The close camera: a fixed offset in the piece's own socket frame (so it rides the weapon and the piece holds
-## still in frame while the hands swing it; anything that slips on the weapon shows), from the side each piece is
-## best seen: the boss from the shield's front, the counterweight and the wrap from below the hand, the rest from the side.
-## The variant turns it round the weapon's long axis.
-const LOOK := {
+## The heads carried onto the bolt in flight, if one is flying; else [param fallback].
+func _flight_piece(fallback: Node3D) -> Node3D:
+	for n in get_children():
+		if n is ZzProjectileFlight and not (n as ZzProjectileFlight).stuck:
+			var p := _piece(n)
+			if p != n:
+				return p
+	return fallback
+
+
+## The close cameras: fixed offsets in the piece's own socket frame, from the side each piece is best seen (NEAR,
+## behind and right of it as its holder sees it; FAR, from the opponent's side). The variant turns both round the
+## weapon's long axis.
+const NEAR := {
 	&"zz_spiked_boss": Vector3(0.35, 0.25, 1.0), &"zz_counterweight": Vector3(0.7, -1.0, 0.4),
-	&"zz_leather_wrap": Vector3(0.85, -0.6, 0.5), &"zz_aperture_sight": Vector3(0.85, -0.35, 0.6),
+	&"zz_leather_wrap": Vector3(0.85, -0.6, 0.5), &"zz_aperture_sight": Vector3(0.5, -0.9, 0.35),
 	&"zz_barbed_heads": Vector3(1.0, 0.1, 0.35),
 }
-var _last := Vector3.ZERO
+## Per weapon, where the NEAR default would see only the fist: the dagger's short grip shows past the fist's ends.
+const NEAR_ON := {&"dagger": Vector3(-0.6, -0.5, 0.7)}
+const FAR := {
+	&"zz_spiked_boss": Vector3(-0.9, 0.35, 0.6), &"zz_counterweight": Vector3(-0.7, -0.8, -0.6),
+	&"zz_leather_wrap": Vector3(-0.85, 0.1, -0.6), &"zz_aperture_sight": Vector3(-0.8, 0.3, 0.5),
+	&"zz_barbed_heads": Vector3(-0.6, 0.6, -0.7),
+}
 
 
-func _aim_detail(piece: Node3D, att: StringName, reach: float) -> void:
-	if _visible(piece):
-		_last = _bounds(piece).get_center()
+func _aim(piece: Node3D, att: StringName, w: StringName, reach: float) -> void:
+	var at := _bounds(piece).get_center() if _visible(piece) else piece.global_position
 	var frame := (piece.get_parent() as Node3D).global_basis.orthonormalized()
-	var local: Vector3 = LOOK.get(att, Vector3(1, 0.3, 0.5))
-	local = local.rotated(Vector3.UP if att != &"zz_spiked_boss" else Vector3.BACK, deg_to_rad(28.0 * (_variant % 3 - 1)))
-	var d := (frame * local).normalized()
-	_detail.position = _last + d * clampf(reach * 3.5, 0.18, 0.9)
-	var up := Vector3.UP if absf(d.y) < 0.95 else Vector3.FORWARD
-	_detail.look_at(_last, up)
+	var turn := deg_to_rad(28.0 * (_variant % 3 - 1))
+	var axis := Vector3.UP if att != &"zz_spiked_boss" else Vector3.BACK
+	var near: Vector3 = NEAR_ON.get(w, NEAR.get(att, Vector3(1, 0.3, 0.5)))
+	var pairs := [[_near, near], [_far, FAR.get(att, Vector3(-1, 0.3, -0.5))]]
+	for p in pairs:
+		var cam := p[0] as Camera3D
+		var local: Vector3 = p[1]
+		var d := (frame * local.rotated(axis, turn)).normalized()
+		cam.position = at + d * clampf(reach * 3.5, 0.18, 0.9)
+		cam.look_at(at, Vector3.UP if absf(d.y) < 0.95 else Vector3.FORWARD)
 
 
-func _piece(h: ZzMedievalHeld) -> Node3D:
+func _piece(h: Node) -> Node3D:
 	for n in h.find_children("*", "", true, false):
 		if n.has_meta(&"gs_attachment_model"):
 			return n as Node3D
-	return h
+	return h as Node3D
 
 
 func _visible(n: Node3D) -> bool:

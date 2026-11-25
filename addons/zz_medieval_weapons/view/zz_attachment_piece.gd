@@ -61,8 +61,8 @@ func _wrap(w: Dictionary) -> void:
 	for i in rs.size():
 		var t := minf(i, rs.size() - 1 - i)
 		leather.append(ZzAttachmentArt.grown(rs[i], 0.0008 + 0.0017 * clampf(t / 2.0, 0.0, 1.0)))
-	var circ := TAU * _radius(rs[rs.size() / 2])
-	_mesh(ZzAttachmentArt.sweep(leather, 32, 3.0, 3.0 / maxf(circ, 0.02)), ZzAttachmentArt.leather())
+	# A 14 mm strap, each turn stepping 1.4 mm over the last: the spiral shows in the outline, past the fist.
+	_mesh(ZzAttachmentArt.wound(leather, 48, 0.014, 0.0014), ZzAttachmentArt.leather())
 	for end: int in [0, rs.size() - 1]:
 		var step := 1 if end == 0 else -1
 		var r0: Dictionary = rs[end]
@@ -82,7 +82,7 @@ func _wrap(w: Dictionary) -> void:
 
 
 ## Pommel weapons: a forged iron cap over the pommel with a peened button and a raised band. Hafted weapons: an iron
-## ferrule shod over the butt, riveted through, ending in a faceted knob.
+## ferrule shod over the butt, riveted through, ending in a round knob.
 func _counterweight(b: Dictionary) -> void:
 	var rs: Array = b.get("rings", [])
 	if rs.size() < 4:
@@ -144,7 +144,7 @@ func _counterweight(b: Dictionary) -> void:
 		ZzAttachmentArt.ring(top_y - 0.001, r, c0),
 		ZzAttachmentArt.ring(top_y, r - 0.002, c0),
 	]
-	_mesh(ZzAttachmentArt.sweep(ferrule, 8, 1.0, 20.0), iron)
+	_mesh(ZzAttachmentArt.sweep(ferrule, 40, 1.0, 20.0), iron)
 	for side: float in [1.0, -1.0]:
 		var rivet := SphereMesh.new()
 		rivet.radius = 0.0032
@@ -164,12 +164,17 @@ func _boss(b: Dictionary) -> void:
 	var pts: Array = [Vector2(base_r + 0.012, -0.001), Vector2(base_r + 0.013, 0.0015), Vector2(base_r + 0.011, 0.003), Vector2(base_r, 0.004)]
 	for i in range(1, 9):
 		var t := float(i) / 8.0 * PI / 2.0
-		var rr := maxf(base_r * cos(t), 0.013)
+		var rr := maxf(base_r * cos(t), 0.026)
 		pts.append(Vector2(rr, 0.004 + (top - face - 0.004) * sin(t)))
-	pts.append(Vector2(0.011, top - face + 0.004))
-	pts.append(Vector2(0.006, top - face + 0.04))
-	pts.append(Vector2(0.0025, top - face + 0.075))
-	pts.append(Vector2(0.0, top - face + 0.09))
+	# A stout forged spike: a collar where it is welded to the dome, then a 9 cm cone, thick at the root.
+	var s0 := top - face
+	pts.append(Vector2(0.026, s0 + 0.004))
+	pts.append(Vector2(0.021, s0 + 0.012))
+	pts.append(Vector2(0.017, s0 + 0.03))
+	pts.append(Vector2(0.012, s0 + 0.05))
+	pts.append(Vector2(0.007, s0 + 0.07))
+	pts.append(Vector2(0.003, s0 + 0.085))
+	pts.append(Vector2(0.0, s0 + 0.092))
 	var lathe := _lathe_rings(pts, Vector2.ZERO, face, 1.0)
 	var to_front := Basis(Vector3(1, 0, 0), PI / 2)
 	_mesh(ZzAttachmentArt.sweep(lathe, 40, 1.0, 20.0), ZzAttachmentArt.iron(), Transform3D(to_front, Vector3.ZERO))
@@ -187,7 +192,8 @@ func _boss(b: Dictionary) -> void:
 ## A peep sight on the stock's top just behind the nut: a forged foot hugging the stock, a leaf, and a ring to look
 ## through along the bolt's line (+Y).
 func _sight(top: Array) -> void:
-	var y := 0.04
+	# 3.5 cm behind the nut (y 0.12): clear of the trigger hand round the origin and the fore hand at y 0.16.
+	var y := 0.085
 	var z := 0.017
 	var slope := 0.0
 	if top.size() >= 2:

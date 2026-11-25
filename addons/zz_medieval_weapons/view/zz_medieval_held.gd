@@ -356,6 +356,7 @@ func _on_loosed(charge: float) -> void:
 		if parent != null:
 			var f := ZzProjectileFlight.launch(parent, StringName(_row["projectile"]), xf, lerpf(speed_lo, speed_hi, charge), float(_cfg.get("gravity_scale", 1.0)))
 			f.mask = flight_mask
+			ZzMedievalAttachmentDress.dress_flight(_missile, f.model)
 
 
 var flight_mask: int = 1

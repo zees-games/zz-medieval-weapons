@@ -32,9 +32,13 @@ static func sweep(rings: Array, segs: int = 32, u_tiles: float = 1.0, v_per_m: f
 			var p11 := _at(r1, a1)
 			var n00 := _normal(r0, r1, a0)
 			var n01 := _normal(r0, r1, a1)
+			var n10 := _smoothed(rings, i, 1, n00, a0)
+			var n11 := _smoothed(rings, i, 1, n01, a1)
+			n00 = _smoothed(rings, i, -1, n00, a0)
+			n01 = _smoothed(rings, i, -1, n01, a1)
 			var u0 := float(j) / float(segs) * u_tiles
 			var u1 := float(j + 1) / float(segs) * u_tiles
-			_quad(st, [p00, p01, p11, p10], [n00, n01, n01, n00], [Vector2(u0, v0), Vector2(u1, v0), Vector2(u1, v1), Vector2(u0, v1)])
+			_quad(st, [p00, p01, p11, p10], [n00, n01, n11, n10], [Vector2(u0, v0), Vector2(u1, v0), Vector2(u1, v1), Vector2(u0, v1)])
 		v0 = v1
 	st.generate_tangents()
 	return st.commit()
@@ -110,6 +114,19 @@ static func _at(r: Dictionary, a: float) -> Vector3:
 
 
 ## Outward normal of the band between [param r0] and [param r1] at angle [param a]: along the band crossed with round it.
+## The normal of segment [param i]'s [param n] at its end ring ([param side] 1) or start ring (-1), averaged with the
+## neighbouring segment's there unless the profile turns more than 60 degrees: a smooth profile shades smooth, not
+## as a stack of lathe-turned bands, while a lip or step keeps its edge.
+static func _smoothed(rings: Array, i: int, side: int, n: Vector3, a: float) -> Vector3:
+	var j := i + side
+	if j < 0 or j + 1 >= rings.size():
+		return n
+	var m := _normal(rings[j], rings[j + 1], a)
+	if m.dot(n) < 0.5:
+		return n
+	return (m + n).normalized()
+
+
 static func _normal(r0: Dictionary, r1: Dictionary, a: float) -> Vector3:
 	var along := _at(r1, a) - _at(r0, a)
 	var h0: Vector2 = r0["h"]
@@ -200,10 +217,10 @@ static func leather() -> StandardMaterial3D:
 	var h := PackedFloat32Array()
 	h.resize(TEX * TEX)
 	var alb := Image.create(TEX, TEX, false, Image.FORMAT_RGBA8)
-	# Oxblood-dyed leather: a red no wooden haft, horn grip or glove shares, so the wrap reads as its own part.
-	var base := Color(0.33, 0.10, 0.06)
-	var dark := Color(0.07, 0.02, 0.015)
-	var thread := Color(0.90, 0.82, 0.62)
+	# Worn oxblood-brown leather: darker and browner than any wooden haft, so the wrap reads as its own part.
+	var base := Color(0.27, 0.12, 0.065)
+	var dark := Color(0.05, 0.022, 0.014)
+	var thread := Color(0.40, 0.30, 0.19)
 	for y in TEX:
 		for x in TEX:
 			var u := float(x) / TEX
@@ -214,7 +231,7 @@ static func leather() -> StandardMaterial3D:
 			var edge := smoothstep(0.0, 0.08, s) * smoothstep(1.0, 0.9, s)
 			var height := 0.55 * edge + 0.3 * g
 			# Pebbled, worn grain: the high spots rubbed lighter and browner by the hand.
-			var col := dark.lerp(base, edge).lerp(Color(0.45, 0.2, 0.12), g * 0.55 * edge).darkened(0.25 * (1.0 - g))
+			var col := dark.lerp(base, edge).lerp(Color(0.40, 0.23, 0.13), g * 0.55 * edge).darkened(0.25 * (1.0 - g))
 			if absf(s - 0.2) < 0.022 and along < 0.55:
 				col = thread.darkened(0.25 * (1.0 - g))
 				height += 0.25
@@ -224,7 +241,7 @@ static func leather() -> StandardMaterial3D:
 			alb.set_pixel(x, y, col)
 			h[y * TEX + x] = height
 	var m := _material(alb, h, 4.5)
-	m.roughness = 0.88
+	m.roughness = 0.92
 	_mats[&"leather"] = m
 	return m
 
@@ -237,7 +254,8 @@ static func rope() -> StandardMaterial3D:
 	var h := PackedFloat32Array()
 	h.resize(TEX * TEX)
 	var alb := Image.create(TEX, TEX, false, Image.FORMAT_RGBA8)
-	var base := Color(0.62, 0.52, 0.36)
+	# Waxed cord, darkened by handling: it binds the leather's end without standing out of it.
+	var base := Color(0.40, 0.30, 0.19)
 	for y in TEX:
 		for x in TEX:
 			var u := float(x) / TEX
@@ -254,12 +272,14 @@ static func rope() -> StandardMaterial3D:
 	return m
 
 
-## Forged iron: satin metal with hammer facets, pitted with rust in the pits; triplanar, about 8 cm a tile.
+## Forged iron: satin metal with hammer facets, pitted with rust in the pits; triplanar, about 12 cm a tile.
 static func iron() -> StandardMaterial3D:
 	if _mats.has(&"iron"):
 		return _mats[&"iron"]
-	var pits := _noise(3, 0.09)
-	var ham := _noise(5, 0.018)
+	# Pits a few millimetres across and hammer facets a couple of centimetres: calm at view-model distance, not a
+	# speckle of tiny bright dots.
+	var pits := _noise(3, 0.035)
+	var ham := _noise(5, 0.012)
 	var h := PackedFloat32Array()
 	h.resize(TEX * TEX)
 	var alb := Image.create(TEX, TEX, false, Image.FORMAT_RGBA8)
@@ -270,20 +290,20 @@ static func iron() -> StandardMaterial3D:
 		for x in TEX:
 			var p := pits.get_pixel(x, y).r
 			var hm := ham.get_pixel(x, y).r
-			var pit := smoothstep(0.74, 0.86, p)
-			var col := steel.darkened(0.2 * hm).lerp(rust, pit * 0.6)
+			var pit := smoothstep(0.72, 0.9, p)
+			var col := steel.darkened(0.28 * hm).lerp(rust, pit * 0.45)
 			alb.set_pixel(x, y, col)
 			# Black-forged, not polished: a satin sheen on the hammer facets, dull in the pits.
-			rough.set_pixel(x, y, Color(0.3 + 0.16 * hm + 0.35 * pit, 0, 0))
-			h[y * TEX + x] = 0.35 * hm - 0.6 * pit
-	var m := _material(alb, h, 1.2)
+			rough.set_pixel(x, y, Color(0.4 + 0.18 * hm + 0.3 * pit, 0, 0))
+			h[y * TEX + x] = 0.5 * hm - 0.35 * pit
+	var m := _material(alb, h, 0.8)
 	m.metallic = 0.88
 	m.roughness = 1.0
 	rough.generate_mipmaps()
 	m.roughness_texture = ImageTexture.create_from_image(rough)
 	m.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
 	m.uv1_triplanar = true
-	m.uv1_scale = Vector3(12, 12, 12)
+	m.uv1_scale = Vector3(8, 8, 8)
 	_mats[&"iron"] = m
 	return m
 

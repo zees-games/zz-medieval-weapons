@@ -116,16 +116,17 @@ static func _radius(ring: Dictionary) -> float:
 	return maxf(h.x, h.y)
 
 
-## The hand's span of grip: the rings round the origin no wider than the ring the hand holds, from a little
-## below the hand to where the weapon swells (a guard or a head), at most 22 cm.
+## The hand's span of grip: the rings round the origin about as wide as the ring the hand holds, centred on the fist
+## (from 11 cm below the hand to 10 cm above it), stopping where the weapon swells: a pommel below, a guard or a head
+## above.
 static func _wrap(rs: Array) -> Dictionary:
 	var at := _nearest(rs, 0.0)
 	var hand := _radius(rs[at])
 	var lo := at
-	while lo > 0 and float(rs[lo - 1]["y"]) > -0.09 and _radius(rs[lo - 1]) < hand * SWELL:
+	while lo > 0 and float(rs[lo - 1]["y"]) > -0.11 and _radius(rs[lo - 1]) < hand * 1.2:
 		lo -= 1
 	var hi := at
-	while hi < rs.size() - 1 and float(rs[hi + 1]["y"]) - float(rs[lo]["y"]) < 0.22 and _radius(rs[hi + 1]) < hand * SWELL:
+	while hi < rs.size() - 1 and float(rs[hi + 1]["y"]) < 0.1 and _radius(rs[hi + 1]) < hand * SWELL:
 		hi += 1
 	# Off the ends by a few millimetres: the end rings are where the grip starts to flare.
 	lo = mini(lo + 1, at)
@@ -148,7 +149,7 @@ static func _butt(rs: Array) -> Dictionary:
 	return {"y": lo, "rings": out, "pommel": widest > above * 1.35}
 
 
-## The crossbow stock's top line near the centre plane: Vector2(y, top z) every 2 cm from 6 cm behind the hand to the prod.
+## The crossbow stock's top line near the centre plane: Vector2(y, top z) every 2 cm from 14 cm behind the hand to the prod.
 static func _top(model: Node3D, grip: Node3D) -> Array:
 	var out: Array = []
 	var pts := PackedVector3Array()
@@ -159,7 +160,7 @@ static func _top(model: Node3D, grip: Node3D) -> Array:
 		var xf := _to(grip, mi)
 		for v: Vector3 in mi.mesh.get_faces():
 			pts.append(xf * v)
-	var y := -0.06
+	var y := -0.14
 	while y <= 0.36:
 		var top := -INF
 		for t in range(0, pts.size(), 3):

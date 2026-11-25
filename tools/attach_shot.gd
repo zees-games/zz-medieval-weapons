@@ -107,7 +107,8 @@ func _clip(cat: GSWeaponAttachments, att: StringName, w: StringName) -> void:
 		var slow := w == &"crossbow" and i >= SHOT and i < SHOT + SLOW
 		_act(vm, w, i, FRAME / 8.0 if slow else FRAME)
 		var piece := held
-		if slow and att == &"zz_barbed_heads":
+		if att == &"zz_barbed_heads" and i >= SHOT:
+			# From the shot on, the close cameras ride the bolt in flight and its heads to the end of the clip.
 			piece = _flight_piece(piece)
 		_aim(piece, att, w, reach)
 		var strip := Image.create(CAM.x * 3, CAM.y, false, Image.FORMAT_RGBA8)
@@ -145,6 +146,9 @@ func _act(vm: ZzMedievalHeld, w: StringName, i: int, dt: float) -> void:
 			if n is ZzProjectileFlight:
 				# Stepped here only: its own _process would fly it on between the cameras' renders.
 				n.set_process(false)
+				# Kept for the whole clip: the cameras stay on its heads, flying or stuck.
+				(n as ZzProjectileFlight).life = 1e9
+				(n as ZzProjectileFlight).stuck_for = 1e9
 				(n as ZzProjectileFlight).step(step)
 		t += step
 
@@ -152,7 +156,7 @@ func _act(vm: ZzMedievalHeld, w: StringName, i: int, dt: float) -> void:
 ## The heads carried onto the bolt in flight, if one is flying; else [param fallback].
 func _flight_piece(fallback: Node3D) -> Node3D:
 	for n in get_children():
-		if n is ZzProjectileFlight and not (n as ZzProjectileFlight).stuck:
+		if n is ZzProjectileFlight:
 			var p := _piece(n)
 			if p != n:
 				return p
@@ -171,7 +175,7 @@ const NEAR := {
 const NEAR_ON := {&"dagger": Vector3(-0.6, -0.5, 0.7)}
 const FAR := {
 	&"zz_spiked_boss": Vector3(-0.9, 0.35, 0.6), &"zz_counterweight": Vector3(-0.7, -0.8, -0.6),
-	&"zz_leather_wrap": Vector3(-0.85, 0.1, -0.6), &"zz_aperture_sight": Vector3(-0.8, 0.3, 0.5),
+	&"zz_leather_wrap": Vector3(-0.85, 0.1, -0.6), &"zz_aperture_sight": Vector3(-0.7, 0.15, 0.9),
 	&"zz_barbed_heads": Vector3(-0.6, 0.6, -0.7),
 }
 

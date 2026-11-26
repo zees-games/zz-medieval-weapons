@@ -8,12 +8,10 @@ extends RefCounted
 ## Used by tools/export_anim_tracks.gd (Nightly's asset viewer plays the sidecar next to the model) and the suite.
 ## Space: the held node's aim frame (the camera's, no hands lens), metres, -Z forward. The sidecar format is Nightly's version 1 (lib/anim-sample.mjs).
 
-const FPS := 60
-const STEP := 1.0 / float(FPS)
-const VERSION := 1
-const PACK_PREFIX := "zz-medieval-weapons__assets__"
-## No hands lens in this pack: the viewer's lens is the identity.
-const LENS := {"viewmodel_fov_h": 90.0, "world_fov_h": 90.0, "reference_fov": 90.0, "reference_depth": 0.5, "max_pull_in": 0.2, "depth_comp": 0.0}
+const Sidecar := preload("res://addons/gs_weapon/view/gs_weapon_anim_sidecar.gd")
+const FPS := Sidecar.FPS
+const STEP := Sidecar.STEP
+const PACK := "zz-medieval-weapons"
 
 var _held: ZzMedievalHeld = null
 var _w: Array = []
@@ -74,8 +72,7 @@ static func projectile_sidecar(projectile_id: StringName, carrier: Dictionary) -
 
 
 static func _sidecar(id: String, clips: Array) -> Dictionary:
-	return {"version": VERSION, "weapon": id, "model": id, "asset": PACK_PREFIX + id, "fps": FPS, "lens": LENS,
-		"nodes": {"bolt": "", "magazine": ""}, "clips": clips}
+	return Sidecar.sidecar(id, id, Sidecar.asset_of(PACK, "res://assets/" + id), Sidecar.lens_identity(), "", "", clips)
 
 
 func _clip(name: String, loop: bool) -> Dictionary:
@@ -113,11 +110,11 @@ func _clip(name: String, loop: bool) -> Dictionary:
 		_:
 			anim.start_use(_style_of(name))
 			_run(anim.swing_s + 0.15)
-	var tracks: Array = [{"target": "weapon", "path": "transform", "values": _round(_w)}]
+	var tracks: Array = [Sidecar.track("weapon", "transform", _w)]
 	if _held.has_missile():
-		tracks.append({"target": "magazine", "path": "transform", "values": _round(_m)})
+		tracks.append(Sidecar.track("magazine", "transform", _m))
 		tracks.append({"target": "magazine.visible", "path": "visible", "values": _vis.duplicate()})
-	return {"name": name, "length": snappedf(float(_frames) / float(FPS), 0.001), "frames": _frames, "loop": loop, "tracks": tracks}
+	return Sidecar.clip(name, loop, _frames, tracks)
 
 
 static func _style_of(name: String) -> int:
@@ -149,12 +146,4 @@ func _snap() -> void:
 
 
 static func _append(into: Array, t: Transform3D) -> void:
-	var q := t.basis.orthonormalized().get_rotation_quaternion()
-	into.append_array([t.origin.x, t.origin.y, t.origin.z, q.x, q.y, q.z, q.w])
-
-
-static func _round(values: Array) -> Array:
-	var out: Array = []
-	for v: float in values:
-		out.append(snappedf(v, 0.00001))
-	return out
+	into.append_array(Sidecar.t7(t))

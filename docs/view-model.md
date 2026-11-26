@@ -29,3 +29,7 @@ zee-gs-weapons has a rig, a view model and a net codec for guns. This pack has i
 - No depth lens: a first-person spear or axe can cut a wall it is pushed against.
 - Arms are cylinders; no sleeve or hand art. Arms stretch a little past full reach rather than detach.
 - Procedural curves are authored for the placeholders; a real model will want `hold`, `rest` and `scale` re-tuned from a sheet.
+
+## Baked clips for Nightly's viewer
+
+`ZzAnimBake` drives a real `ZzMedievalViewModel` through each weapon's clips (swing, overhead, block, bash, draw, loose, fire, reload, idle) at 60 fps and reads the weapon and the nocked arrow or bolt back each frame. `tools/export_anim_tracks.gd -- out_dir [ids]` writes `<asset>.anim.json` beside Nightly's GLBs (`-` prints `SIDECAR<TAB>asset<TAB>json` lines for offloaded runs); the arrow and bolt get sidecars of their own. There is no bolt or magazine node, so the nocked missile rides the `magazine` track. The suite's `_anim_bake` section checks them.

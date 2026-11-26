@@ -185,6 +185,24 @@ func grip_transform() -> Transform3D:
 	return Transform3D(b, rest + (p["pos"] as Vector3))
 
 
+## The weapon's transform in the aim frame, what the Nightly viewer plays as the `weapon` track ([ZzAnimBake]).
+func weapon_transform() -> Transform3D:
+	return _grip.transform if _grip != null else Transform3D.IDENTITY
+
+
+## The nocked arrow or bolt in the grip's frame (identity for a weapon that looses nothing).
+func missile_transform() -> Transform3D:
+	return _missile.transform if _missile != null else Transform3D.IDENTITY
+
+
+func has_missile() -> bool:
+	return _missile != null
+
+
+func missile_visible() -> bool:
+	return _missile != null and _missile.visible
+
+
 static func _rad(v: Vector3) -> Vector3:
 	return Vector3(deg_to_rad(v.x), deg_to_rad(v.y), deg_to_rad(v.z))
 

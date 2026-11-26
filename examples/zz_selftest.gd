@@ -4,7 +4,7 @@ extends "res://examples/selftest/zz_motion_checks.gd"
 ## so a script error that aborts a section cannot report "0 failed" with checks missing.
 ## What it cannot see is how the weapons look: `tools/screenshot.sh`.
 
-const CHECKS := 470
+const CHECKS := 479
 
 
 func _ready() -> void:
@@ -34,6 +34,7 @@ func _ready() -> void:
 	_held()
 	_flight()
 	_sound()
+	_anim_bake()
 	print("%d sections entered, %d finished, %d checks (expected %d), %d failed" % [_entered, _finished, _checks, CHECKS, _failures])
 	if _entered != _finished or _checks != CHECKS:
 		_failures += 1
@@ -552,3 +553,79 @@ func _net() -> void:
 	_end()
 
 
+
+
+## Every weapon's baked animation (the sidecars Nightly's viewer plays): real clips with frames and tracks, moving, from the held node the game draws.
+func _anim_bake() -> void:
+	_begin("anim bake")
+	var host := Node3D.new()
+	add_child(host)
+	var bad: Array[String] = []
+	var flat: Array[String] = []
+	var unbuilt: Array[String] = []
+	var no_swing: Array[String] = []
+	var no_missile: Array[String] = []
+	var total := 0
+	var baked := {}
+	for id in ZzMedievalConfig.IDS:
+		var sc := ZzAnimBake.new().bake(host, id)
+		if sc.is_empty():
+			unbuilt.append(String(id))
+			continue
+		baked[id] = sc
+		var names: Array = []
+		for c: Dictionary in sc.clips:
+			total += 1
+			names.append(c.name)
+			var tracks: Array = c.tracks
+			var w: Array = tracks[0].values
+			if c.frames < 10 or w.size() != int(c.frames) * 7 or not _finite(w):
+				bad.append("%s/%s" % [id, c.name])
+			if c.name != "idle" and _span(w) < 0.005:
+				flat.append("%s/%s" % [id, c.name])
+		for want: Dictionary in ZzAnimBake.clip_names(id):
+			if not names.has(want.name):
+				bad.append("%s missing %s" % [id, want.name])
+		if sc.asset != "zz-medieval-weapons__assets__" + String(id):
+			bad.append("%s asset name %s" % [id, sc.asset])
+		var row := ZzMedievalArtTable.row(id)
+		if row.has("projectile"):
+			var mag_moves := false
+			for c: Dictionary in sc.clips:
+				for t: Dictionary in c.tracks:
+					if t.target == "magazine" and _span(t.values) > 0.02:
+						mag_moves = true
+			if not mag_moves:
+				no_missile.append(String(id))
+		elif sc.clips.size() < 2:
+			no_swing.append(String(id))
+	_check(unbuilt.is_empty(), "every weapon has a model to bake (%s)" % [unbuilt])
+	_check(baked.size() == ZzMedievalConfig.IDS.size(), "all %d weapons baked" % ZzMedievalConfig.IDS.size())
+	_check(bad.is_empty(), "every clip has frames, seven floats a frame, finite values and the asset's name (%s)" % [bad])
+	_check(flat.is_empty(), "every clip but idle moves the weapon (%s)" % [flat])
+	_check(no_swing.is_empty(), "every melee weapon has a use clip besides idle (%s)" % [no_swing])
+	_check(no_missile.is_empty(), "a bow's and crossbow's arrow or bolt moves in its clips (%s)" % [no_missile])
+	_check(total >= 25, "enough clips baked across the pack (%d)" % total)
+	for pid: StringName in [&"arrow", &"bolt"]:
+		var carrier: Dictionary = baked.get(&"bow" if pid == &"arrow" else &"crossbow", {})
+		var ps := ZzAnimBake.projectile_sidecar(pid, carrier)
+		_check(not ps.is_empty() and ps.asset == "zz-medieval-weapons__assets__" + String(pid), "the %s has its own sidecar from its carrier's clips" % pid)
+	host.queue_free()
+	_end()
+
+
+func _finite(values: Array) -> bool:
+	for v: float in values:
+		if is_nan(v) or is_inf(v):
+			return false
+	return true
+
+
+## The largest distance any frame's position (floats 0..2 of a 7-float transform, or 3 of a vec3) strays from the first.
+func _span(values: Array) -> float:
+	var stride := 7
+	var best := 0.0
+	var first := Vector3(values[0], values[1], values[2])
+	for i in range(0, values.size() - 6, stride):
+		best = maxf(best, first.distance_to(Vector3(values[i], values[i + 1], values[i + 2])))
+	return best
